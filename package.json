@@ -1,0 +1,15 @@
+{
+  "name": "casa-mestres-restaurant-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "App consolidada de gestió i reserves de Casa Mestres",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check public/app.js",
+    "test": "node tests/integration.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

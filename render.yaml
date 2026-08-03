@@ -1,0 +1,51 @@
+# Render Blueprint · Casa Mestres
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Ús:
+#   1. Puja aquest projecte a GitHub (repo Casa-mestres-restaurant).
+#   2. A Render, ves a New > Blueprint > tria el repo.
+#   3. Render detecta aquest fitxer i crea el servei automàticament.
+#   4. Després del primer deploy, entra les variables marcades
+#      `sync: false` a l'apartat Environment del servei.
+#
+# IMPORTANT: el pla "free" NO suporta discs persistents.
+# Per a reserves reals cal el pla "starter" (amb disc de 1 GB).
+
+services:
+  - type: web
+    name: casa-mestres
+    runtime: node
+    plan: starter
+    region: frankfurt
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+
+    # Disc persistent: aquí es guarden data.json i backups/.
+    # Sobreviu als reinicis i als redeploys.
+    disk:
+      name: casa-mestres-data
+      mountPath: /var/data
+      sizeGB: 1
+
+    envVars:
+      # ── Configuració fixa ──────────────────────────────────
+      - key: NODE_VERSION
+        value: 24.18.1
+      - key: DATA_DIR
+        value: /var/data
+      - key: HOST
+        value: 0.0.0.0
+
+      # ── Secrets (cal entrar-los manualment a Render) ──────
+      - key: ADMIN_USER
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: APP_BASE_URL
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
