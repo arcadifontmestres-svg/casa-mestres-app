@@ -12,7 +12,7 @@
     "test": "node tests/structure.test.js && node tests/integration.test.js && node tests/desktop-mode.test.js"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.12"
   },
   "devDependencies": {
     "electron": "^37.2.6",
