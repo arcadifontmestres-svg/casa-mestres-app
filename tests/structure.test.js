@@ -5,6 +5,7 @@ const path = require('path');
 const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const data = JSON.parse(read('data.json'));
+const catalog = JSON.parse(read('seed/catalog.json'));
 const packageJson = JSON.parse(read('package.json'));
 const index = read('public/index.html');
 const modules = read('public/js/arcadi-modules.js');
@@ -20,11 +21,12 @@ for (let phase = 40; phase <= 67; phase += 1) {
   assert.match(modules, new RegExp(`(?:phase:\\s*${phase}|,\\s*${phase},)`), `Falta integrar la fase ${phase}`);
 }
 
-assert.equal(data.products.length, 460);
-assert.equal(data.bases.length, 21);
-assert.equal(data.dishes.length, 51);
-assert.equal(data.saleItems.length, 204);
-assert.equal(data.reservations.length, 2);
+assert.ok(data.products.length > 0);
+assert.equal(catalog.products.length, 460);
+assert.equal(catalog.bases.length, 21);
+assert.equal(catalog.dishes.length, 51);
+assert.equal(catalog.saleItems.length, 204);
+assert.equal(catalog.reservations.length, 2);
 assert.match(read('server.js'), /function normalizeArcadiData\(data\)/);
 
 assert.doesNotMatch(modules, /Math\.random\s*\(/, 'Els panells no poden mostrar dades aleatòries');
