@@ -24,6 +24,7 @@ Una modificació és un canvi del projecte, **no una nova versió completa desca
 ## Dades
 
 - `data.json` és la seed i la còpia de referència.
+- `seed/catalog.json` completa una instal·lació nova sense tocar instal·lacions existents.
 - A Render, les dades vives són al disc persistent configurat amb `DATA_DIR`.
 - A Windows, les dades vives són a la carpeta d’usuari del programa.
 - L’EXE no conté l’única còpia de les dades: es pot actualitzar sense perdre-les.
@@ -31,4 +32,3 @@ Una modificació és un canvi del projecte, **no una nova versió completa desca
 ## IA
 
 La IA és una integració opcional. No pot ser necessària per arrencar, guardar, imprimir ni consultar cap mòdul.
-
