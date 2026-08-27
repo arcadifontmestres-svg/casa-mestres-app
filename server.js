@@ -8,6 +8,7 @@ const { exec } = require('child_process');
 const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, 'public');
 const SEED_DATA = path.join(ROOT, 'data.json');
+const CATALOG_DATA = path.join(ROOT, 'seed', 'catalog.json');
 
 function loadEnv() {
   const file = path.join(ROOT, '.env');
@@ -39,6 +40,12 @@ function ensureStorage() {
   if (!fs.existsSync(DATA)) {
     if (!fs.existsSync(SEED_DATA)) throw new Error('Falta el fitxer inicial data.json');
     fs.copyFileSync(SEED_DATA, DATA);
+    if (fs.existsSync(CATALOG_DATA)) {
+      const initial = JSON.parse(fs.readFileSync(DATA, 'utf8'));
+      const catalog = JSON.parse(fs.readFileSync(CATALOG_DATA, 'utf8'));
+      Object.assign(initial, catalog);
+      fs.writeFileSync(DATA, JSON.stringify(initial, null, 2), 'utf8');
+    }
   }
 }
 
@@ -64,10 +71,14 @@ function safeEqual(left, right) {
 }
 
 function adminConfigured() {
-  return Boolean(process.env.ADMIN_USER && process.env.ADMIN_PASSWORD);
+  return process.env.ARCADI_DESKTOP === '1' || Boolean(process.env.ADMIN_USER && process.env.ADMIN_PASSWORD);
 }
 
 function isAdmin(req) {
+  if (process.env.ARCADI_DESKTOP === '1') {
+    const address = String(req.socket?.remoteAddress || '');
+    return ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(address);
+  }
   if (!adminConfigured()) return false;
   const header = String(req.headers.authorization || '');
   if (!header.startsWith('Basic ')) return false;
@@ -96,9 +107,36 @@ function requireAdmin(req, res) {
   return true;
 }
 
+function normalizeArcadiData(data) {
+  data.arcadiSchema = data.arcadiSchema || 'ARCADI_GESTIO_RESTAURANT_V1';
+  const collections = [
+    'maintenanceRecords', 'communications', 'crmContacts', 'marketingCampaigns',
+    'groupEvents', 'experiences', 'loyaltyAccounts', 'purchaseOrders',
+    'goodsReceipts', 'traceabilityRecords', 'productionRecords', 'restaurants',
+    'platformProfiles', 'miniApps'
+  ];
+  for (const key of collections) if (!Array.isArray(data[key])) data[key] = [];
+  if (!data.restaurants.some(item => item.id === 'restaurant_casa_mestres')) {
+    data.restaurants.unshift({
+      id: 'restaurant_casa_mestres',
+      name: data.company?.name || 'Casa Mestres',
+      address: data.company?.address || '',
+      phone: data.company?.phone || '',
+      status: 'Actiu',
+      notes: 'Centre principal'
+    });
+  }
+  const defaultMiniApps = [
+    { id: 'miniapp_reserves', name: 'Reserves', type: 'Reserves', path: '/reserves.html', status: 'Activa', notes: 'Mini app pública existent' },
+    { id: 'miniapp_fitxatges', name: 'Fitxatges', type: 'RRHH', path: '/fitxatges.html', status: 'Activa', notes: 'Mini app de personal existent' }
+  ];
+  for (const item of defaultMiniApps) if (!data.miniApps.some(current => current.id === item.id)) data.miniApps.push(item);
+  return data;
+}
+
 function readData() {
   try {
-    return JSON.parse(fs.readFileSync(DATA, 'utf8'));
+    return normalizeArcadiData(JSON.parse(fs.readFileSync(DATA, 'utf8')));
   } catch (error) {
     throw new Error(`No es pot llegir data.json: ${error.message}`);
   }
@@ -344,7 +382,7 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/health' && req.method === 'GET') {
       return send(res, 200, {
         ok: true,
-        app: 'Casa Mestres',
+      app: 'ARCADI GESTIO RESTAURANT',
         stripeConfigured: Boolean(process.env.STRIPE_SECRET_KEY),
         adminConfigured: adminConfigured(),
         persistence: configuredDataDir ? 'directori extern configurat' : 'fitxer local'
@@ -681,7 +719,7 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, HOST, () => {
   const localHost = HOST === '0.0.0.0' ? '127.0.0.1' : HOST;
   const url = `http://${localHost}:${PORT}`;
-  console.log(`CASA MESTRES APP: ${url}`);
+  console.log(`ARCADI GESTIO RESTAURANT: ${url}`);
   if (process.platform === 'win32' && !process.env.NO_OPEN) {
     setTimeout(() => exec(`start "" "${url}"`), 600);
   }

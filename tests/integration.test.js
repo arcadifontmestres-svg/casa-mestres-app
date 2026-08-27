@@ -70,6 +70,8 @@ async function main() {
   const authorized = await request('/api/state', { headers: { Authorization: credentials } });
   assert.equal(authorized.response.status, 200);
   assert.ok(Array.isArray(authorized.data.reservations));
+  assert.equal(authorized.data.arcadiSchema, 'ARCADI_GESTIO_RESTAURANT_V1');
+  assert.ok(Array.isArray(authorized.data.purchaseOrders));
 
   const config = await request('/api/reservation-config');
   assert.equal(config.response.status, 200);
