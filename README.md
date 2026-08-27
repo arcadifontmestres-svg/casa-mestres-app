@@ -34,6 +34,8 @@ La seed actual conserva les dades de treball recuperades:
 
 Les comandes i registres posteriors es conserven al `data.json` viu de cada instal·lació. L’arrencada afegeix les col·leccions noves que faltin sense substituir les dades existents.
 
+`seed/catalog.json` aporta el catàleg consolidat a una instal·lació nova de Windows. En un Render que ja té `DATA_DIR`, aquest catàleg no substitueix el fitxer viu.
+
 Els mòduls nous utilitzen el mateix `data.json`; no creen un segon inventari, una segona llista de plats ni unes segones reserves.
 
 ## Executable de Windows
@@ -97,12 +99,14 @@ Stripe és opcional. Només cal configurar-lo si s’han de cobrar fiances onlin
 desktop/main.cjs              finestra Windows i servidor local
 server.js                     API, persistència, reserves i Stripe
 data.json                     dades inicials consolidades
+seed/catalog.json             catàleg complet per a una instal·lació nova
 public/app.js                 aplicació original publicada a Render
 public/js/arcadi-runtime.js   guardat i formularis de la gestió integral
 public/js/arcadi-modules.js   fases funcionals 40–67 adaptades
 public/arcadi.css             estil dels nous panells
 public/control_normatiu.html  registres APPCC i PRL
 tests/                        comprovacions automàtiques
+tools/build-catalog.mjs       reconstrucció mecànica del catàleg inicial
 ```
 
 ## Verificació
