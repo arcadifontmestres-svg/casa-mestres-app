@@ -27,6 +27,7 @@
       "public/**/*",
       "server.js",
       "data.json",
+      "seed/**/*",
       "package.json"
     ],
     "directories": {
