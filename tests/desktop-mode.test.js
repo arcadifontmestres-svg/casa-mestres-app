@@ -6,14 +6,6 @@ const { spawn } = require('child_process');
 
 const root = path.resolve(__dirname, '..');
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'arcadi-desktop-test-'));
-const legacyData = JSON.parse(fs.readFileSync(path.join(root, 'data.json'), 'utf8'));
-for (const key of [
-  'arcadiSchema', 'maintenanceRecords', 'communications', 'crmContacts',
-  'marketingCampaigns', 'groupEvents', 'experiences', 'loyaltyAccounts',
-  'purchaseOrders', 'goodsReceipts', 'traceabilityRecords', 'productionRecords',
-  'restaurants', 'platformProfiles', 'miniApps'
-]) delete legacyData[key];
-fs.writeFileSync(path.join(dataDir, 'data.json'), JSON.stringify(legacyData), 'utf8');
 const port = 39000 + Math.floor(Math.random() * 500);
 const base = `http://127.0.0.1:${port}`;
 const child = spawn(process.execPath, ['server.js'], {
