@@ -1,15 +1,40 @@
 {
-  "name": "casa-mestres-restaurant-app",
+  "name": "arcadi-gestio-restaurant",
   "version": "1.0.0",
   "private": true,
-  "description": "App consolidada de gestió i reserves de Casa Mestres",
-  "main": "server.js",
+  "description": "ERP integral de restaurant per a Windows i Render",
+  "main": "desktop/main.cjs",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check public/app.js",
-    "test": "node tests/integration.test.js"
+    "desktop": "electron .",
+    "build:windows": "electron-builder --win portable",
+    "check": "node --check server.js && node --check public/app.js && node --check public/js/arcadi-runtime.js && node --check public/js/arcadi-modules.js && node --check desktop/main.cjs",
+    "test": "node tests/structure.test.js && node tests/integration.test.js && node tests/desktop-mode.test.js"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "electron": "^37.2.6",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "cat.arcadi.gestio.restaurant",
+    "productName": "ARCADI GESTIO RESTAURANT",
+    "asar": true,
+    "files": [
+      "desktop/**/*",
+      "public/**/*",
+      "server.js",
+      "data.json",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist-windows"
+    },
+    "win": {
+      "target": ["portable"],
+      "artifactName": "ARCADI_GESTIO_RESTAURANT.exe"
+    }
   }
 }
