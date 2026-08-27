@@ -8,6 +8,7 @@ const { exec } = require('child_process');
 const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, 'public');
 const SEED_DATA = path.join(ROOT, 'data.json');
+const CATALOG_DATA = path.join(ROOT, 'seed', 'catalog.json');
 
 function loadEnv() {
   const file = path.join(ROOT, '.env');
@@ -39,6 +40,12 @@ function ensureStorage() {
   if (!fs.existsSync(DATA)) {
     if (!fs.existsSync(SEED_DATA)) throw new Error('Falta el fitxer inicial data.json');
     fs.copyFileSync(SEED_DATA, DATA);
+    if (fs.existsSync(CATALOG_DATA)) {
+      const initial = JSON.parse(fs.readFileSync(DATA, 'utf8'));
+      const catalog = JSON.parse(fs.readFileSync(CATALOG_DATA, 'utf8'));
+      Object.assign(initial, catalog);
+      fs.writeFileSync(DATA, JSON.stringify(initial, null, 2), 'utf8');
+    }
   }
 }
 
