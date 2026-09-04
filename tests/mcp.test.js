@@ -1,4 +1,5 @@
 const assert = require('assert/strict');
+const crypto = require('crypto');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -8,12 +9,16 @@ const root = path.resolve(__dirname, '..');
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'arcadi-mcp-test-'));
 const port = 39000 + Math.floor(Math.random() * 500);
 const base = `http://127.0.0.1:${port}`;
+const resource = `${base}/mcp`;
+const redirectUri = `${base}/oauth-test-callback`;
 const child = spawn(process.execPath, ['server.js'], {
   cwd: root,
   env: {
     ...process.env,
+    NODE_ENV: 'test',
     HOST: '127.0.0.1',
     PORT: String(port),
+    APP_BASE_URL: base,
     NO_OPEN: '1',
     DATA_DIR: dataDir,
     ADMIN_USER: 'arcadi',
@@ -39,27 +44,207 @@ async function waitForServer() {
   throw new Error(`El servidor MCP de prova no ha arrencat.\n${logs}`);
 }
 
+async function formPost(url, values, options = {}) {
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(values),
+    ...options
+  });
+}
+
+async function registerOAuthClient() {
+  const response = await fetch(`${base}/oauth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_name: 'ChatGPT test',
+      redirect_uris: [redirectUri],
+      grant_types: ['authorization_code', 'refresh_token'],
+      response_types: ['code'],
+      token_endpoint_auth_method: 'none',
+      scope: 'arcadi.read arcadi.write'
+    })
+  });
+  assert.equal(response.status, 201);
+  return response.json();
+}
+
+async function authorize(clientId) {
+  const verifier = crypto.randomBytes(48).toString('base64url');
+  const challenge = crypto.createHash('sha256').update(verifier).digest('base64url');
+  const url = new URL(`${base}/oauth/authorize`);
+  url.searchParams.set('response_type', 'code');
+  url.searchParams.set('client_id', clientId);
+  url.searchParams.set('redirect_uri', redirectUri);
+  url.searchParams.set('scope', 'arcadi.read arcadi.write');
+  url.searchParams.set('state', 'state-test-123');
+  url.searchParams.set('resource', resource);
+  url.searchParams.set('code_challenge', challenge);
+  url.searchParams.set('code_challenge_method', 'S256');
+
+  const page = await fetch(url);
+  assert.equal(page.status, 200);
+  const html = await page.text();
+  assert.match(html, /Connectar amb ChatGPT/);
+  const requestToken = html.match(/name="request" value="([^"]+)"/)?.[1];
+  assert.ok(requestToken, 'El formulari OAuth ha de contenir la petició signada');
+
+  const denied = await formPost(`${base}/oauth/authorize`, {
+    request: requestToken,
+    decision: 'allow',
+    username: 'arcadi',
+    password: 'incorrecta'
+  });
+  assert.equal(denied.status, 401);
+  assert.match(await denied.text(), /incorrectes/);
+
+  const accepted = await formPost(`${base}/oauth/authorize`, {
+    request: requestToken,
+    decision: 'allow',
+    username: 'arcadi',
+    password: 'test-password'
+  }, { redirect: 'manual' });
+  assert.equal(accepted.status, 302);
+  const callback = new URL(accepted.headers.get('location'));
+  assert.equal(callback.origin + callback.pathname, redirectUri);
+  assert.equal(callback.searchParams.get('state'), 'state-test-123');
+  assert.equal(callback.searchParams.get('iss'), base);
+  const code = callback.searchParams.get('code');
+  assert.ok(code);
+  return { code, verifier };
+}
+
+async function exchangeCode(clientId, code, verifier) {
+  const response = await formPost(`${base}/oauth/token`, {
+    grant_type: 'authorization_code',
+    client_id: clientId,
+    code,
+    code_verifier: verifier,
+    redirect_uri: redirectUri,
+    resource
+  });
+  assert.equal(response.status, 200);
+  const tokens = await response.json();
+  assert.equal(tokens.token_type, 'Bearer');
+  assert.equal(tokens.expires_in, 3600);
+  assert.match(tokens.scope, /arcadi\.read/);
+  assert.ok(tokens.access_token);
+  assert.ok(tokens.refresh_token);
+  return tokens;
+}
+
 async function main() {
   await waitForServer();
+
+  const resourceMetadata = await fetch(`${base}/.well-known/oauth-protected-resource`).then(response => response.json());
+  assert.equal(resourceMetadata.resource, resource);
+  assert.deepEqual(resourceMetadata.authorization_servers, [base]);
+  assert.ok(resourceMetadata.scopes_supported.includes('arcadi.write'));
+
+  const authMetadata = await fetch(`${base}/.well-known/oauth-authorization-server`).then(response => response.json());
+  assert.equal(authMetadata.issuer, base);
+  assert.deepEqual(authMetadata.code_challenge_methods_supported, ['S256']);
+  assert.equal(authMetadata.token_endpoint_auth_methods_supported[0], 'none');
+
+  const clientInfo = await registerOAuthClient();
+  const { code, verifier } = await authorize(clientInfo.client_id);
+  const tokens = await exchangeCode(clientInfo.client_id, code, verifier);
+
+  const replay = await formPost(`${base}/oauth/token`, {
+    grant_type: 'authorization_code',
+    client_id: clientInfo.client_id,
+    code,
+    code_verifier: verifier,
+    redirect_uri: redirectUri,
+    resource
+  });
+  assert.equal(replay.status, 400);
+  assert.equal((await replay.json()).error, 'invalid_grant');
+
+  const refresh = await formPost(`${base}/oauth/token`, {
+    grant_type: 'refresh_token',
+    client_id: clientInfo.client_id,
+    refresh_token: tokens.refresh_token,
+    resource
+  });
+  assert.equal(refresh.status, 200);
+  assert.ok((await refresh.json()).access_token);
+
   const [{ Client }, { StreamableHTTPClientTransport }] = await Promise.all([
     import('@modelcontextprotocol/sdk/client/index.js'),
     import('@modelcontextprotocol/sdk/client/streamableHttp.js')
   ]);
-  const client = new Client({ name: 'arcadi-local-test', version: '1.0.0' });
-  const transport = new StreamableHTTPClientTransport(new URL(`${base}/mcp`));
 
-  await client.connect(transport);
-  const listed = await client.listTools();
-  const tool = listed.tools.find(item => item.name === 'get_system_status');
-  assert.ok(tool, 'El connector ha d’exposar get_system_status');
-  assert.equal(tool.annotations.readOnlyHint, true);
+  const anonymousClient = new Client({ name: 'arcadi-anonymous-test', version: '1.0.0' });
+  const anonymousTransport = new StreamableHTTPClientTransport(new URL(resource));
+  await anonymousClient.connect(anonymousTransport);
+  const listed = await anonymousClient.listTools();
+  assert.deepEqual(
+    listed.tools.map(item => item.name).sort(),
+    ['get_daily_status', 'get_system_status', 'list_purchases', 'list_reservations', 'record_daily_entry', 'update_daily_entry'].sort()
+  );
+  const statusTool = listed.tools.find(item => item.name === 'get_system_status');
+  const writeTool = listed.tools.find(item => item.name === 'record_daily_entry');
+  assert.equal(statusTool.annotations.readOnlyHint, true);
+  assert.equal(writeTool.annotations.readOnlyHint, false);
+  assert.deepEqual(writeTool._meta.securitySchemes, [{ type: 'oauth2', scopes: ['arcadi.write'] }]);
 
-  const called = await client.callTool({ name: 'get_system_status', arguments: {} });
-  assert.equal(called.structuredContent.ok, true);
-  assert.equal(called.structuredContent.app, 'ARCADI GESTIO RESTAURANT');
-  assert.match(called.content[0].text, /Connexió correcta/);
-  await client.close();
-  console.log('OK · MCP inicialitza, publica eines i respon sense exposar dades');
+  const status = await anonymousClient.callTool({ name: 'get_system_status', arguments: {} });
+  assert.equal(status.structuredContent.ok, true);
+  assert.equal(status.structuredContent.connectorVersion, '0.2.0');
+  const blocked = await anonymousClient.callTool({ name: 'get_daily_status', arguments: { date: '2026-09-05' } });
+  assert.equal(blocked.isError, true);
+  assert.ok(blocked._meta['mcp/www_authenticate'][0].includes('error="insufficient_scope"'));
+  await anonymousClient.close();
+
+  const authorizedClient = new Client({ name: 'arcadi-authorized-test', version: '1.0.0' });
+  const authorizedTransport = new StreamableHTTPClientTransport(new URL(resource), {
+    requestInit: { headers: { Authorization: `Bearer ${tokens.access_token}` } }
+  });
+  await authorizedClient.connect(authorizedTransport);
+
+  const reservations = await authorizedClient.callTool({
+    name: 'list_reservations',
+    arguments: { date_from: '2026-08-01', date_to: '2026-08-31' }
+  });
+  assert.equal(reservations.structuredContent.count, 2);
+  assert.equal('manageToken' in reservations.structuredContent.items[0], false);
+  assert.equal('stripeSessionId' in reservations.structuredContent.items[0], false);
+
+  const input = {
+    requestId: 'test-opening-20260905-001',
+    date: '2026-09-05',
+    type: 'opening',
+    description: 'Obertura de Sarriera comprovada',
+    status: 'Completat',
+    actualTime: '07:45'
+  };
+  const created = await authorizedClient.callTool({ name: 'record_daily_entry', arguments: input });
+  assert.equal(created.structuredContent.created, true);
+  assert.equal(created.structuredContent.entry.actualTime, '07:45');
+  const repeated = await authorizedClient.callTool({ name: 'record_daily_entry', arguments: input });
+  assert.equal(repeated.structuredContent.created, false);
+  assert.equal(repeated.structuredContent.entry.id, created.structuredContent.entry.id);
+
+  const daily = await authorizedClient.callTool({ name: 'get_daily_status', arguments: { date: '2026-09-05' } });
+  assert.equal(daily.structuredContent.totals.dailyOperations, 1);
+  assert.equal(daily.structuredContent.dailyOperations[0].description, 'Obertura de Sarriera comprovada');
+
+  const updated = await authorizedClient.callTool({
+    name: 'update_daily_entry',
+    arguments: {
+      requestId: 'test-closing-20260905-001',
+      id: created.structuredContent.entry.id,
+      status: 'Completat',
+      closingNotes: 'Comprovació final correcta'
+    }
+  });
+  assert.equal(updated.structuredContent.updated, true);
+  assert.equal(updated.structuredContent.entry.closingNotes, 'Comprovació final correcta');
+
+  await authorizedClient.close();
+  console.log('OK · OAuth 2.1 + PKCE, eines privades i escriptura idempotent verificats');
 }
 
 main()

@@ -5,6 +5,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { exec } = require('child_process');
 const { handleMcpRequest } = require('./mcp.js');
+const { authenticateBearer, handleOAuthRequest, oauthChallenge } = require('./oauth.js');
 
 const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, 'public');
@@ -114,7 +115,7 @@ function normalizeArcadiData(data) {
     'maintenanceRecords', 'communications', 'crmContacts', 'marketingCampaigns',
     'groupEvents', 'experiences', 'loyaltyAccounts', 'purchaseOrders',
     'goodsReceipts', 'traceabilityRecords', 'productionRecords', 'restaurants',
-    'platformProfiles', 'miniApps'
+    'platformProfiles', 'miniApps', 'dailyOperations'
   ];
   for (const key of collections) if (!Array.isArray(data[key])) data[key] = [];
   if (!data.restaurants.some(item => item.id === 'restaurant_casa_mestres')) {
@@ -379,14 +380,24 @@ const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host || HOST}`);
     const pathname = url.pathname;
+    const baseUrl = publicBaseUrl(req);
+
+    if (await handleOAuthRequest(req, res, url, baseUrl)) return;
 
     if (pathname === '/mcp') {
-      return handleMcpRequest(req, res, () => ({
-        ok: true,
-        app: 'ARCADI GESTIO RESTAURANT',
-        connectorVersion: '0.1.0',
-        serverTime: new Date().toISOString()
-      }));
+      const auth = authenticateBearer(req, baseUrl);
+      return handleMcpRequest(req, res, {
+        auth,
+        readData,
+        mutateData,
+        getStatus: () => ({
+          ok: true,
+          app: 'ARCADI GESTIO RESTAURANT',
+          connectorVersion: '0.2.0',
+          serverTime: new Date().toISOString()
+        }),
+        challenge: (scope, error, description) => oauthChallenge(baseUrl, scope, error, description)
+      });
     }
 
     if (pathname === '/api/health' && req.method === 'GET') {
@@ -424,8 +435,9 @@ const server = http.createServer(async (req, res) => {
       const state = await mutateData(current => {
         const reservations = current.reservations || [];
         const punches = current.punches || [];
+        const dailyOperations = current.dailyOperations || [];
         for (const key of Object.keys(current)) delete current[key];
-        Object.assign(current, incoming, { reservations, punches });
+        Object.assign(current, incoming, { reservations, punches, dailyOperations });
         return current;
       });
       return send(res, 200, { ok: true, state });

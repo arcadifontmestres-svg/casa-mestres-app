@@ -19,16 +19,26 @@ No són dues versions del programa. Les pantalles, la lògica i el model de dade
 - Producció, sala avançada, RRHH, analítica, costos i economia.
 - Exportacions, còpies de seguretat, multi-restaurant, plataformes i mini apps.
 
-La fase d’assistència amb IA està visible però aparcada. Cap funció del programa necessita una API key.
+La gestió continua sent autònoma: cap funció del programa necessita una API key. La connexió opcional amb ChatGPT només actua quan Arcadi la selecciona i inicia sessió.
 
-## Connexió amb ChatGPT (prova inicial)
+## Connexió privada amb ChatGPT
 
-El servidor exposa `POST /mcp` mitjançant el protocol MCP. La primera versió
-només ofereix `get_system_status`, una comprovació de connexió de només lectura
-que no accedeix a reserves, compres, caixa ni altres dades operatives.
+El servidor exposa `/mcp` mitjançant MCP Streamable HTTP. La comprovació
+`get_system_status` és pública i no accedeix a dades del restaurant. Totes les
+eines operatives exigeixen OAuth 2.1 amb PKCE i utilitzen el mateix usuari i
+contrasenya configurats per al Back Office.
 
-Quan aquesta comprovació funcioni des de ChatGPT, s’afegirà autenticació abans
-d’habilitar eines de consulta o escriptura sobre les dades reals.
+Eines disponibles:
+
+- `get_daily_status`: resum de reserves, grups, compres, recepcions i controls d’un dia.
+- `list_reservations`: consulta de reserves dins un interval.
+- `list_purchases`: consulta de GS-COMP i GS-REC dins un interval.
+- `record_daily_entry`: alta idempotent d’obertura, tancament, caixa, facturació, compres, incidències, tasques i previsions.
+- `update_daily_entry`: canvi d’estat i tancament d’un control existent.
+
+Les eines només retornen els camps necessaris. No exposen tokens de gestió,
+identificadors de pagament, secrets de Stripe ni credencials. La contrasenya es
+valida al servidor d’ARCADI i no es lliura a ChatGPT.
 
 ## Dades consolidades
 
@@ -42,6 +52,10 @@ La seed actual conserva les dades de treball recuperades:
 - 2 reserves.
 
 Les comandes i registres posteriors es conserven al `data.json` viu de cada instal·lació. L’arrencada afegeix les col·leccions noves que faltin sense substituir les dades existents.
+
+Els registres creats des de ChatGPT es guarden a `dailyOperations` dins aquest
+mateix `data.json`, amb còpia prèvia automàtica i un `requestId` que evita altes
+duplicades si una petició es repeteix.
 
 `seed/catalog.json` aporta el catàleg consolidat a una instal·lació nova de Windows. En un Render que ja té `DATA_DIR`, aquest catàleg no substitueix el fitxer viu.
 
@@ -133,4 +147,5 @@ Les proves comproven la sintaxi, l’estructura de les fases, les dades mestres,
 - `.env` està exclòs de Git.
 - A Windows, el servidor només escolta `127.0.0.1` i accepta l’aplicació local.
 - A Render, el Back Office i les API de gestió continuen protegits amb autenticació.
-- Les dades no s’envien a cap IA mentre la funció estigui aparcada.
+- Les eines de ChatGPT que llegeixen o escriuen dades exigeixen OAuth 2.1, PKCE S256, tokens signats amb caducitat, verificació d’audiència i permisos separats de lectura i escriptura.
+- Canviar `ADMIN_PASSWORD` invalida també els tokens actius del connector.
