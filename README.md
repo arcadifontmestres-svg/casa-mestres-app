@@ -21,6 +21,15 @@ No són dues versions del programa. Les pantalles, la lògica i el model de dade
 
 La fase d’assistència amb IA està visible però aparcada. Cap funció del programa necessita una API key.
 
+## Connexió amb ChatGPT (prova inicial)
+
+El servidor exposa `POST /mcp` mitjançant el protocol MCP. La primera versió
+només ofereix `get_system_status`, una comprovació de connexió de només lectura
+que no accedeix a reserves, compres, caixa ni altres dades operatives.
+
+Quan aquesta comprovació funcioni des de ChatGPT, s’afegirà autenticació abans
+d’habilitar eines de consulta o escriptura sobre les dades reals.
+
 ## Dades consolidades
 
 La seed actual conserva les dades de treball recuperades:
