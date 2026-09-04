@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { exec } = require('child_process');
+const { handleMcpRequest } = require('./mcp.js');
 
 const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, 'public');
@@ -378,6 +379,15 @@ const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host || HOST}`);
     const pathname = url.pathname;
+
+    if (pathname === '/mcp') {
+      return handleMcpRequest(req, res, () => ({
+        ok: true,
+        app: 'ARCADI GESTIO RESTAURANT',
+        connectorVersion: '0.1.0',
+        serverTime: new Date().toISOString()
+      }));
+    }
 
     if (pathname === '/api/health' && req.method === 'GET') {
       return send(res, 200, {
