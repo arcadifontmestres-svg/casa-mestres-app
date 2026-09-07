@@ -182,7 +182,7 @@ async function main() {
   const listed = await anonymousClient.listTools();
   assert.deepEqual(
     listed.tools.map(item => item.name).sort(),
-    ['get_daily_status', 'get_system_status', 'list_purchases', 'list_reservations', 'record_daily_entry', 'update_daily_entry'].sort()
+    ['get_daily_status', 'get_system_status', 'list_kitchen_bases', 'list_products', 'list_purchases', 'list_reservations', 'record_daily_entry', 'update_daily_entry', 'upsert_kitchen_base', 'upsert_product'].sort()
   );
   const statusTool = listed.tools.find(item => item.name === 'get_system_status');
   const writeTool = listed.tools.find(item => item.name === 'record_daily_entry');
@@ -192,7 +192,7 @@ async function main() {
 
   const status = await anonymousClient.callTool({ name: 'get_system_status', arguments: {} });
   assert.equal(status.structuredContent.ok, true);
-  assert.equal(status.structuredContent.connectorVersion, '0.2.0');
+  assert.equal(status.structuredContent.connectorVersion, '0.3.0');
   const blocked = await anonymousClient.callTool({ name: 'get_daily_status', arguments: { date: '2026-09-05' } });
   assert.equal(blocked.isError, true);
   assert.ok(blocked._meta['mcp/www_authenticate'][0].includes('error="insufficient_scope"'));
@@ -203,6 +203,46 @@ async function main() {
     requestInit: { headers: { Authorization: `Bearer ${tokens.access_token}` } }
   });
   await authorizedClient.connect(authorizedTransport);
+
+  const products = await authorizedClient.callTool({
+    name: 'list_products',
+    arguments: { query: 'Pastanaga' }
+  });
+  assert.equal(products.structuredContent.count, 1);
+  assert.equal(products.structuredContent.items[0].price, 0);
+  assert.equal(products.structuredContent.items[0].stock, 0);
+
+  const kitchenBases = await authorizedClient.callTool({
+    name: 'list_kitchen_bases',
+    arguments: { sourceFile: '37357.jpg' }
+  });
+  assert.equal(kitchenBases.structuredContent.count, 1);
+  assert.equal(kitchenBases.structuredContent.items[0].name, 'Beixamel');
+  assert.equal(kitchenBases.structuredContent.items[0].baseUses[0].name, 'Roux blanc');
+
+  const createdProduct = await authorizedClient.callTool({
+    name: 'upsert_product',
+    arguments: {
+      requestId: 'test-producte-20260907-001',
+      name: 'Producte prova sense preu',
+      family: 'Altres',
+      unit: 'kg'
+    }
+  });
+  assert.equal(createdProduct.structuredContent.created, true);
+  assert.equal(createdProduct.structuredContent.product.price, 0);
+  assert.equal(createdProduct.structuredContent.product.pricePending, true);
+  const repeatedProduct = await authorizedClient.callTool({
+    name: 'upsert_product',
+    arguments: {
+      requestId: 'test-producte-20260907-001',
+      name: 'Producte prova sense preu',
+      family: 'Altres',
+      unit: 'kg'
+    }
+  });
+  assert.equal(repeatedProduct.structuredContent.created, false);
+  assert.equal(repeatedProduct.structuredContent.updated, false);
 
   const reservations = await authorizedClient.callTool({
     name: 'list_reservations',
