@@ -1,0 +1,1153 @@
+{
+  "schema": "ARCADI_SARRIERA_KITCHEN_BASES_V1",
+  "migration": "sarriera_kitchen_bases_2026_09_07_v1",
+  "source": "9 fitxes tècniques manuscrites Sarriera 1930",
+  "products": [
+    {
+      "id": "prod_sarriera_tomaquet_conserva",
+      "code": "SEC-007",
+      "supplierCode": "",
+      "name": "Tomàquet en conserva",
+      "family": "Secs i rebost",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real. Possible marca manuscrita «Navé»; confirmar a recepció.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_pastanaga",
+      "code": "VER-014",
+      "supplierCode": "",
+      "name": "Pastanaga",
+      "family": "Verdures i hortalisses",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_porro",
+      "code": "VER-015",
+      "supplierCode": "",
+      "name": "Porro",
+      "family": "Verdures i hortalisses",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_ceba_fuentes",
+      "code": "VER-016",
+      "supplierCode": "",
+      "name": "Ceba Fuentes",
+      "family": "Verdures i hortalisses",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_fonoll_fresc",
+      "code": "VER-017",
+      "supplierCode": "",
+      "name": "Fonoll fresc",
+      "family": "Verdures i hortalisses",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_llorer",
+      "code": "SEC-008",
+      "supplierCode": "",
+      "name": "Llorer",
+      "family": "Secs i rebost",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_farigola",
+      "code": "SEC-009",
+      "supplierCode": "",
+      "name": "Farigola",
+      "family": "Secs i rebost",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_oli_04",
+      "code": "SEC-010",
+      "supplierCode": "",
+      "name": "Oli d’oliva 0,4º",
+      "family": "Secs i rebost",
+      "subfamily": "",
+      "unit": "L",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_pebre_vermell",
+      "code": "SEC-011",
+      "supplierCode": "",
+      "name": "Pebre vermell dolç",
+      "family": "Secs i rebost",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_nou_moscada",
+      "code": "SEC-012",
+      "supplierCode": "",
+      "name": "Nou moscada",
+      "family": "Secs i rebost",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_pebre_blanc",
+      "code": "SEC-013",
+      "supplierCode": "",
+      "name": "Pebre blanc",
+      "family": "Secs i rebost",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_vi_blanc",
+      "code": "BEG-004",
+      "supplierCode": "",
+      "name": "Vi blanc de cuina",
+      "family": "Begudes",
+      "subfamily": "",
+      "unit": "L",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_vi_negre",
+      "code": "BEG-005",
+      "supplierCode": "",
+      "name": "Vi negre de cuina",
+      "family": "Begudes",
+      "subfamily": "",
+      "unit": "L",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_brandi",
+      "code": "BEG-006",
+      "supplierCode": "",
+      "name": "Brandi de cuina",
+      "family": "Begudes",
+      "subfamily": "",
+      "unit": "L",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_aigua",
+      "code": "ALT-003",
+      "supplierCode": "",
+      "name": "Aigua",
+      "family": "Altres",
+      "subfamily": "",
+      "unit": "L",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real. Ingredient intern; no incloure a la compra.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": false
+    },
+    {
+      "id": "prod_sarriera_ossos_vedella",
+      "code": "CAR-020",
+      "supplierCode": "",
+      "name": "Ossos de vedella",
+      "family": "Carns",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_pollastre_sencer",
+      "code": "CAR-021",
+      "supplierCode": "",
+      "name": "Pollastre sencer",
+      "family": "Carns",
+      "subfamily": "",
+      "unit": "unitat",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_carcasses_pollastre",
+      "code": "CAR-022",
+      "supplierCode": "",
+      "name": "Carcasses de pollastre",
+      "family": "Carns",
+      "subfamily": "",
+      "unit": "unitat",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_peu_porc",
+      "code": "CAR-023",
+      "supplierCode": "",
+      "name": "Peu de porc",
+      "family": "Carns",
+      "subfamily": "",
+      "unit": "unitat",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_os_pernil",
+      "code": "CAR-024",
+      "supplierCode": "",
+      "name": "Os de pernil",
+      "family": "Carns",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_carn_salada_coll",
+      "code": "CAR-025",
+      "supplierCode": "",
+      "name": "Carn salada de coll",
+      "family": "Carns",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_xoric_guisar",
+      "code": "CAR-026",
+      "supplierCode": "",
+      "name": "Xoriç per guisar",
+      "family": "Carns",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_punta_costella",
+      "code": "CAR-027",
+      "supplierCode": "",
+      "name": "Punta de costella de porc",
+      "family": "Carns",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_espines_morralla",
+      "code": "PEI-024",
+      "supplierCode": "",
+      "name": "Espines i morralla de peix",
+      "family": "Peixos i marisc",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_marisc_caldo",
+      "code": "PEI-025",
+      "supplierCode": "",
+      "name": "Marisc per a caldo",
+      "family": "Peixos i marisc",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_mantega",
+      "code": "LAC-005",
+      "supplierCode": "",
+      "name": "Mantega",
+      "family": "Làctics i ous",
+      "subfamily": "",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "prod_sarriera_llet_sencera",
+      "code": "LAC-006",
+      "supplierCode": "",
+      "name": "Llet sencera",
+      "family": "Làctics i ous",
+      "subfamily": "",
+      "unit": "L",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "location": "",
+      "notes": "Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "purchasable": true
+    },
+    {
+      "id": "mrntf9zd1up5p",
+      "code": "VER-001",
+      "name": "Ceba",
+      "family": "Verdures i hortalisses",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "notes": "Referència existent; si falta, crear pendent de la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "purchasable": true
+    },
+    {
+      "id": "mrntf9zdr9ypu",
+      "code": "VER-004",
+      "name": "All",
+      "family": "Verdures i hortalisses",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "notes": "Referència existent; si falta, crear pendent de la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "purchasable": true
+    },
+    {
+      "id": "mrntf9zd2ncq4",
+      "code": "VER-003",
+      "name": "Patata",
+      "family": "Verdures i hortalisses",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "notes": "Referència existent; si falta, crear pendent de la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "purchasable": true
+    },
+    {
+      "id": "prod_msmpsyb6_wzl9k",
+      "code": "SEC-006",
+      "name": "Sal",
+      "family": "Secs i rebost",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "notes": "Referència existent; si falta, crear pendent de la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "purchasable": true
+    },
+    {
+      "id": "prod_msmppm2t_8vq28",
+      "code": "SEC-005",
+      "name": "Farina",
+      "family": "Secs i rebost",
+      "unit": "kg",
+      "price": 0,
+      "stock": 0,
+      "min": 0,
+      "supplierId": "",
+      "notes": "Referència existent; si falta, crear pendent de la primera recepció real.",
+      "active": true,
+      "pricePending": true,
+      "purchasable": true
+    }
+  ],
+  "bases": [
+    {
+      "id": "base_catalog_5",
+      "name": "Passata de tomàquet",
+      "type": "",
+      "station": "",
+      "life": "",
+      "process": "",
+      "techniques": [],
+      "source": "Fitxa tècnica manuscrita · Sarriera 1930",
+      "sourceFile": "37364.jpg",
+      "sourceVersion": "2026-09-07",
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "yield": null,
+      "yieldUnit": "kg",
+      "yieldPending": true,
+      "initialQtyText": "",
+      "ingredients": [
+        {
+          "productId": "prod_sarriera_tomaquet_conserva",
+          "name": "Tomàquet en conserva",
+          "qty": 3.5,
+          "unit": "kg"
+        },
+        {
+          "productId": "mrntf9zd1up5p",
+          "name": "Ceba",
+          "qty": 1.5,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_sarriera_pastanaga",
+          "name": "Pastanaga",
+          "qty": 0.5,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_sarriera_porro",
+          "name": "Porro",
+          "qty": 0.3,
+          "unit": "kg"
+        },
+        {
+          "productId": "mrntf9zdr9ypu",
+          "name": "All",
+          "qty": 0.1,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_sarriera_llorer",
+          "name": "Llorer",
+          "qty": 0,
+          "unit": "kg",
+          "asNeeded": true,
+          "qtyText": "SCP"
+        },
+        {
+          "productId": "prod_sarriera_farigola",
+          "name": "Farigola",
+          "qty": 0,
+          "unit": "kg",
+          "asNeeded": true,
+          "qtyText": "SCP"
+        },
+        {
+          "productId": "prod_msmpsyb6_wzl9k",
+          "name": "Sal",
+          "qty": 0,
+          "unit": "kg",
+          "asNeeded": true,
+          "qtyText": "SCP"
+        },
+        {
+          "productId": "prod_sarriera_vi_blanc",
+          "name": "Vi blanc de cuina",
+          "qty": 0.5,
+          "unit": "L"
+        },
+        {
+          "productId": "prod_sarriera_oli_04",
+          "name": "Oli d’oliva 0,4º",
+          "qty": 0.4,
+          "unit": "L"
+        }
+      ],
+      "baseUses": [],
+      "transcriptionNotes": "Rendiment no indicat. Possible marca del tomàquet: «Navé»; pendent de confirmar."
+    },
+    {
+      "id": "base_catalog_8",
+      "name": "Brou blanc",
+      "type": "",
+      "station": "",
+      "life": "",
+      "process": "",
+      "techniques": [],
+      "source": "Fitxa tècnica manuscrita · Sarriera 1930",
+      "sourceFile": "37363.jpg",
+      "sourceVersion": "2026-09-07",
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "yield": 10,
+      "yieldUnit": "L",
+      "yieldPending": false,
+      "initialQty": 15,
+      "initialUnit": "L",
+      "ingredients": [
+        {
+          "productId": "prod_sarriera_aigua",
+          "name": "Aigua",
+          "qty": 15,
+          "unit": "L"
+        },
+        {
+          "productId": "prod_sarriera_ossos_vedella",
+          "name": "Ossos de vedella",
+          "qty": 0.5,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_sarriera_pollastre_sencer",
+          "name": "Pollastre sencer",
+          "qty": 1,
+          "unit": "unitat"
+        },
+        {
+          "productId": "prod_sarriera_carcasses_pollastre",
+          "name": "Carcasses de pollastre",
+          "qty": 4,
+          "unit": "unitat"
+        },
+        {
+          "productId": "prod_sarriera_peu_porc",
+          "name": "Peu de porc",
+          "qty": 1,
+          "unit": "unitat"
+        },
+        {
+          "productId": "prod_sarriera_os_pernil",
+          "name": "Os de pernil",
+          "qty": 200,
+          "unit": "g"
+        },
+        {
+          "productId": "prod_sarriera_pastanaga",
+          "name": "Pastanaga",
+          "qty": 200,
+          "unit": "g"
+        },
+        {
+          "productId": "prod_sarriera_porro",
+          "name": "Porro",
+          "qty": 500,
+          "unit": "g"
+        },
+        {
+          "productId": "mrntf9zd2ncq4",
+          "name": "Patata",
+          "qty": 100,
+          "unit": "g"
+        }
+      ],
+      "baseUses": []
+    },
+    {
+      "id": "base_catalog_10",
+      "name": "Sofregit de ceba en juliana",
+      "type": "",
+      "station": "",
+      "life": "",
+      "process": "",
+      "techniques": [],
+      "source": "Fitxa tècnica manuscrita · Sarriera 1930",
+      "sourceFile": "37362.jpg",
+      "sourceVersion": "2026-09-07",
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "yield": 10,
+      "yieldUnit": "kg",
+      "yieldPending": false,
+      "yieldApproximate": true,
+      "initialQty": 18.1,
+      "initialUnit": "kg",
+      "ingredients": [
+        {
+          "productId": "prod_sarriera_ceba_fuentes",
+          "name": "Ceba Fuentes",
+          "qty": 15,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_sarriera_oli_04",
+          "name": "Oli d’oliva 0,4º",
+          "qty": 2,
+          "unit": "L"
+        },
+        {
+          "productId": "mrntf9zdr9ypu",
+          "name": "All",
+          "qty": 0.5,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_msmpsyb6_wzl9k",
+          "name": "Sal",
+          "qty": 0.1,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_sarriera_vi_blanc",
+          "name": "Vi blanc de cuina",
+          "qty": 0.5,
+          "unit": "L"
+        }
+      ],
+      "baseUses": [],
+      "originalTitle": "Sofregit de ceba"
+    },
+    {
+      "id": "base_catalog_11",
+      "name": "Base de cocido",
+      "type": "",
+      "station": "",
+      "life": "",
+      "process": "",
+      "techniques": [],
+      "source": "Fitxa tècnica manuscrita · Sarriera 1930",
+      "sourceFile": "37361.jpg",
+      "sourceVersion": "2026-09-07",
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "yield": null,
+      "yieldMin": 8,
+      "yieldMax": 9,
+      "yieldUnit": "kg",
+      "yieldPending": false,
+      "initialQty": 9.3,
+      "initialUnit": "kg",
+      "ingredients": [
+        {
+          "productId": "prod_sarriera_carn_salada_coll",
+          "name": "Carn salada de coll",
+          "qty": 1,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_sarriera_xoric_guisar",
+          "name": "Xoriç per guisar",
+          "qty": 1,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_sarriera_punta_costella",
+          "name": "Punta de costella de porc",
+          "qty": 1,
+          "unit": "kg"
+        }
+      ],
+      "baseUses": [
+        {
+          "baseId": "base_catalog_5",
+          "name": "Passata de tomàquet",
+          "qty": 1,
+          "unit": "L"
+        },
+        {
+          "baseId": "base_catalog_10",
+          "name": "Sofregit de ceba en juliana",
+          "qty": 0.3,
+          "unit": "kg"
+        },
+        {
+          "baseId": "base_catalog_8",
+          "name": "Brou blanc",
+          "qty": 5,
+          "unit": "L"
+        }
+      ],
+      "packSize": 0.5,
+      "packUnit": "kg",
+      "packText": "500 g",
+      "conservation": "Buit / congelat",
+      "transcriptionNotes": "Vida útil manuscrita poc clara; pendent de confirmar."
+    },
+    {
+      "id": "base_catalog_9",
+      "name": "Fons de vedella",
+      "type": "",
+      "station": "",
+      "life": "",
+      "process": "",
+      "techniques": [],
+      "source": "Fitxa tècnica manuscrita · Sarriera 1930",
+      "sourceFile": "37360.jpg",
+      "sourceVersion": "2026-09-07",
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "yield": null,
+      "yieldMin": 6,
+      "yieldMax": 8,
+      "yieldUnit": "L",
+      "yieldPending": false,
+      "initialQtyText": "20 kg + 40 L d’aigua",
+      "ingredients": [
+        {
+          "productId": "prod_sarriera_ossos_vedella",
+          "name": "Ossos de vedella",
+          "qty": 10,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_sarriera_porro",
+          "name": "Porro",
+          "qty": 3,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_sarriera_pastanaga",
+          "name": "Pastanaga",
+          "qty": 2,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_sarriera_vi_negre",
+          "name": "Vi negre de cuina",
+          "qty": 2,
+          "unit": "L"
+        },
+        {
+          "productId": "prod_sarriera_brandi",
+          "name": "Brandi de cuina",
+          "qty": 1,
+          "unit": "L"
+        },
+        {
+          "productId": "prod_sarriera_aigua",
+          "name": "Aigua",
+          "qty": 40,
+          "unit": "L"
+        }
+      ],
+      "baseUses": [
+        {
+          "baseId": "base_catalog_5",
+          "name": "Passata de tomàquet",
+          "qty": 3,
+          "unit": "kg"
+        }
+      ]
+    },
+    {
+      "id": "base_catalog_6",
+      "name": "Fumet de peix",
+      "type": "",
+      "station": "",
+      "life": "",
+      "process": "",
+      "techniques": [],
+      "source": "Fitxa tècnica manuscrita · Sarriera 1930",
+      "sourceFile": "37359.jpg",
+      "sourceVersion": "2026-09-07",
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "yield": 13,
+      "yieldUnit": "L",
+      "yieldPending": false,
+      "initialQty": 15,
+      "initialUnit": "L",
+      "ingredients": [
+        {
+          "productId": "prod_sarriera_espines_morralla",
+          "name": "Espines i morralla de peix",
+          "qty": 5,
+          "unit": "kg"
+        },
+        {
+          "productId": "mrntf9zd1up5p",
+          "name": "Ceba",
+          "qty": 100,
+          "unit": "g"
+        },
+        {
+          "productId": "prod_sarriera_fonoll_fresc",
+          "name": "Fonoll fresc",
+          "qty": 100,
+          "unit": "g"
+        },
+        {
+          "productId": "prod_sarriera_llorer",
+          "name": "Llorer",
+          "qty": 0,
+          "unit": "kg",
+          "asNeeded": true,
+          "qtyText": "SCP"
+        },
+        {
+          "productId": "prod_sarriera_aigua",
+          "name": "Aigua",
+          "qty": 15,
+          "unit": "L"
+        },
+        {
+          "productId": "prod_sarriera_pastanaga",
+          "name": "Pastanaga",
+          "qty": 150,
+          "unit": "g"
+        }
+      ],
+      "baseUses": []
+    },
+    {
+      "id": "base_catalog_7",
+      "name": "Fumet vermell",
+      "type": "",
+      "station": "",
+      "life": "",
+      "process": "",
+      "techniques": [],
+      "source": "Fitxa tècnica manuscrita · Sarriera 1930",
+      "sourceFile": "37358.jpg",
+      "sourceVersion": "2026-09-07",
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "yield": null,
+      "yieldMin": 8,
+      "yieldMax": 9,
+      "yieldUnit": "L",
+      "yieldPending": false,
+      "ingredients": [
+        {
+          "productId": "prod_sarriera_marisc_caldo",
+          "name": "Marisc per a caldo",
+          "qty": 3,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_sarriera_brandi",
+          "name": "Brandi de cuina",
+          "qty": 1,
+          "unit": "L"
+        },
+        {
+          "productId": "prod_sarriera_pebre_vermell",
+          "name": "Pebre vermell dolç",
+          "qty": 10,
+          "unit": "g"
+        },
+        {
+          "productId": "prod_sarriera_aigua",
+          "name": "Aigua",
+          "qty": 5,
+          "unit": "L"
+        }
+      ],
+      "baseUses": [
+        {
+          "baseId": "base_catalog_6",
+          "name": "Fumet de peix",
+          "qty": 5,
+          "unit": "L"
+        },
+        {
+          "baseId": "base_catalog_5",
+          "name": "Passata de tomàquet",
+          "qty": 1,
+          "unit": "kg"
+        }
+      ]
+    },
+    {
+      "id": "base_catalog_15",
+      "name": "Beixamel",
+      "type": "",
+      "station": "",
+      "life": "",
+      "process": "",
+      "techniques": [],
+      "source": "Fitxa tècnica manuscrita · Sarriera 1930",
+      "sourceFile": "37357.jpg",
+      "sourceVersion": "2026-09-07",
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "yield": 10,
+      "yieldUnit": "L",
+      "yieldPending": false,
+      "ingredients": [
+        {
+          "productId": "prod_sarriera_llet_sencera",
+          "name": "Llet sencera",
+          "qty": 10,
+          "unit": "L"
+        },
+        {
+          "productId": "prod_msmpsyb6_wzl9k",
+          "name": "Sal",
+          "qty": 100,
+          "unit": "g"
+        },
+        {
+          "productId": "prod_sarriera_nou_moscada",
+          "name": "Nou moscada",
+          "qty": 0,
+          "unit": "kg",
+          "asNeeded": true,
+          "qtyText": "SCP"
+        },
+        {
+          "productId": "prod_sarriera_pebre_blanc",
+          "name": "Pebre blanc",
+          "qty": 0,
+          "unit": "kg",
+          "asNeeded": true,
+          "qtyText": "SCP"
+        }
+      ],
+      "baseUses": [
+        {
+          "baseId": "base_catalog_12",
+          "name": "Roux blanc",
+          "qty": 900,
+          "unit": "g"
+        }
+      ]
+    },
+    {
+      "id": "base_catalog_12",
+      "name": "Roux blanc",
+      "type": "",
+      "station": "",
+      "life": "",
+      "process": "",
+      "techniques": [],
+      "source": "Fitxa tècnica manuscrita · Sarriera 1930",
+      "sourceFile": "37356.jpg",
+      "sourceVersion": "2026-09-07",
+      "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1",
+      "yield": 10,
+      "yieldUnit": "kg",
+      "yieldPending": false,
+      "initialQty": 10,
+      "initialUnit": "kg",
+      "ingredients": [
+        {
+          "productId": "prod_sarriera_mantega",
+          "name": "Mantega",
+          "qty": 5,
+          "unit": "kg"
+        },
+        {
+          "productId": "prod_msmppm2t_8vq28",
+          "name": "Farina",
+          "qty": 5,
+          "unit": "kg"
+        }
+      ],
+      "baseUses": [],
+      "originalTitle": "Roux blanc"
+    }
+  ],
+  "openingPurchaseConfig": {
+    "assumeZeroStock": true,
+    "pricePolicy": "goods_receipt",
+    "excludeNonPurchasable": true,
+    "sourceMigration": "sarriera_kitchen_bases_2026_09_07_v1"
+  }
+}

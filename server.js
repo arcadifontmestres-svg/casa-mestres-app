@@ -11,6 +11,7 @@ const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, 'public');
 const SEED_DATA = path.join(ROOT, 'data.json');
 const CATALOG_DATA = path.join(ROOT, 'seed', 'catalog.json');
+const SARRIERA_DATA = path.join(ROOT, 'seed', 'sarriera-kitchen-bases.json');
 
 function loadEnv() {
   const file = path.join(ROOT, '.env');
@@ -115,7 +116,7 @@ function normalizeArcadiData(data) {
     'maintenanceRecords', 'communications', 'crmContacts', 'marketingCampaigns',
     'groupEvents', 'experiences', 'loyaltyAccounts', 'purchaseOrders',
     'goodsReceipts', 'traceabilityRecords', 'productionRecords', 'restaurants',
-    'platformProfiles', 'miniApps', 'dailyOperations'
+    'platformProfiles', 'miniApps', 'dailyOperations', 'appliedMigrations'
   ];
   for (const key of collections) if (!Array.isArray(data[key])) data[key] = [];
   if (!data.restaurants.some(item => item.id === 'restaurant_casa_mestres')) {
@@ -173,6 +174,110 @@ function mutateData(change) {
   mutationQueue = job.catch(() => {});
   return job;
 }
+
+const SARRIERA_MIGRATION = 'sarriera_kitchen_bases_2026_09_07_v1';
+
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function catalogName(value) {
+  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+function applyCatalogMigrations() {
+  if (!fs.existsSync(SARRIERA_DATA)) return;
+  const data = readData();
+  data.appliedMigrations = Array.isArray(data.appliedMigrations) ? data.appliedMigrations : [];
+  if (data.appliedMigrations.some(item => (typeof item === 'string' ? item : item?.id) === SARRIERA_MIGRATION)) return;
+
+  const catalog = JSON.parse(fs.readFileSync(SARRIERA_DATA, 'utf8'));
+  const productTemplates = Array.isArray(catalog.products) ? catalog.products : [];
+  const baseTemplates = Array.isArray(catalog.bases) ? catalog.bases : [];
+  const sourceProducts = productTemplates.filter(item => item.sourceMigration === SARRIERA_MIGRATION);
+  data.products = Array.isArray(data.products) ? data.products : [];
+  data.bases = Array.isArray(data.bases) ? data.bases : [];
+
+  const productTemplateById = new Map(productTemplates.map(item => [item.id, item]));
+  const productIdMap = new Map();
+  const ensureProduct = template => {
+    if (!template) return null;
+    let current = data.products.find(item => item.id === template.id);
+    if (!current) current = data.products.find(item => catalogName(item.name) === catalogName(template.name));
+    if (!current) {
+      current = cloneJson(template);
+      current.price = 0;
+      current.stock = 0;
+      current.min = 0;
+      current.supplierId = '';
+      current.pricePending = true;
+      const pending = 'Pendent de preu, format de compra i proveïdor; completar amb la primera recepció real.';
+      current.notes = current.notes ? `${current.notes} ${pending}` : pending;
+      data.products.push(current);
+    } else if (template.sourceMigration) {
+      current.sourceMigration = template.sourceMigration;
+      if (current.purchasable === undefined) current.purchasable = template.purchasable !== false;
+    }
+    productIdMap.set(template.id, current.id);
+    return current;
+  };
+
+  for (const template of sourceProducts) ensureProduct(template);
+  for (const base of baseTemplates) {
+    for (const ingredient of base.ingredients || []) {
+      ensureProduct(productTemplateById.get(ingredient.productId));
+    }
+  }
+
+  const baseIdMap = new Map();
+  for (const template of baseTemplates) {
+    let current = data.bases.find(item => item.id === template.id);
+    if (!current) current = data.bases.find(item => catalogName(item.name) === catalogName(template.name));
+    if (!current && template.id === 'base_catalog_12') {
+      current = data.bases.find(item => catalogName(item.name) === 'roux');
+    }
+    if (!current) {
+      current = { id: template.id, name: template.name, ingredients: [], baseUses: [] };
+      data.bases.push(current);
+    }
+    baseIdMap.set(template.id, current.id);
+  }
+
+  for (const template of baseTemplates) {
+    const currentId = baseIdMap.get(template.id);
+    const current = data.bases.find(item => item.id === currentId);
+    const migrated = cloneJson(template);
+    migrated.id = current.id;
+    migrated.ingredients = (migrated.ingredients || []).map(item => ({
+      ...item,
+      productId: productIdMap.get(item.productId) || item.productId
+    }));
+    migrated.baseUses = (migrated.baseUses || []).map(item => ({
+      ...item,
+      baseId: baseIdMap.get(item.baseId) || item.baseId
+    }));
+    if (!migrated.process && current.process) migrated.process = current.process;
+    if (!migrated.life && current.life) migrated.life = current.life;
+    Object.assign(current, migrated);
+  }
+
+  data.openingPurchaseConfig = {
+    ...(data.openingPurchaseConfig || {}),
+    ...(catalog.openingPurchaseConfig || {}),
+    assumeZeroStock: true,
+    pricePolicy: 'goods_receipt'
+  };
+  data.appliedMigrations.push({
+    id: SARRIERA_MIGRATION,
+    appliedAt: new Date().toISOString(),
+    productsAddedOrLinked: sourceProducts.length,
+    basesUpdated: baseTemplates.length
+  });
+  writeData(data);
+  console.log(`Migració Sarriera aplicada: ${sourceProducts.length} productes i ${baseTemplates.length} bases.`);
+}
+
+applyCatalogMigrations();
 
 function readRaw(req, limit = 25 * 1024 * 1024) {
   return new Promise((resolve, reject) => {
@@ -393,7 +498,7 @@ const server = http.createServer(async (req, res) => {
         getStatus: () => ({
           ok: true,
           app: 'ARCADI GESTIO RESTAURANT',
-          connectorVersion: '0.2.0',
+          connectorVersion: '0.3.0',
           serverTime: new Date().toISOString()
         }),
         challenge: (scope, error, description) => oauthChallenge(baseUrl, scope, error, description)
