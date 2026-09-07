@@ -11,6 +11,7 @@ const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, 'public');
 const SEED_DATA = path.join(ROOT, 'data.json');
 const CATALOG_DATA = path.join(ROOT, 'seed', 'catalog.json');
+const SARRIERA_DATA = path.join(ROOT, 'seed', 'sarriera-kitchen-bases.json');
 
 function loadEnv() {
   const file = path.join(ROOT, '.env');
@@ -185,15 +186,14 @@ function catalogName(value) {
 }
 
 function applyCatalogMigrations() {
-  if (!fs.existsSync(CATALOG_DATA)) return;
+  if (!fs.existsSync(SARRIERA_DATA)) return;
   const data = readData();
   data.appliedMigrations = Array.isArray(data.appliedMigrations) ? data.appliedMigrations : [];
   if (data.appliedMigrations.some(item => (typeof item === 'string' ? item : item?.id) === SARRIERA_MIGRATION)) return;
 
-  const catalog = JSON.parse(fs.readFileSync(CATALOG_DATA, 'utf8'));
+  const catalog = JSON.parse(fs.readFileSync(SARRIERA_DATA, 'utf8'));
   const productTemplates = Array.isArray(catalog.products) ? catalog.products : [];
-  const baseTemplates = (Array.isArray(catalog.bases) ? catalog.bases : [])
-    .filter(item => item.sourceMigration === SARRIERA_MIGRATION);
+  const baseTemplates = Array.isArray(catalog.bases) ? catalog.bases : [];
   const sourceProducts = productTemplates.filter(item => item.sourceMigration === SARRIERA_MIGRATION);
   data.products = Array.isArray(data.products) ? data.products : [];
   data.bases = Array.isArray(data.bases) ? data.bases : [];
