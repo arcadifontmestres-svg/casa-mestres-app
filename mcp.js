@@ -9,6 +9,7 @@ const ENTRY_TYPES = [
   'group_service', 'incident', 'task', 'next_purchase_forecast', 'note'
 ];
 const ENTRY_STATUSES = ['Pendent', 'En curs', 'Completat'];
+const PRODUCT_UNITS = ['kg', 'g', 'L', 'ml', 'unitat', 'ració', 'caixa', 'paquet', 'ampolla', 'sac'];
 
 let sdkPromise;
 
@@ -112,6 +113,70 @@ function sanitizeDailyEntry(item) {
   return result;
 }
 
+function optionalNumber(value) {
+  if (value === undefined || value === null || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function normalizedName(value) {
+  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('ca').trim();
+}
+
+function sanitizeProduct(item) {
+  return {
+    id: String(item.id || ''), code: String(item.code || ''), name: String(item.name || ''),
+    family: String(item.family || ''), unit: String(item.unit || ''),
+    price: Number(item.price || 0), stock: Number(item.stock || 0), min: Number(item.min || 0),
+    supplierId: String(item.supplierId || ''), notes: String(item.notes || ''),
+    active: item.active !== false, pricePending: item.pricePending === true,
+    purchasable: item.purchasable !== false
+  };
+}
+
+function sanitizeIngredient(item) {
+  return {
+    productId: String(item.productId || ''), name: String(item.name || ''),
+    qty: Number(item.qty || 0), unit: String(item.unit || ''),
+    asNeeded: item.asNeeded === true, qtyText: String(item.qtyText || '')
+  };
+}
+
+function sanitizeBaseUse(item) {
+  return {
+    baseId: String(item.baseId || ''), name: String(item.name || ''),
+    qty: Number(item.qty || 0), unit: String(item.unit || '')
+  };
+}
+
+function sanitizeKitchenBase(item) {
+  return {
+    id: String(item.id || ''), name: String(item.name || ''), type: String(item.type || ''),
+    station: String(item.station || ''), yield: optionalNumber(item.yield),
+    yieldMin: optionalNumber(item.yieldMin), yieldMax: optionalNumber(item.yieldMax),
+    yieldUnit: String(item.yieldUnit || ''), yieldPending: item.yieldPending === true,
+    yieldApproximate: item.yieldApproximate === true, life: String(item.life || ''),
+    initialQtyText: String(item.initialQtyText || (item.initialQty !== undefined ? `${item.initialQty} ${item.initialUnit || ''}`.trim() : '')),
+    packText: String(item.packText || ''), conservation: String(item.conservation || ''),
+    ingredients: (item.ingredients || []).map(sanitizeIngredient),
+    baseUses: (item.baseUses || []).map(sanitizeBaseUse),
+    process: String(item.process || ''), source: String(item.source || ''),
+    sourceFile: String(item.sourceFile || ''), transcriptionNotes: String(item.transcriptionNotes || '')
+  };
+}
+
+function nextProductCode(data, family) {
+  const definition = (data.config?.families || []).find(item => item.name === family);
+  const prefix = String(definition?.prefix || 'ALT').toUpperCase();
+  let maximum = 0;
+  for (const product of data.products || []) {
+    const expression = new RegExp('^' + prefix + '-(\\d+)$', 'i');
+    const match = String(product.code || '').match(expression);
+    if (match) maximum = Math.max(maximum, Number(match[1]));
+  }
+  return prefix + '-' + String(maximum + 1).padStart(3, '0');
+}
+
 function authFailure(context, scope) {
   const invalid = context.auth?.reason === 'invalid_token';
   return {
@@ -142,8 +207,8 @@ function toolError(message) {
 
 async function createArcadiMcpServer(context) {
   const { McpServer, z } = await loadSdk();
-  const server = new McpServer({ name: 'arcadi-gestio-restaurant', version: '0.2.0' }, {
-    instructions: 'Connector privat d’ARCADI GESTIO RESTAURANT. Permet consultar reserves, grups, compres i recepcions, i guardar o tancar controls diaris amb autenticació.'
+  const server = new McpServer({ name: 'arcadi-gestio-restaurant', version: '0.3.0' }, {
+    instructions: 'Connector privat d’ARCADI GESTIO RESTAURANT. Permet consultar i mantenir productes, bases de cuina, reserves, grups, compres, recepcions i controls diaris amb autenticació.'
   });
 
   const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format requerit: YYYY-MM-DD');
@@ -171,6 +236,35 @@ async function createArcadiMcpServer(context) {
     status: z.string(), amount: z.number().optional(), supplier: z.string().optional(),
     responsible: z.string().optional(), actualTime: z.string().optional(), closingNotes: z.string().optional(),
     createdAt: z.string(), updatedAt: z.string()
+  });
+  const productSchema = z.object({
+    id: z.string(), code: z.string(), name: z.string(), family: z.string(), unit: z.string(),
+    price: z.number(), stock: z.number(), min: z.number(), supplierId: z.string(), notes: z.string(),
+    active: z.boolean(), pricePending: z.boolean(), purchasable: z.boolean()
+  });
+  const ingredientSchema = z.object({
+    productId: z.string(), name: z.string(), qty: z.number(), unit: z.string(),
+    asNeeded: z.boolean(), qtyText: z.string()
+  });
+  const baseUseSchema = z.object({
+    baseId: z.string(), name: z.string(), qty: z.number(), unit: z.string()
+  });
+  const kitchenBaseSchema = z.object({
+    id: z.string(), name: z.string(), type: z.string(), station: z.string(),
+    yield: z.number().nullable(), yieldMin: z.number().nullable(), yieldMax: z.number().nullable(),
+    yieldUnit: z.string(), yieldPending: z.boolean(), yieldApproximate: z.boolean(),
+    life: z.string(), initialQtyText: z.string(), packText: z.string(), conservation: z.string(),
+    ingredients: z.array(ingredientSchema), baseUses: z.array(baseUseSchema),
+    process: z.string(), source: z.string(), sourceFile: z.string(), transcriptionNotes: z.string()
+  });
+  const ingredientInputSchema = z.object({
+    productId: z.string().max(160).optional(), productName: z.string().max(200).optional(),
+    qty: z.number().finite().min(0).optional(), unit: z.enum(PRODUCT_UNITS),
+    asNeeded: z.boolean().optional()
+  });
+  const baseUseInputSchema = z.object({
+    baseId: z.string().max(160).optional(), baseName: z.string().max(200).optional(),
+    qty: z.number().finite().positive(), unit: z.enum(PRODUCT_UNITS)
   });
 
   server.registerTool('get_system_status', {
@@ -282,6 +376,240 @@ async function createArcadiMcpServer(context) {
     };
     return {
       content: [{ type: 'text', text: `${result.purchaseOrders.length} comandes i ${result.goodsReceipts.length} recepcions entre ${date_from} i ${date_to}.` }],
+      structuredContent: result
+    };
+  });
+
+  server.registerTool('list_products', {
+    title: 'Consultar productes de magatzem',
+    description: 'Cerca productes reals del magatzem per nom, codi o família. Retorna preu, stock i si el preu encara s’ha de confirmar en una recepció.',
+    inputSchema: {
+      query: z.string().max(200).optional(), family: z.string().max(120).optional(),
+      active: z.boolean().optional(), limit: z.number().int().min(1).max(200).optional()
+    },
+    outputSchema: { count: z.number(), items: z.array(productSchema) },
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    securitySchemes: [{ type: 'oauth2', scopes: [READ_SCOPE] }],
+    _meta: { securitySchemes: [{ type: 'oauth2', scopes: [READ_SCOPE] }] }
+  }, async ({ query, family, active, limit }) => {
+    if (!requireScope(context, READ_SCOPE)) return authFailure(context, READ_SCOPE);
+    const wanted = normalizedName(query);
+    const wantedFamily = normalizedName(family);
+    const items = (context.readData().products || [])
+      .filter(item => active === undefined || (item.active !== false) === active)
+      .filter(item => !wantedFamily || normalizedName(item.family) === wantedFamily)
+      .filter(item => !wanted || normalizedName(`${item.code || ''} ${item.name || ''}`).includes(wanted))
+      .sort((left, right) => String(left.name || '').localeCompare(String(right.name || ''), 'ca'))
+      .slice(0, limit || 100)
+      .map(sanitizeProduct);
+    return {
+      content: [{ type: 'text', text: `${items.length} productes trobats al magatzem.` }],
+      structuredContent: { count: items.length, items }
+    };
+  });
+
+  server.registerTool('upsert_product', {
+    title: 'Crear o actualitzar un producte',
+    description: 'Crea un producte si no existeix o actualitza el producte indicat. Si no s’envia preu en una alta, queda a 0 i pendent de confirmar a la recepció. No duplica noms ni requestId.',
+    inputSchema: {
+      requestId: z.string().min(8).max(120).regex(/^[A-Za-z0-9._:-]+$/),
+      id: z.string().max(160).optional(), code: z.string().max(40).optional(),
+      name: z.string().min(1).max(200), family: z.string().min(1).max(120),
+      unit: z.enum(PRODUCT_UNITS), price: z.number().finite().min(0).optional(),
+      stock: z.number().finite().min(0).optional(), min: z.number().finite().min(0).optional(),
+      supplierId: z.string().max(160).optional(), notes: z.string().max(1000).optional(),
+      active: z.boolean().optional(), purchasable: z.boolean().optional()
+    },
+    outputSchema: { created: z.boolean(), updated: z.boolean(), product: productSchema },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    securitySchemes: [{ type: 'oauth2', scopes: [WRITE_SCOPE] }],
+    _meta: { securitySchemes: [{ type: 'oauth2', scopes: [WRITE_SCOPE] }] }
+  }, async input => {
+    if (!requireScope(context, WRITE_SCOPE)) return authFailure(context, WRITE_SCOPE);
+    const result = await context.mutateData(data => {
+      data.products = data.products || [];
+      let product = input.id ? data.products.find(item => item.id === input.id) : null;
+      if (!product) product = data.products.find(item => normalizedName(item.name) === normalizedName(input.name));
+      if (product?.lastRequestId === input.requestId) {
+        return { created: false, updated: false, product: sanitizeProduct(product) };
+      }
+      const created = !product;
+      if (!product) {
+        product = {
+          id: input.id || `product_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`,
+          price: 0, stock: 0, min: 0, supplierId: '', notes: '', active: true,
+          pricePending: input.price === undefined, purchasable: true
+        };
+        data.products.push(product);
+      }
+      product.name = cleanText(input.name, 200);
+      product.family = cleanText(input.family, 120);
+      product.unit = input.unit;
+      product.code = cleanOptionalText(input.code, 40) || product.code || nextProductCode(data, product.family);
+      if (input.price !== undefined) {
+        product.price = input.price;
+        product.pricePending = false;
+      } else if (created) {
+        product.price = 0;
+        product.pricePending = true;
+      }
+      if (input.stock !== undefined) product.stock = input.stock;
+      if (input.min !== undefined) product.min = input.min;
+      if (input.supplierId !== undefined) product.supplierId = cleanText(input.supplierId, 160);
+      if (input.notes !== undefined) product.notes = cleanText(input.notes, 1000);
+      if (input.active !== undefined) product.active = input.active;
+      if (input.purchasable !== undefined) product.purchasable = input.purchasable;
+      product.lastRequestId = input.requestId;
+      product.updatedAt = new Date().toISOString();
+      product.updatedBy = context.auth.user;
+      return { created, updated: !created, product: sanitizeProduct(product) };
+    });
+    return {
+      content: [{
+        type: 'text',
+        text: result.created
+          ? `Producte creat: ${result.product.name}. Preu ${result.product.pricePending ? 'pendent de recepció' : 'informat'}.`
+          : result.updated ? `Producte actualitzat: ${result.product.name}.` : `La petició ja estava aplicada a ${result.product.name}.`
+      }],
+      structuredContent: result
+    };
+  });
+
+  server.registerTool('list_kitchen_bases', {
+    title: 'Consultar bases de cuina',
+    description: 'Consulta les bases de cuina amb rendiments, productes directes, altres bases utilitzades i dades transcrites de la fitxa tècnica.',
+    inputSchema: {
+      query: z.string().max(200).optional(), sourceFile: z.string().max(120).optional(),
+      limit: z.number().int().min(1).max(100).optional()
+    },
+    outputSchema: { count: z.number(), items: z.array(kitchenBaseSchema) },
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    securitySchemes: [{ type: 'oauth2', scopes: [READ_SCOPE] }],
+    _meta: { securitySchemes: [{ type: 'oauth2', scopes: [READ_SCOPE] }] }
+  }, async ({ query, sourceFile, limit }) => {
+    if (!requireScope(context, READ_SCOPE)) return authFailure(context, READ_SCOPE);
+    const wanted = normalizedName(query);
+    const wantedFile = cleanText(sourceFile, 120);
+    const items = (context.readData().bases || [])
+      .filter(item => !wanted || normalizedName(item.name).includes(wanted))
+      .filter(item => !wantedFile || String(item.sourceFile || '') === wantedFile)
+      .sort((left, right) => String(left.name || '').localeCompare(String(right.name || ''), 'ca'))
+      .slice(0, limit || 100)
+      .map(sanitizeKitchenBase);
+    return {
+      content: [{ type: 'text', text: `${items.length} bases de cuina trobades.` }],
+      structuredContent: { count: items.length, items }
+    };
+  });
+
+  server.registerTool('upsert_kitchen_base', {
+    title: 'Crear o actualitzar una base de cuina',
+    description: 'Crea o actualitza una base tècnica sense duplicar-la. Permet productes directes, dependències d’altres bases, rendiment exacte, rang o pendent, i quantitats SCP.',
+    inputSchema: {
+      requestId: z.string().min(8).max(120).regex(/^[A-Za-z0-9._:-]+$/),
+      id: z.string().max(160).optional(), name: z.string().min(1).max(200),
+      type: z.string().max(120).optional(), station: z.string().max(120).optional(),
+      yield: z.number().finite().positive().nullable().optional(),
+      yieldMin: z.number().finite().positive().nullable().optional(),
+      yieldMax: z.number().finite().positive().nullable().optional(),
+      yieldUnit: z.enum(PRODUCT_UNITS).optional(), life: z.string().max(200).optional(),
+      initialQtyText: z.string().max(200).optional(), packText: z.string().max(200).optional(),
+      conservation: z.string().max(300).optional(), process: z.string().max(6000).optional(),
+      transcriptionNotes: z.string().max(1000).optional(),
+      ingredients: z.array(ingredientInputSchema).max(100).optional(),
+      baseUses: z.array(baseUseInputSchema).max(50).optional()
+    },
+    outputSchema: { created: z.boolean(), updated: z.boolean(), base: kitchenBaseSchema },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    securitySchemes: [{ type: 'oauth2', scopes: [WRITE_SCOPE] }],
+    _meta: { securitySchemes: [{ type: 'oauth2', scopes: [WRITE_SCOPE] }] }
+  }, async input => {
+    if (!requireScope(context, WRITE_SCOPE)) return authFailure(context, WRITE_SCOPE);
+    const result = await context.mutateData(data => {
+      data.products = data.products || [];
+      data.bases = data.bases || [];
+      let base = input.id ? data.bases.find(item => item.id === input.id) : null;
+      if (!base) base = data.bases.find(item => normalizedName(item.name) === normalizedName(input.name));
+      if (base?.lastRequestId === input.requestId) {
+        return { created: false, updated: false, base: sanitizeKitchenBase(base) };
+      }
+
+      const resolveIngredients = () => {
+        if (input.ingredients === undefined) return undefined;
+        const items = [];
+        for (const ingredient of input.ingredients) {
+          const product = ingredient.productId
+            ? data.products.find(item => item.id === ingredient.productId)
+            : data.products.find(item => normalizedName(item.name) === normalizedName(ingredient.productName));
+          if (!product) return { error: `No s’ha trobat el producte ${ingredient.productId || ingredient.productName || '(sense nom)'}.` };
+          if (!ingredient.asNeeded && ingredient.qty === undefined) {
+            return { error: `Falta la quantitat de ${product.name}; indica-la o marca-la com a SCP.` };
+          }
+          items.push({
+            productId: product.id, name: product.name, qty: ingredient.asNeeded ? 0 : ingredient.qty,
+            unit: ingredient.unit, asNeeded: ingredient.asNeeded === true,
+            qtyText: ingredient.asNeeded ? 'SCP' : ''
+          });
+        }
+        return items;
+      };
+      const resolveBaseUses = () => {
+        if (input.baseUses === undefined) return undefined;
+        const items = [];
+        for (const use of input.baseUses) {
+          const used = use.baseId
+            ? data.bases.find(item => item.id === use.baseId)
+            : data.bases.find(item => normalizedName(item.name) === normalizedName(use.baseName));
+          if (!used) return { error: `No s’ha trobat la base ${use.baseId || use.baseName || '(sense nom)'}.` };
+          if (base && used.id === base.id) return { error: 'Una base no es pot utilitzar a si mateixa.' };
+          items.push({ baseId: used.id, name: used.name, qty: use.qty, unit: use.unit });
+        }
+        return items;
+      };
+
+      const ingredients = resolveIngredients();
+      if (ingredients?.error) return ingredients;
+      const baseUses = resolveBaseUses();
+      if (baseUses?.error) return baseUses;
+
+      const created = !base;
+      if (!base) {
+        base = {
+          id: input.id || `base_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`,
+          ingredients: [], baseUses: [], techniques: [], process: '', life: '', source: 'ChatGPT'
+        };
+        data.bases.push(base);
+      }
+      base.name = cleanText(input.name, 200);
+      if (input.type !== undefined) base.type = cleanText(input.type, 120);
+      if (input.station !== undefined) base.station = cleanText(input.station, 120);
+      if (input.yield !== undefined) base.yield = input.yield;
+      if (input.yieldMin !== undefined) base.yieldMin = input.yieldMin;
+      if (input.yieldMax !== undefined) base.yieldMax = input.yieldMax;
+      if (input.yieldUnit !== undefined) base.yieldUnit = input.yieldUnit;
+      if (input.life !== undefined) base.life = cleanText(input.life, 200);
+      if (input.initialQtyText !== undefined) base.initialQtyText = cleanText(input.initialQtyText, 200);
+      if (input.packText !== undefined) base.packText = cleanText(input.packText, 200);
+      if (input.conservation !== undefined) base.conservation = cleanText(input.conservation, 300);
+      if (input.process !== undefined) base.process = cleanText(input.process, 6000);
+      if (input.transcriptionNotes !== undefined) base.transcriptionNotes = cleanText(input.transcriptionNotes, 1000);
+      if (ingredients !== undefined) base.ingredients = ingredients;
+      if (baseUses !== undefined) base.baseUses = baseUses;
+      base.yieldPending = optionalNumber(base.yield) === null
+        && optionalNumber(base.yieldMin) === null && optionalNumber(base.yieldMax) === null;
+      base.lastRequestId = input.requestId;
+      base.updatedAt = new Date().toISOString();
+      base.updatedBy = context.auth.user;
+      return { created, updated: !created, base: sanitizeKitchenBase(base) };
+    });
+    if (result.error) return toolError(result.error);
+    return {
+      content: [{
+        type: 'text',
+        text: result.created
+          ? `Base creada: ${result.base.name}.`
+          : result.updated ? `Base actualitzada: ${result.base.name}.` : `La petició ja estava aplicada a ${result.base.name}.`
+      }],
       structuredContent: result
     };
   });
