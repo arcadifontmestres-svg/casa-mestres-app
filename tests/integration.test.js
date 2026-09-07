@@ -8,6 +8,14 @@ const { spawn } = require('child_process');
 const root = path.resolve(__dirname, '..');
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'casa-mestres-test-'));
 fs.copyFileSync(path.join(root, 'data.json'), path.join(dataDir, 'data.json'));
+const seededStatePath = path.join(dataDir, 'data.json');
+const seededState = JSON.parse(fs.readFileSync(seededStatePath, 'utf8'));
+seededState.products.push({
+  id: 'existing_real_pastanaga', code: 'VER-099', name: 'Pastanaga',
+  family: 'Verdures i hortalisses', unit: 'kg', price: 1.23, stock: 7,
+  min: 2, supplierId: 'supplier_real', notes: 'Dada real prèvia', active: true
+});
+fs.writeFileSync(seededStatePath, JSON.stringify(seededState), 'utf8');
 
 const port = 37000 + Math.floor(Math.random() * 1000);
 const base = `http://127.0.0.1:${port}`;
@@ -72,6 +80,21 @@ async function main() {
   assert.ok(Array.isArray(authorized.data.reservations));
   assert.equal(authorized.data.arcadiSchema, 'ARCADI_GESTIO_RESTAURANT_V1');
   assert.ok(Array.isArray(authorized.data.purchaseOrders));
+  assert.ok(authorized.data.appliedMigrations.some(item => item.id === 'sarriera_kitchen_bases_2026_09_07_v1'));
+  const sarrieraProducts = authorized.data.products.filter(item => item.sourceMigration === 'sarriera_kitchen_bases_2026_09_07_v1');
+  const sarrieraBases = authorized.data.bases.filter(item => item.sourceMigration === 'sarriera_kitchen_bases_2026_09_07_v1');
+  assert.equal(sarrieraProducts.length, 27);
+  assert.equal(sarrieraBases.length, 9);
+  assert.equal(sarrieraProducts.filter(item => item.id !== 'existing_real_pastanaga').every(item => item.price === 0 && item.stock === 0), true);
+  const preservedProduct = authorized.data.products.find(item => item.id === 'existing_real_pastanaga');
+  assert.equal(preservedProduct.price, 1.23);
+  assert.equal(preservedProduct.stock, 7);
+  assert.equal(preservedProduct.supplierId, 'supplier_real');
+  assert.equal(authorized.data.products.filter(item => item.name === 'Pastanaga').length, 1);
+  assert.equal(sarrieraBases.find(item => item.id === 'base_catalog_15').baseUses[0].baseId, 'base_catalog_12');
+  assert.equal(sarrieraBases.find(item => item.id === 'base_catalog_5').yield, null);
+  assert.equal(authorized.data.openingPurchaseConfig.assumeZeroStock, true);
+  assert.equal(authorized.data.openingPurchaseConfig.pricePolicy, 'goods_receipt');
 
   const config = await request('/api/reservation-config');
   assert.equal(config.response.status, 200);
