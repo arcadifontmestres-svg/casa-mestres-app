@@ -49,7 +49,7 @@ async function main() {
 
   const state = await request('/api/state');
   assert.equal(state.response.status, 200);
-  assert.equal(state.data.products.length, 460);
+  assert.equal(state.data.products.length, 487);
   assert.equal(state.data.arcadiSchema, 'ARCADI_GESTIO_RESTAURANT_V1');
   assert.ok(Array.isArray(state.data.purchaseOrders));
   assert.ok(state.data.restaurants.some(item => item.id === 'restaurant_casa_mestres'));
