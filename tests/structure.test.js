@@ -10,6 +10,7 @@ const sarriera = JSON.parse(read('seed/sarriera-kitchen-bases.json'));
 const packageJson = JSON.parse(read('package.json'));
 const index = read('public/index.html');
 const modules = read('public/js/arcadi-modules.js');
+const control = read('public/control_normatiu.html');
 
 assert.equal(packageJson.name, 'arcadi-gestio-restaurant');
 assert.equal(packageJson.build.productName, 'ARCADI GESTIO RESTAURANT');
@@ -34,6 +35,10 @@ assert.equal(sarriera.products.every(item => item.price === 0 && item.stock === 
 assert.ok(sarriera.bases.find(item => item.id === 'base_catalog_11').baseUses.length === 3);
 assert.equal(sarriera.bases.find(item => item.id === 'base_catalog_5').yieldPending, true);
 assert.match(read('server.js'), /function normalizeArcadiData\(data\)/);
+assert.match(read('mcp.js'), /function ensurePurchaseControlChain\(data, purchaseOrder, actor\)/);
+assert.match(control, /APPCC - Recepció i traçabilitat de matèria primera/);
+assert.match(control, /'recepcio'/);
+assert.match(modules, /Pendent de recepció/);
 
 assert.doesNotMatch(modules, /Math\.random\s*\(/, 'Els panells no poden mostrar dades aleatòries');
 assert.doesNotMatch(modules, /\/api\/assistant/, 'La IA ha de quedar aparcada');
