@@ -182,7 +182,7 @@ async function main() {
   const listed = await anonymousClient.listTools();
   assert.deepEqual(
     listed.tools.map(item => item.name).sort(),
-    ['get_daily_status', 'get_system_status', 'list_kitchen_bases', 'list_products', 'list_purchases', 'list_reservations', 'record_daily_entry', 'update_daily_entry', 'upsert_kitchen_base', 'upsert_product'].sort()
+    ['create_purchase_order', 'get_daily_status', 'get_system_status', 'list_kitchen_bases', 'list_products', 'list_purchases', 'list_reservations', 'record_daily_entry', 'update_daily_entry', 'update_purchase_order', 'upsert_kitchen_base', 'upsert_product'].sort()
   );
   const statusTool = listed.tools.find(item => item.name === 'get_system_status');
   const writeTool = listed.tools.find(item => item.name === 'record_daily_entry');
@@ -192,7 +192,7 @@ async function main() {
 
   const status = await anonymousClient.callTool({ name: 'get_system_status', arguments: {} });
   assert.equal(status.structuredContent.ok, true);
-  assert.equal(status.structuredContent.connectorVersion, '0.3.0');
+  assert.equal(status.structuredContent.connectorVersion, '0.4.0');
   const blocked = await anonymousClient.callTool({ name: 'get_daily_status', arguments: { date: '2026-09-05' } });
   assert.equal(blocked.isError, true);
   assert.ok(blocked._meta['mcp/www_authenticate'][0].includes('error="insufficient_scope"'));
@@ -211,6 +211,38 @@ async function main() {
   assert.equal(products.structuredContent.count, 1);
   assert.equal(products.structuredContent.items[0].price, 0);
   assert.equal(products.structuredContent.items[0].stock, 0);
+
+  const purchaseInput = {
+    requestId: 'test-compra-20260908-001',
+    date: '2026-09-08',
+    supplier: 'Proveïdor de prova',
+    responsible: 'Arcadi',
+    lines: [{ productId: products.structuredContent.items[0].id, requested: '5 kg', observations: 'Per al servei' }]
+  };
+  const createdPurchase = await authorizedClient.callTool({ name: 'create_purchase_order', arguments: purchaseInput });
+  assert.equal(createdPurchase.structuredContent.created, true);
+  assert.match(createdPurchase.structuredContent.purchaseOrder.code, /^GS-COMP-20260908-001$/);
+  assert.equal(createdPurchase.structuredContent.purchaseOrder.status, 'Preparada');
+  assert.equal(createdPurchase.structuredContent.purchaseOrder.lineItems[0].product, 'Pastanaga');
+  const repeatedPurchase = await authorizedClient.callTool({ name: 'create_purchase_order', arguments: purchaseInput });
+  assert.equal(repeatedPurchase.structuredContent.created, false);
+  assert.equal(repeatedPurchase.structuredContent.purchaseOrder.id, createdPurchase.structuredContent.purchaseOrder.id);
+
+  const updatedPurchase = await authorizedClient.callTool({
+    name: 'update_purchase_order',
+    arguments: {
+      requestId: 'test-compra-20260908-actualitza-001',
+      id: createdPurchase.structuredContent.purchaseOrder.id,
+      status: 'Enviada'
+    }
+  });
+  assert.equal(updatedPurchase.structuredContent.updated, true);
+  assert.equal(updatedPurchase.structuredContent.purchaseOrder.status, 'Enviada');
+  const listedPurchases = await authorizedClient.callTool({
+    name: 'list_purchases', arguments: { date_from: '2026-09-08', date_to: '2026-09-08' }
+  });
+  assert.equal(listedPurchases.structuredContent.purchaseOrders.length, 1);
+  assert.equal(listedPurchases.structuredContent.purchaseOrders[0].status, 'Enviada');
 
   const kitchenBases = await authorizedClient.callTool({
     name: 'list_kitchen_bases',

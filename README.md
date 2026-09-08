@@ -33,6 +33,10 @@ Eines disponibles:
 - `get_daily_status`: resum de reserves, grups, compres, recepcions i controls d’un dia.
 - `list_reservations`: consulta de reserves dins un interval.
 - `list_purchases`: consulta de GS-COMP i GS-REC dins un interval.
+- `create_purchase_order`: crea i desa una llista de compra GS-COMP amb productes reals del catàleg, sense duplicats.
+- `update_purchase_order`: actualitza l’estat, el responsable o les observacions d’una GS-COMP existent.
+- `list_products` i `upsert_product`: consulta, alta i actualització del magatzem.
+- `list_kitchen_bases` i `upsert_kitchen_base`: consulta, alta i actualització de bases i fitxes tècniques.
 - `record_daily_entry`: alta idempotent d’obertura, tancament, caixa, facturació, compres, incidències, tasques i previsions.
 - `update_daily_entry`: canvi d’estat i tancament d’un control existent.
 
@@ -53,9 +57,10 @@ La seed actual conserva les dades de treball recuperades:
 
 Les comandes i registres posteriors es conserven al `data.json` viu de cada instal·lació. L’arrencada afegeix les col·leccions noves que faltin sense substituir les dades existents.
 
-Els registres creats des de ChatGPT es guarden a `dailyOperations` dins aquest
-mateix `data.json`, amb còpia prèvia automàtica i un `requestId` que evita altes
-duplicades si una petició es repeteix.
+Els registres creats des de ChatGPT es guarden a la col·lecció real que correspon
+(`purchaseOrders`, `products`, `bases` o `dailyOperations`) dins aquest mateix
+`data.json`, amb còpia prèvia automàtica i un `requestId` que evita altes duplicades
+si una petició es repeteix.
 
 `seed/catalog.json` aporta el catàleg consolidat a una instal·lació nova de Windows. En un Render que ja té `DATA_DIR`, aquest catàleg no substitueix el fitxer viu.
 

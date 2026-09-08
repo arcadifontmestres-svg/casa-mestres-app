@@ -32,3 +32,11 @@ Una modificació és un canvi del projecte, **no una nova versió completa desca
 ## IA
 
 La IA és una integració opcional. No pot ser necessària per arrencar, guardar, imprimir ni consultar cap mòdul.
+
+## Operativa diària des de ChatGPT
+
+- El punt d’entrada és sempre el projecte **ARCADI GESTIO** de la barra lateral.
+- Les ordres operatives no destructives es guarden a l’app en el mateix moment, sense demanar una autorització nova.
+- Les llistes de compra es creen com a registres `GS-COMP`, vinculades als productes reals del catàleg i protegides contra duplicats.
+- Les tasques i controls es registren al llibre d’operacions; els productes i les bases s’actualitzen als seus mòduls corresponents.
+- Només cal confirmació expressa per eliminar dades, substituir informació ambigua, fer pagaments o modificar seguretat i credencials.
