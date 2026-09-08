@@ -64,14 +64,14 @@
   register({
     key: 'receipts', phase: 52, section: 'purchases', label: 'Recepció de mercaderies', singular: 'recepció',
     description: 'GS-REC, lots, caducitats, temperatura i incidències.', collection: 'goodsReceipts',
-    fields: [text('code', 'Codi GS-REC', true), text('purchaseCode', 'GS-COMP relacionada'), dateField('date', 'Data'), text('supplier', 'Proveïdor'), text('lot', 'Lot'), dateField('expiry', 'Caducitat'), number('temperature', 'Temperatura ºC'), select('packaging', 'Envàs', ['Conforme', 'No conforme']), select('status', 'Resultat', ['Acceptada', 'Amb incidència', 'Rebutjada']), area('lines', 'Productes rebuts'), area('correctiveAction', 'Incidència / acció correctora')],
+    fields: [text('code', 'Codi GS-REC', true), text('purchaseCode', 'GS-COMP relacionada'), text('traceabilityCode', 'GS-TRAC relacionada'), dateField('date', 'Data'), text('supplier', 'Proveïdor'), text('lot', 'Lot'), dateField('expiry', 'Caducitat'), number('temperature', 'Temperatura ºC'), select('packaging', 'Envàs', ['Pendent', 'Conforme', 'No conforme']), select('status', 'Resultat', ['Pendent de recepció', 'Acceptada', 'Amb incidència', 'Rebutjada']), area('lines', 'Productes rebuts'), area('correctiveAction', 'Incidència / acció correctora')],
     columns: [['code', 'Codi'], ['date', 'Data'], ['supplier', 'Proveïdor'], ['lot', 'Lot'], ['status', 'Resultat']]
   });
   register({
     key: 'traceability', phase: 52, section: 'purchases', label: 'Traçabilitat', singular: 'registre de traçabilitat',
     description: 'Lots rebuts i plats o menús on s’han utilitzat.', collection: 'traceabilityRecords',
-    fields: [text('product', 'Producte', true), text('lot', 'Lot', true), text('supplier', 'Proveïdor'), dateField('receivedAt', 'Recepció'), dateField('expiry', 'Caducitat'), number('temperature', 'Temperatura ºC'), text('usedIn', 'Plat / menú'), area('notes', 'Observacions')],
-    columns: [['product', 'Producte'], ['lot', 'Lot'], ['supplier', 'Proveïdor'], ['receivedAt', 'Recepció'], ['usedIn', 'Utilitzat a']]
+    fields: [text('code', 'Codi GS-TRAC'), text('purchaseCode', 'GS-COMP relacionada'), text('receiptCode', 'GS-REC relacionada'), text('product', 'Producte', true), text('lot', 'Lot'), text('supplier', 'Proveïdor'), dateField('receivedAt', 'Recepció'), dateField('expiry', 'Caducitat'), number('temperature', 'Temperatura ºC'), select('status', 'Estat', ['Pendent de recepció', 'Rebut', 'Utilitzat', 'Tancat']), text('usedIn', 'Plat / menú'), area('notes', 'Observacions')],
+    columns: [['code', 'Codi'], ['product', 'Producte'], ['lot', 'Lot'], ['supplier', 'Proveïdor'], ['receivedAt', 'Recepció'], ['status', 'Estat']]
   });
   register({
     key: 'productionRecords', phase: 55, section: 'operations', label: 'Producció', singular: 'ordre de producció',

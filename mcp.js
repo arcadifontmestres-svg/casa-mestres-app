@@ -98,11 +98,44 @@ function sanitizePurchase(item) {
 function sanitizeReceipt(item) {
   return {
     id: String(item.id || ''), code: String(item.code || ''), purchaseCode: String(item.purchaseCode || ''),
+    traceabilityCode: String(item.traceabilityCode || ''),
     date: String(item.date || ''), supplier: String(item.supplier || ''), lot: String(item.lot || ''),
     expiry: String(item.expiry || ''),
     temperature: item.temperature === undefined || item.temperature === '' ? null : Number(item.temperature),
     packaging: String(item.packaging || ''), status: String(item.status || ''),
-    lines: String(item.lines || ''), correctiveAction: String(item.correctiveAction || '')
+    lines: String(item.lines || ''), correctiveAction: String(item.correctiveAction || ''),
+    lineItems: (item.lineItems || []).map(line => ({
+      productId: String(line.productId || ''), code: String(line.code || ''),
+      product: String(line.product || ''), requested: String(line.requested || ''),
+      received: String(line.received || ''), lot: String(line.lot || ''), expiry: String(line.expiry || ''),
+      temperature: line.temperature === undefined || line.temperature === '' ? null : Number(line.temperature),
+      packaging: String(line.packaging || ''), ok: line.ok === true
+    }))
+  };
+}
+
+function sanitizeTraceability(item) {
+  return {
+    id: String(item.id || ''), code: String(item.code || ''),
+    purchaseCode: String(item.purchaseCode || ''), receiptCode: String(item.receiptCode || ''),
+    productId: String(item.productId || ''), product: String(item.product || ''),
+    supplier: String(item.supplier || ''), receivedAt: String(item.receivedAt || ''),
+    lot: String(item.lot || ''), expiry: String(item.expiry || ''),
+    temperature: item.temperature === undefined || item.temperature === '' ? null : Number(item.temperature),
+    usedIn: String(item.usedIn || ''), notes: String(item.notes || ''), status: String(item.status || '')
+  };
+}
+
+function sanitizeAppccReceipt(item) {
+  return {
+    id: String(item.id || ''), codi_recepcio: String(item.codi_recepcio || ''),
+    data: String(item.data || ''), hora: String(item.hora || ''),
+    gs_comp: String(item.gs_comp || ''), gs_rec: String(item.gs_rec || ''), gs_trac: String(item.gs_trac || ''),
+    proveidor: String(item.proveidor || ''), productes: String(item.productes || ''),
+    lot: String(item.lot || ''), caducitat: String(item.caducitat || ''), temperatura: String(item.temperatura || ''),
+    estat_envas: String(item.estat_envas || ''), conforme: String(item.conforme || ''),
+    incidencia: String(item.incidencia || ''), accio: String(item.accio || ''),
+    responsable: String(item.responsable || ''), estat: String(item.estat || ''), validacio: String(item.validacio || '')
   };
 }
 
@@ -193,6 +226,75 @@ function nextPurchaseCode(data, date) {
   return prefix + String(maximum + 1).padStart(3, '0');
 }
 
+function ensurePurchaseControlChain(data, purchaseOrder, actor) {
+  data.goodsReceipts = Array.isArray(data.goodsReceipts) ? data.goodsReceipts : [];
+  data.traceabilityRecords = Array.isArray(data.traceabilityRecords) ? data.traceabilityRecords : [];
+  data.controlNormatiu = data.controlNormatiu && typeof data.controlNormatiu === 'object' ? data.controlNormatiu : { empresa: {}, records: {} };
+  data.controlNormatiu.records = data.controlNormatiu.records && typeof data.controlNormatiu.records === 'object' ? data.controlNormatiu.records : {};
+  data.controlNormatiu.records.recepcio = Array.isArray(data.controlNormatiu.records.recepcio) ? data.controlNormatiu.records.recepcio : [];
+
+  const timestamp = new Date().toISOString();
+  const suffix = String(purchaseOrder.code || '').replace(/^GS-COMP-/, '');
+  const receiptCode = `GS-REC-${suffix}`;
+  const traceabilityCode = `GS-TRAC-${suffix}`;
+  const lineItems = Array.isArray(purchaseOrder.lineItems) ? purchaseOrder.lineItems : [];
+
+  let goodsReceipt = data.goodsReceipts.find(item => item.purchaseId === purchaseOrder.id || item.purchaseCode === purchaseOrder.code);
+  if (!goodsReceipt) {
+    goodsReceipt = {
+      id: `receipt_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`,
+      code: receiptCode, purchaseId: purchaseOrder.id, purchaseCode: purchaseOrder.code,
+      traceabilityCode, date: purchaseOrder.date, supplier: purchaseOrder.supplier,
+      lot: '', expiry: '', temperature: null, packaging: 'Pendent',
+      status: 'Pendent de recepció', lines: purchaseOrder.lines || '', correctiveAction: '',
+      lineItems: lineItems.map(line => ({
+        productId: line.productId, code: line.code, product: line.product, requested: line.requested,
+        received: '', lot: '', expiry: '', temperature: null, packaging: 'Pendent', ok: false
+      })),
+      source: 'ChatGPT', createdBy: actor, createdAt: timestamp, updatedAt: timestamp
+    };
+    data.goodsReceipts.push(goodsReceipt);
+  }
+
+  for (const line of lineItems) {
+    const exists = data.traceabilityRecords.some(item =>
+      item.purchaseCode === purchaseOrder.code && item.productId === line.productId
+    );
+    if (!exists) {
+      data.traceabilityRecords.push({
+        id: `trace_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`,
+        code: traceabilityCode, purchaseCode: purchaseOrder.code, receiptCode: goodsReceipt.code,
+        productId: line.productId, product: line.product, supplier: purchaseOrder.supplier,
+        receivedAt: '', lot: '', expiry: '', temperature: null, usedIn: '',
+        notes: line.observations || '', status: 'Pendent de recepció',
+        source: 'ChatGPT', createdBy: actor, createdAt: timestamp, updatedAt: timestamp
+      });
+    }
+  }
+
+  let appccReceipt = data.controlNormatiu.records.recepcio.find(item => item.gs_comp === purchaseOrder.code);
+  if (!appccReceipt) {
+    appccReceipt = {
+      id: `appcc_receipt_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`,
+      codi_recepcio: goodsReceipt.code, data: purchaseOrder.date, hora: '',
+      gs_comp: purchaseOrder.code, gs_rec: goodsReceipt.code, gs_trac: traceabilityCode,
+      proveidor: purchaseOrder.supplier,
+      productes: lineItems.map(line => `${line.code ? `${line.code} · ` : ''}${line.product}: ${line.requested}`).join('\n'),
+      lot: '', caducitat: '', temperatura: '', estat_envas: 'Pendent', conforme: 'Pendent',
+      incidencia: '', accio: '', responsable: purchaseOrder.responsible || '',
+      estat: 'Pendent de recepció', validacio: 'Pendent',
+      source: 'ChatGPT', createdBy: actor, createdAt: timestamp, updatedAt: timestamp
+    };
+    data.controlNormatiu.records.recepcio.push(appccReceipt);
+  }
+
+  return {
+    goodsReceipt: sanitizeReceipt(goodsReceipt),
+    traceabilityRecords: data.traceabilityRecords.filter(item => item.purchaseCode === purchaseOrder.code).map(sanitizeTraceability),
+    appccReceipt: sanitizeAppccReceipt(appccReceipt)
+  };
+}
+
 function authFailure(context, scope) {
   const invalid = context.auth?.reason === 'invalid_token';
   return {
@@ -223,8 +325,8 @@ function toolError(message) {
 
 async function createArcadiMcpServer(context) {
   const { McpServer, z } = await loadSdk();
-  const server = new McpServer({ name: 'arcadi-gestio-restaurant', version: '0.4.0' }, {
-    instructions: 'Connector privat d’ARCADI GESTIO RESTAURANT. Permet consultar i mantenir productes, bases de cuina, reserves, grups, llistes de compra, recepcions i controls diaris amb autenticació.'
+  const server = new McpServer({ name: 'arcadi-gestio-restaurant', version: '0.5.0' }, {
+    instructions: 'Connector privat d’ARCADI GESTIO RESTAURANT. Permet consultar i mantenir productes, bases de cuina, reserves, grups, llistes de compra, recepcions, traçabilitat i controls APPCC amb autenticació.'
   });
 
   const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format requerit: YYYY-MM-DD');
@@ -246,9 +348,26 @@ async function createArcadiMcpServer(context) {
     }))
   });
   const receiptSchema = z.object({
-    id: z.string(), code: z.string(), purchaseCode: z.string(), date: z.string(), supplier: z.string(),
+    id: z.string(), code: z.string(), purchaseCode: z.string(), traceabilityCode: z.string(), date: z.string(), supplier: z.string(),
     lot: z.string(), expiry: z.string(), temperature: z.number().nullable(), packaging: z.string(),
-    status: z.string(), lines: z.string(), correctiveAction: z.string()
+    status: z.string(), lines: z.string(), correctiveAction: z.string(),
+    lineItems: z.array(z.object({
+      productId: z.string(), code: z.string(), product: z.string(), requested: z.string(), received: z.string(),
+      lot: z.string(), expiry: z.string(), temperature: z.number().nullable(), packaging: z.string(), ok: z.boolean()
+    }))
+  });
+  const traceabilitySchema = z.object({
+    id: z.string(), code: z.string(), purchaseCode: z.string(), receiptCode: z.string(),
+    productId: z.string(), product: z.string(), supplier: z.string(), receivedAt: z.string(),
+    lot: z.string(), expiry: z.string(), temperature: z.number().nullable(), usedIn: z.string(),
+    notes: z.string(), status: z.string()
+  });
+  const appccReceiptSchema = z.object({
+    id: z.string(), codi_recepcio: z.string(), data: z.string(), hora: z.string(),
+    gs_comp: z.string(), gs_rec: z.string(), gs_trac: z.string(), proveidor: z.string(),
+    productes: z.string(), lot: z.string(), caducitat: z.string(), temperatura: z.string(),
+    estat_envas: z.string(), conforme: z.string(), incidencia: z.string(), accio: z.string(),
+    responsable: z.string(), estat: z.string(), validacio: z.string()
   });
   const dailyEntrySchema = z.object({
     id: z.string(), requestId: z.string(), date: z.string(), type: z.string(), description: z.string(),
@@ -406,14 +525,17 @@ async function createArcadiMcpServer(context) {
 
   server.registerTool('create_purchase_order', {
     title: 'Crear una llista de compra GS-COMP',
-    description: 'Crea i desa immediatament una llista de compra real a ARCADI GESTIO. Cada línia ha de correspondre a un producte existent. requestId evita duplicats si es repeteix la mateixa ordre.',
+    description: 'Crea i desa immediatament una llista de compra real a ARCADI GESTIO. També prepara automàticament la GS-REC, la GS-TRAC i el formulari APPCC de recepció de matèria primera, tots pendents fins que arribi la mercaderia. requestId evita duplicats.',
     inputSchema: {
       requestId: z.string().min(8).max(120).regex(/^[A-Za-z0-9._:-]+$/),
       date: dateSchema.optional(), supplier: z.string().min(1).max(160),
       responsible: z.string().max(160).optional(), status: z.enum(PURCHASE_STATUSES).optional(),
       lines: z.array(purchaseLineInputSchema).min(1).max(200), notes: z.string().max(2000).optional()
     },
-    outputSchema: { created: z.boolean(), purchaseOrder: purchaseSchema },
+    outputSchema: {
+      created: z.boolean(), purchaseOrder: purchaseSchema, goodsReceipt: receiptSchema,
+      traceabilityRecords: z.array(traceabilitySchema), appccReceipt: appccReceiptSchema
+    },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     securitySchemes: [{ type: 'oauth2', scopes: [WRITE_SCOPE] }],
     _meta: { securitySchemes: [{ type: 'oauth2', scopes: [WRITE_SCOPE] }] }
@@ -422,7 +544,12 @@ async function createArcadiMcpServer(context) {
     const result = await context.mutateData(data => {
       data.purchaseOrders = data.purchaseOrders || [];
       const existing = data.purchaseOrders.find(item => item.requestId === input.requestId);
-      if (existing) return { created: false, purchaseOrder: sanitizePurchase(existing) };
+      if (existing) {
+        return {
+          created: false, purchaseOrder: sanitizePurchase(existing),
+          ...ensurePurchaseControlChain(data, existing, context.auth.user)
+        };
+      }
 
       const products = Array.isArray(data.products) ? data.products : [];
       const lineItems = [];
@@ -454,15 +581,18 @@ async function createArcadiMcpServer(context) {
         createdAt: timestamp, updatedAt: timestamp
       };
       data.purchaseOrders.push(purchaseOrder);
-      return { created: true, purchaseOrder: sanitizePurchase(purchaseOrder) };
+      return {
+        created: true, purchaseOrder: sanitizePurchase(purchaseOrder),
+        ...ensurePurchaseControlChain(data, purchaseOrder, context.auth.user)
+      };
     });
     if (result.error) return toolError(result.error);
     return {
       content: [{
         type: 'text',
         text: result.created
-          ? `${result.purchaseOrder.code} desada amb ${result.purchaseOrder.lineItems.length} línies per a ${result.purchaseOrder.supplier}.`
-          : `${result.purchaseOrder.code} ja existia i no s’ha duplicat.`
+          ? `${result.purchaseOrder.code} desada amb ${result.purchaseOrder.lineItems.length} línies. Preparats automàticament ${result.goodsReceipt.code}, ${result.appccReceipt.gs_trac} i el control APPCC de recepció.`
+          : `${result.purchaseOrder.code} ja existia; la recepció, la traçabilitat i l’APPCC estan vinculats sense duplicats.`
       }],
       structuredContent: result
     };

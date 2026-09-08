@@ -192,7 +192,7 @@ async function main() {
 
   const status = await anonymousClient.callTool({ name: 'get_system_status', arguments: {} });
   assert.equal(status.structuredContent.ok, true);
-  assert.equal(status.structuredContent.connectorVersion, '0.4.0');
+  assert.equal(status.structuredContent.connectorVersion, '0.5.0');
   const blocked = await anonymousClient.callTool({ name: 'get_daily_status', arguments: { date: '2026-09-05' } });
   assert.equal(blocked.isError, true);
   assert.ok(blocked._meta['mcp/www_authenticate'][0].includes('error="insufficient_scope"'));
@@ -224,9 +224,24 @@ async function main() {
   assert.match(createdPurchase.structuredContent.purchaseOrder.code, /^GS-COMP-20260908-001$/);
   assert.equal(createdPurchase.structuredContent.purchaseOrder.status, 'Preparada');
   assert.equal(createdPurchase.structuredContent.purchaseOrder.lineItems[0].product, 'Pastanaga');
+  assert.equal(createdPurchase.structuredContent.goodsReceipt.code, 'GS-REC-20260908-001');
+  assert.equal(createdPurchase.structuredContent.goodsReceipt.status, 'Pendent de recepció');
+  assert.equal(createdPurchase.structuredContent.goodsReceipt.lineItems[0].product, 'Pastanaga');
+  assert.equal(createdPurchase.structuredContent.goodsReceipt.lineItems[0].ok, false);
+  assert.equal(createdPurchase.structuredContent.traceabilityRecords.length, 1);
+  assert.equal(createdPurchase.structuredContent.traceabilityRecords[0].code, 'GS-TRAC-20260908-001');
+  assert.equal(createdPurchase.structuredContent.traceabilityRecords[0].status, 'Pendent de recepció');
+  assert.equal(createdPurchase.structuredContent.appccReceipt.gs_comp, 'GS-COMP-20260908-001');
+  assert.equal(createdPurchase.structuredContent.appccReceipt.gs_rec, 'GS-REC-20260908-001');
+  assert.equal(createdPurchase.structuredContent.appccReceipt.gs_trac, 'GS-TRAC-20260908-001');
+  assert.equal(createdPurchase.structuredContent.appccReceipt.estat, 'Pendent de recepció');
+  assert.equal(createdPurchase.structuredContent.appccReceipt.validacio, 'Pendent');
   const repeatedPurchase = await authorizedClient.callTool({ name: 'create_purchase_order', arguments: purchaseInput });
   assert.equal(repeatedPurchase.structuredContent.created, false);
   assert.equal(repeatedPurchase.structuredContent.purchaseOrder.id, createdPurchase.structuredContent.purchaseOrder.id);
+  assert.equal(repeatedPurchase.structuredContent.goodsReceipt.id, createdPurchase.structuredContent.goodsReceipt.id);
+  assert.equal(repeatedPurchase.structuredContent.traceabilityRecords.length, 1);
+  assert.equal(repeatedPurchase.structuredContent.appccReceipt.id, createdPurchase.structuredContent.appccReceipt.id);
 
   const updatedPurchase = await authorizedClient.callTool({
     name: 'update_purchase_order',
@@ -243,6 +258,8 @@ async function main() {
   });
   assert.equal(listedPurchases.structuredContent.purchaseOrders.length, 1);
   assert.equal(listedPurchases.structuredContent.purchaseOrders[0].status, 'Enviada');
+  assert.equal(listedPurchases.structuredContent.goodsReceipts.length, 1);
+  assert.equal(listedPurchases.structuredContent.goodsReceipts[0].traceabilityCode, 'GS-TRAC-20260908-001');
 
   const kitchenBases = await authorizedClient.callTool({
     name: 'list_kitchen_bases',

@@ -144,6 +144,26 @@
       ['responsable','Responsable','text'],
       ['accio','Acció correctiva','textarea']
     ]},
+    recepcio: { title:'APPCC - Recepció i traçabilitat de matèria primera', code:'APPCC-REC-01', fields:[
+      ['codi_recepcio','Codi de recepció','text'],
+      ['data','Data de recepció','date'],
+      ['hora','Hora','time'],
+      ['gs_comp','Llista de compra GS-COMP','text'],
+      ['gs_rec','Recepció GS-REC','text'],
+      ['gs_trac','Traçabilitat GS-TRAC','text'],
+      ['proveidor','Proveïdor','text'],
+      ['productes','Productes i quantitats','textarea'],
+      ['lot','Lot / lots','textarea'],
+      ['caducitat','Caducitat / caducitats','textarea'],
+      ['temperatura','Temperatura de recepció','text'],
+      ['estat_envas','Estat dels envasos','select:Pendent|Conforme|No conforme'],
+      ['conforme','Recepció conforme','select:Pendent|Sí|No'],
+      ['incidencia','Incidència detectada','textarea'],
+      ['accio','Acció correctiva','textarea'],
+      ['responsable','Responsable de la recepció','text'],
+      ['estat','Estat del registre','select:Pendent de recepció|En curs|Completat'],
+      ['validacio','Validació responsable','select:Pendent|Validat|Rebutjat']
+    ]},
     incidencies: { title:'Incidències i accions correctives', code:'INC-AC-01', fields:[
       ['data','Data','date'],
       ['seccio','Secció','select:APPCC|PRL|EPIs|Formació|Assetjament|Altres'],
@@ -209,7 +229,7 @@
     const menu=document.getElementById('menu');
     const groups = [
       ['Configuració', ['empresa','zones','productes_neteja']],
-      ['APPCC', ['neteja','neteja_setmanal','temperatures','incidencies']],
+      ['APPCC', ['neteja','neteja_setmanal','temperatures','recepcio','incidencies']],
       ['PRL i personal', ['formacio','epis','riscos','assetjament']]
     ];
     let html = groups.map(([title, keys]) => `<div class="navTitle">${esc(title)}</div>` + keys.map(k=>`<button data-sec="${k}" class="${k===current?'active':''}">${sections[k].title}</button>`).join('')).join('') +

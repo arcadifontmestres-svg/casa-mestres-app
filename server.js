@@ -119,6 +119,11 @@ function normalizeArcadiData(data) {
     'platformProfiles', 'miniApps', 'dailyOperations', 'appliedMigrations'
   ];
   for (const key of collections) if (!Array.isArray(data[key])) data[key] = [];
+  data.controlNormatiu = data.controlNormatiu && typeof data.controlNormatiu === 'object'
+    ? data.controlNormatiu : { empresa: {}, records: {} };
+  data.controlNormatiu.records = data.controlNormatiu.records && typeof data.controlNormatiu.records === 'object'
+    ? data.controlNormatiu.records : {};
+  if (!Array.isArray(data.controlNormatiu.records.recepcio)) data.controlNormatiu.records.recepcio = [];
   if (!data.restaurants.some(item => item.id === 'restaurant_casa_mestres')) {
     data.restaurants.unshift({
       id: 'restaurant_casa_mestres',
@@ -498,7 +503,7 @@ const server = http.createServer(async (req, res) => {
         getStatus: () => ({
           ok: true,
           app: 'ARCADI GESTIO RESTAURANT',
-          connectorVersion: '0.4.0',
+          connectorVersion: '0.5.0',
           serverTime: new Date().toISOString()
         }),
         challenge: (scope, error, description) => oauthChallenge(baseUrl, scope, error, description)
