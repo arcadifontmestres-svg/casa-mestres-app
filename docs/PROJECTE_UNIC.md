@@ -38,5 +38,7 @@ La IA és una integració opcional. No pot ser necessària per arrencar, guardar
 - El punt d’entrada és sempre el projecte **ARCADI GESTIO** de la barra lateral.
 - Les ordres operatives no destructives es guarden a l’app en el mateix moment, sense demanar una autorització nova.
 - Les llistes de compra es creen com a registres `GS-COMP`, vinculades als productes reals del catàleg i protegides contra duplicats.
+- Cada `GS-COMP` crea automàticament la seva `GS-REC`, la `GS-TRAC` per producte i el formulari APPCC de recepció de matèria primera. Tots tres queden en estat **Pendent de recepció** fins que arribi la mercaderia.
+- El formulari APPCC és un registre real: conserva data, hora, proveïdor, lots, caducitats, temperatura, estat dels envasos, conformitat, incidència, acció correctiva, responsable i validació.
 - Les tasques i controls es registren al llibre d’operacions; els productes i les bases s’actualitzen als seus mòduls corresponents.
 - Només cal confirmació expressa per eliminar dades, substituir informació ambigua, fer pagaments o modificar seguretat i credencials.
