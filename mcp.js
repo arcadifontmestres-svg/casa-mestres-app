@@ -10,6 +10,7 @@ const ENTRY_TYPES = [
 ];
 const ENTRY_STATUSES = ['Pendent', 'En curs', 'Completat'];
 const PRODUCT_UNITS = ['kg', 'g', 'L', 'ml', 'unitat', 'ració', 'caixa', 'paquet', 'ampolla', 'sac'];
+const PURCHASE_STATUSES = ['Preparada', 'Enviada', 'Rebuda', 'Tancada'];
 
 let sdkPromise;
 
@@ -85,7 +86,12 @@ function sanitizePurchase(item) {
   return {
     id: String(item.id || ''), code: String(item.code || ''), date: String(item.date || ''),
     supplier: String(item.supplier || ''), status: String(item.status || ''),
-    responsible: String(item.responsible || ''), lines: String(item.lines || ''), notes: String(item.notes || '')
+    responsible: String(item.responsible || ''), lines: String(item.lines || ''), notes: String(item.notes || ''),
+    lineItems: (item.lineItems || []).map(line => ({
+      productId: String(line.productId || ''), code: String(line.code || ''),
+      product: String(line.product || ''), requested: String(line.requested || ''),
+      observations: String(line.observations || '')
+    }))
   };
 }
 
@@ -177,6 +183,16 @@ function nextProductCode(data, family) {
   return prefix + '-' + String(maximum + 1).padStart(3, '0');
 }
 
+function nextPurchaseCode(data, date) {
+  const prefix = `GS-COMP-${String(date).replaceAll('-', '')}-`;
+  let maximum = 0;
+  for (const purchase of data.purchaseOrders || []) {
+    const match = String(purchase.code || '').match(new RegExp(`^${prefix}(\\d+)$`, 'i'));
+    if (match) maximum = Math.max(maximum, Number(match[1]));
+  }
+  return prefix + String(maximum + 1).padStart(3, '0');
+}
+
 function authFailure(context, scope) {
   const invalid = context.auth?.reason === 'invalid_token';
   return {
@@ -207,8 +223,8 @@ function toolError(message) {
 
 async function createArcadiMcpServer(context) {
   const { McpServer, z } = await loadSdk();
-  const server = new McpServer({ name: 'arcadi-gestio-restaurant', version: '0.3.0' }, {
-    instructions: 'Connector privat d’ARCADI GESTIO RESTAURANT. Permet consultar i mantenir productes, bases de cuina, reserves, grups, compres, recepcions i controls diaris amb autenticació.'
+  const server = new McpServer({ name: 'arcadi-gestio-restaurant', version: '0.4.0' }, {
+    instructions: 'Connector privat d’ARCADI GESTIO RESTAURANT. Permet consultar i mantenir productes, bases de cuina, reserves, grups, llistes de compra, recepcions i controls diaris amb autenticació.'
   });
 
   const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format requerit: YYYY-MM-DD');
@@ -224,7 +240,10 @@ async function createArcadiMcpServer(context) {
   });
   const purchaseSchema = z.object({
     id: z.string(), code: z.string(), date: z.string(), supplier: z.string(), status: z.string(),
-    responsible: z.string(), lines: z.string(), notes: z.string()
+    responsible: z.string(), lines: z.string(), notes: z.string(),
+    lineItems: z.array(z.object({
+      productId: z.string(), code: z.string(), product: z.string(), requested: z.string(), observations: z.string()
+    }))
   });
   const receiptSchema = z.object({
     id: z.string(), code: z.string(), purchaseCode: z.string(), date: z.string(), supplier: z.string(),
@@ -265,6 +284,11 @@ async function createArcadiMcpServer(context) {
   const baseUseInputSchema = z.object({
     baseId: z.string().max(160).optional(), baseName: z.string().max(200).optional(),
     qty: z.number().finite().positive(), unit: z.enum(PRODUCT_UNITS)
+  });
+  const purchaseLineInputSchema = z.object({
+    productId: z.string().max(160).optional(), productCode: z.string().max(40).optional(),
+    productName: z.string().max(200).optional(), requested: z.string().min(1).max(200),
+    observations: z.string().max(500).optional()
   });
 
   server.registerTool('get_system_status', {
@@ -376,6 +400,104 @@ async function createArcadiMcpServer(context) {
     };
     return {
       content: [{ type: 'text', text: `${result.purchaseOrders.length} comandes i ${result.goodsReceipts.length} recepcions entre ${date_from} i ${date_to}.` }],
+      structuredContent: result
+    };
+  });
+
+  server.registerTool('create_purchase_order', {
+    title: 'Crear una llista de compra GS-COMP',
+    description: 'Crea i desa immediatament una llista de compra real a ARCADI GESTIO. Cada línia ha de correspondre a un producte existent. requestId evita duplicats si es repeteix la mateixa ordre.',
+    inputSchema: {
+      requestId: z.string().min(8).max(120).regex(/^[A-Za-z0-9._:-]+$/),
+      date: dateSchema.optional(), supplier: z.string().min(1).max(160),
+      responsible: z.string().max(160).optional(), status: z.enum(PURCHASE_STATUSES).optional(),
+      lines: z.array(purchaseLineInputSchema).min(1).max(200), notes: z.string().max(2000).optional()
+    },
+    outputSchema: { created: z.boolean(), purchaseOrder: purchaseSchema },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    securitySchemes: [{ type: 'oauth2', scopes: [WRITE_SCOPE] }],
+    _meta: { securitySchemes: [{ type: 'oauth2', scopes: [WRITE_SCOPE] }] }
+  }, async input => {
+    if (!requireScope(context, WRITE_SCOPE)) return authFailure(context, WRITE_SCOPE);
+    const result = await context.mutateData(data => {
+      data.purchaseOrders = data.purchaseOrders || [];
+      const existing = data.purchaseOrders.find(item => item.requestId === input.requestId);
+      if (existing) return { created: false, purchaseOrder: sanitizePurchase(existing) };
+
+      const products = Array.isArray(data.products) ? data.products : [];
+      const lineItems = [];
+      for (const inputLine of input.lines) {
+        const product = inputLine.productId
+          ? products.find(item => item.id === inputLine.productId)
+          : inputLine.productCode
+            ? products.find(item => normalizedName(item.code) === normalizedName(inputLine.productCode))
+            : products.find(item => normalizedName(item.name) === normalizedName(inputLine.productName));
+        if (!product) {
+          return { error: `No s’ha trobat el producte ${inputLine.productId || inputLine.productCode || inputLine.productName || '(sense identificar)'}.` };
+        }
+        if (product.purchasable === false) return { error: `${product.name} està marcat com a no comprable.` };
+        lineItems.push({
+          productId: product.id, code: String(product.code || ''), product: String(product.name || ''),
+          requested: cleanText(inputLine.requested, 200), observations: cleanText(inputLine.observations, 500)
+        });
+      }
+
+      const date = normalizeDate(input.date);
+      const timestamp = new Date().toISOString();
+      const purchaseOrder = {
+        id: `purchase_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`,
+        requestId: input.requestId, code: nextPurchaseCode(data, date), date,
+        supplier: cleanText(input.supplier, 160), status: input.status || 'Preparada',
+        responsible: cleanText(input.responsible, 160), lineItems,
+        lines: lineItems.map(line => `${line.code ? `${line.code} · ` : ''}${line.product}: ${line.requested}${line.observations ? ` · ${line.observations}` : ''}`).join('\n'),
+        notes: cleanText(input.notes, 2000), source: 'ChatGPT', createdBy: context.auth.user,
+        createdAt: timestamp, updatedAt: timestamp
+      };
+      data.purchaseOrders.push(purchaseOrder);
+      return { created: true, purchaseOrder: sanitizePurchase(purchaseOrder) };
+    });
+    if (result.error) return toolError(result.error);
+    return {
+      content: [{
+        type: 'text',
+        text: result.created
+          ? `${result.purchaseOrder.code} desada amb ${result.purchaseOrder.lineItems.length} línies per a ${result.purchaseOrder.supplier}.`
+          : `${result.purchaseOrder.code} ja existia i no s’ha duplicat.`
+      }],
+      structuredContent: result
+    };
+  });
+
+  server.registerTool('update_purchase_order', {
+    title: 'Actualitzar una llista de compra GS-COMP',
+    description: 'Actualitza l’estat, el responsable o les observacions d’una llista de compra existent. No elimina cap línia.',
+    inputSchema: {
+      requestId: z.string().min(8).max(120).regex(/^[A-Za-z0-9._:-]+$/), id: z.string().min(1).max(160),
+      status: z.enum(PURCHASE_STATUSES).optional(), responsible: z.string().max(160).optional(),
+      notes: z.string().max(2000).optional()
+    },
+    outputSchema: { updated: z.boolean(), purchaseOrder: purchaseSchema },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    securitySchemes: [{ type: 'oauth2', scopes: [WRITE_SCOPE] }],
+    _meta: { securitySchemes: [{ type: 'oauth2', scopes: [WRITE_SCOPE] }] }
+  }, async input => {
+    if (!requireScope(context, WRITE_SCOPE)) return authFailure(context, WRITE_SCOPE);
+    const result = await context.mutateData(data => {
+      data.purchaseOrders = data.purchaseOrders || [];
+      const purchaseOrder = data.purchaseOrders.find(item => item.id === input.id);
+      if (!purchaseOrder) return null;
+      if (purchaseOrder.lastRequestId === input.requestId) return { updated: false, purchaseOrder: sanitizePurchase(purchaseOrder) };
+      if (input.status !== undefined) purchaseOrder.status = input.status;
+      if (input.responsible !== undefined) purchaseOrder.responsible = cleanText(input.responsible, 160);
+      if (input.notes !== undefined) purchaseOrder.notes = cleanText(input.notes, 2000);
+      purchaseOrder.updatedAt = new Date().toISOString();
+      purchaseOrder.updatedBy = context.auth.user;
+      purchaseOrder.lastRequestId = input.requestId;
+      return { updated: true, purchaseOrder: sanitizePurchase(purchaseOrder) };
+    });
+    if (!result) return toolError(`No s’ha trobat la llista ${input.id}.`);
+    return {
+      content: [{ type: 'text', text: result.updated ? `${result.purchaseOrder.code} actualitzada a ${result.purchaseOrder.status}.` : `${result.purchaseOrder.code} ja tenia aplicada aquesta petició.` }],
       structuredContent: result
     };
   });
