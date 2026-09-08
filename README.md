@@ -33,7 +33,7 @@ Eines disponibles:
 - `get_daily_status`: resum de reserves, grups, compres, recepcions i controls d’un dia.
 - `list_reservations`: consulta de reserves dins un interval.
 - `list_purchases`: consulta de GS-COMP i GS-REC dins un interval.
-- `create_purchase_order`: crea i desa una llista de compra GS-COMP amb productes reals del catàleg, sense duplicats.
+- `create_purchase_order`: crea i desa una GS-COMP amb productes reals i prepara automàticament la GS-REC, la GS-TRAC i el registre APPCC de recepció, sense duplicats.
 - `update_purchase_order`: actualitza l’estat, el responsable o les observacions d’una GS-COMP existent.
 - `list_products` i `upsert_product`: consulta, alta i actualització del magatzem.
 - `list_kitchen_bases` i `upsert_kitchen_base`: consulta, alta i actualització de bases i fitxes tècniques.
@@ -65,6 +65,14 @@ si una petició es repeteix.
 `seed/catalog.json` aporta el catàleg consolidat a una instal·lació nova de Windows. En un Render que ja té `DATA_DIR`, aquest catàleg no substitueix el fitxer viu.
 
 Els mòduls nous utilitzen el mateix `data.json`; no creen un segon inventari, una segona llista de plats ni unes segones reserves.
+
+### Cadena automàtica de compra i APPCC
+
+Quan una llista es crea des de ChatGPT, el programa desa una única cadena vinculada:
+
+`GS-COMP` → `GS-REC` pendent → `GS-TRAC` pendent per producte → formulari `APPCC-REC-01` pendent de completar i validar.
+
+Crear la llista no marca mai la mercaderia com a rebuda. Lot, caducitat, temperatura, estat de l’envàs, conformitat, incidències i accions correctives es completen quan arriba el proveïdor.
 
 ## Executable de Windows
 
