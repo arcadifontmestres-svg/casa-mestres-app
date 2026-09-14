@@ -368,11 +368,18 @@ function haversine(lat1, lon1, lat2, lon2) {
 }
 
 function publicBaseUrl(req) {
+  const forwardedProtocol = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
+  const protocol = forwardedProtocol || (req.socket.encrypted ? 'https' : 'http');
+  const forwardedHost = String(req.headers['x-forwarded-host'] || '').split(',')[0].trim();
+  const requestHost = forwardedHost || String(req.headers.host || '').trim();
+  const requestBaseUrl = requestHost ? `${protocol}://${requestHost}`.replace(/\/$/, '') : '';
+
+  // A Render, OAuth must advertise the exact public host used by ChatGPT.
+  // Prefer the live request host so a stale APP_BASE_URL cannot break discovery.
+  if (/\.onrender\.com(?::\d+)?$/i.test(requestHost)) return requestBaseUrl;
+
   const configured = String(process.env.APP_BASE_URL || '').trim().replace(/\/$/, '');
-  if (configured) return configured;
-  const forwarded = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
-  const protocol = forwarded || (req.socket.encrypted ? 'https' : 'http');
-  return `${protocol}://${req.headers.host}`;
+  return configured || requestBaseUrl;
 }
 
 function stripeRequest(method, endpoint, parameters = {}) {
