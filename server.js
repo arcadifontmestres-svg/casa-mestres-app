@@ -510,7 +510,7 @@ const server = http.createServer(async (req, res) => {
         getStatus: () => ({
           ok: true,
           app: 'ARCADI GESTIO RESTAURANT',
-          connectorVersion: '0.5.0',
+          connectorVersion: '0.5.1',
           serverTime: new Date().toISOString()
         }),
         challenge: (scope, error, description) => oauthChallenge(baseUrl, scope, error, description)
