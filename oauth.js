@@ -449,7 +449,7 @@ async function handleOAuthRequest(req, res, url, baseUrl) {
   if (path === '/.well-known/oauth-authorization-server' && req.method === 'GET') {
     sendJson(res, 200, {
       issuer: base,
-      authorization_response_iss_parameter_supported: true,
+      authorization_response_iss_parameter_supported: false,
       authorization_endpoint: `${base}/oauth/authorize`,
       token_endpoint: `${base}/oauth/token`,
       registration_endpoint: `${base}/oauth/register`,
