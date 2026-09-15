@@ -4,7 +4,7 @@ const path = require('path');
 const net = require('net');
 const { app, BrowserWindow, dialog } = require('electron');
 
-const CENTRAL_URL = String(process.env.ARCADI_CENTRAL_URL || 'https://casa-mestres.onrender.com').replace(/\/$/, '');
+const CENTRAL_URL = String(process.env.ARCADI_CENTRAL_URL || 'https://casa-mestres-restaurant-app.onrender.com').replace(/\/$/, '');
 const OFFLINE_MODE = process.env.ARCADI_OFFLINE === '1';
 
 let mainWindow;
