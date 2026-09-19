@@ -47,6 +47,9 @@ assert.match(read('public\/app.js'), /documentTemplateOptions/);
 assert.match(read('public\/app.js'), /designTemplate/);
 assert.match(control, /selectdyn:employees/);
 assert.match(control, /nivell_assignat/);
+assert.match(control, /ASSIGNMENT_FIELDS/);
+assert.match(control, /tasca_assignada/);
+assert.match(control, /Assignació de responsabilitat/);
 
 assert.doesNotMatch(modules, /Math\.random\s*\(/, 'Els panells no poden mostrar dades aleatòries');
 assert.doesNotMatch(modules, /\/api\/assistant/, 'La IA ha de quedar aparcada');
