@@ -1,0 +1,29 @@
+name: Proves de qualitat
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Baixar codi
+        uses: actions/checkout@v4
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Instal·lar dependències
+        run: npm ci
+      - name: Comprovar sintaxi
+        run: npm run check
+      - name: Executar proves
+        run: npm test
