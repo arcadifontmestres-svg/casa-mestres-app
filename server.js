@@ -642,7 +642,7 @@ const server = http.createServer(async (req, res) => {
         .sort((a, b) => String(a.date).localeCompare(String(b.date)))
         .map(item => ({ date: item.date, start: item.start || '', end: item.end || '', area: item.area || '', shiftCode: item.shiftCode || '', exception: item.exception === true, notes: item.notes || '' }));
       return send(res, 200, {
-        employee: { code: employee.code, name: employee.name, level: employee.level || '', role: employee.role || employee.roleBase || '' },
+        employee: { code: employee.code, name: employee.name, level: employee.level || '', role: employee.role || employee.roleBase || '', tasks: employee.tasks || '', responsibilities: employee.responsibilities || '', notes: employee.notes || '' },
         from, to, items
       });
     }
