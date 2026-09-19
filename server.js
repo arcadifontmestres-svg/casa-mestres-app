@@ -355,6 +355,27 @@ function applyDishRecipeProposals() {
     });
   };
   let updated = 0;
+  let productsCreated = 0;
+  const ensureProduct = ingredient => {
+    let product = productByName(ingredient.name);
+    if (product) return product;
+    product = {
+      id: 'product_recipe_' + crypto.createHash('sha1').update(catalogName(ingredient.name)).digest('hex').slice(0, 12),
+      code: '',
+      name: ingredient.name,
+      family: 'Pendent de classificar',
+      unit: ingredient.unit || 'g',
+      price: 0,
+      stock: 0,
+      min: 0,
+      active: true,
+      notes: 'Creat per una proposta de recepta. Pendent de validar, classificar i valorar.',
+      sourceMigration: migrationId
+    };
+    data.products.push(product);
+    productsCreated += 1;
+    return product;
+  };
   for (const proposal of source.recipes || []) {
     const dish = data.dishes.find(item => item.id === proposal.id)
       || data.dishes.find(item => catalogName(item.name) === catalogName(proposal.name));
@@ -363,8 +384,8 @@ function applyDishRecipeProposals() {
     if (alreadyDocumented) continue;
     dish.servings = dish.servings || proposal.servings || 1;
     dish.ingredients = (proposal.ingredients || []).map(item => {
-      const product = productByName(item.name);
-      return { ...item, productId: product?.id || '', name: product?.name || item.name };
+      const product = ensureProduct(item);
+      return { ...item, productId: product.id, name: product.name };
     });
     dish.baseUses = Array.isArray(dish.baseUses) ? dish.baseUses : [];
     dish.allergens = proposal.allergens || '';
@@ -375,9 +396,9 @@ function applyDishRecipeProposals() {
     dish.recipeProposalMigration = migrationId;
     updated += 1;
   }
-  data.appliedMigrations.push({ id: migrationId, appliedAt: new Date().toISOString(), dishesUpdated: updated });
+  data.appliedMigrations.push({ id: migrationId, appliedAt: new Date().toISOString(), dishesUpdated: updated, productsCreated });
   writeData(data);
-  console.log(`Propostes de recepta aplicades: ${updated} plats.`);
+  console.log(`Propostes de recepta aplicades: ${updated} plats i ${productsCreated} ingredients pendents creats.`);
 }
 
 applyDishRecipeProposals();
