@@ -12,6 +12,7 @@ const PUBLIC = path.join(ROOT, 'public');
 const SEED_DATA = path.join(ROOT, 'data.json');
 const CATALOG_DATA = path.join(ROOT, 'seed', 'catalog.json');
 const SARRIERA_DATA = path.join(ROOT, 'seed', 'sarriera-kitchen-bases.json');
+const DISH_RECIPE_DATA = path.join(ROOT, 'seed', 'dish-recipe-proposals.json');
 
 function loadEnv() {
   const file = path.join(ROOT, '.env');
@@ -336,6 +337,71 @@ function applyCatalogMigrations() {
 }
 
 applyCatalogMigrations();
+
+function applyDishRecipeProposals() {
+  if (!fs.existsSync(DISH_RECIPE_DATA)) return;
+  const source = JSON.parse(fs.readFileSync(DISH_RECIPE_DATA, 'utf8'));
+  const migrationId = source.migration || 'dish_recipe_proposals';
+  const data = readData();
+  data.appliedMigrations = Array.isArray(data.appliedMigrations) ? data.appliedMigrations : [];
+  if (data.appliedMigrations.some(item => (typeof item === 'string' ? item : item?.id) === migrationId)) return;
+  data.dishes = Array.isArray(data.dishes) ? data.dishes : [];
+  data.products = Array.isArray(data.products) ? data.products : [];
+  const productByName = name => {
+    const wanted = catalogName(name);
+    return data.products.find(item => {
+      const current = catalogName(item.name);
+      return current === wanted || current.includes(wanted) || wanted.includes(current);
+    });
+  };
+  let updated = 0;
+  let productsCreated = 0;
+  const ensureProduct = ingredient => {
+    let product = productByName(ingredient.name);
+    if (product) return product;
+    product = {
+      id: 'product_recipe_' + crypto.createHash('sha1').update(catalogName(ingredient.name)).digest('hex').slice(0, 12),
+      code: '',
+      name: ingredient.name,
+      family: 'Pendent de classificar',
+      unit: ingredient.unit || 'g',
+      price: 0,
+      stock: 0,
+      min: 0,
+      active: true,
+      notes: 'Creat per una proposta de recepta. Pendent de validar, classificar i valorar.',
+      sourceMigration: migrationId
+    };
+    data.products.push(product);
+    productsCreated += 1;
+    return product;
+  };
+  for (const proposal of source.recipes || []) {
+    const dish = data.dishes.find(item => item.id === proposal.id)
+      || data.dishes.find(item => catalogName(item.name) === catalogName(proposal.name));
+    if (!dish) continue;
+    const alreadyDocumented = (dish.ingredients || []).length || (dish.baseUses || []).length || String(dish.process || '').trim();
+    if (alreadyDocumented) continue;
+    dish.servings = dish.servings || proposal.servings || 1;
+    dish.ingredients = (proposal.ingredients || []).map(item => {
+      const product = ensureProduct(item);
+      return { ...item, productId: product.id, name: product.name };
+    });
+    dish.baseUses = Array.isArray(dish.baseUses) ? dish.baseUses : [];
+    dish.allergens = proposal.allergens || '';
+    dish.desc = proposal.desc || '';
+    dish.process = proposal.process || '';
+    dish.plating = proposal.plating || '';
+    dish.recipeStatus = proposal.status || 'PROPOSTA PENDENT DE VALIDACIÓ';
+    dish.recipeProposalMigration = migrationId;
+    updated += 1;
+  }
+  data.appliedMigrations.push({ id: migrationId, appliedAt: new Date().toISOString(), dishesUpdated: updated, productsCreated });
+  writeData(data);
+  console.log(`Propostes de recepta aplicades: ${updated} plats i ${productsCreated} ingredients pendents creats.`);
+}
+
+applyDishRecipeProposals();
 
 function readRaw(req, limit = 25 * 1024 * 1024) {
   return new Promise((resolve, reject) => {
