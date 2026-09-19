@@ -33,3 +33,5 @@
 .employeeWeek>div{border:1px solid #d6c7b5;border-radius:7px;padding:7px;background:#fffaf2;display:flex;flex-direction:column;gap:4px}
 .employeeWeek span{font-weight:800;color:#285748}.employeeWeek small{color:#665f57}
 @media(max-width:720px){.employeeWeek{grid-template-columns:1fr 1fr}.weeklySchedule th,.weeklySchedule td{min-width:112px}}
+
+.employeeTasks{margin-top:12px;padding:12px;border-left:4px solid #a55d19;background:#fff;border-radius:7px}.employeeTasks h3{margin-top:0}.employeeTasks p{white-space:pre-wrap;line-height:1.45}
