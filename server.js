@@ -73,6 +73,38 @@ function safeEqual(left, right) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
+function hashSecret(value) {
+  return crypto.createHash('sha256').update(String(value)).digest('hex');
+}
+
+function cookieValue(req, name) {
+  const cookies = String(req.headers.cookie || '').split(';');
+  for (const item of cookies) {
+    const separator = item.indexOf('=');
+    if (separator < 0) continue;
+    if (item.slice(0, separator).trim() === name) return decodeURIComponent(item.slice(separator + 1).trim());
+  }
+  return '';
+}
+
+function authenticatedEmployee(data, req) {
+  const token = cookieValue(req, 'arcadi_employee_device');
+  if (!token) return null;
+  const tokenHash = hashSecret(token);
+  return (data.employees || []).find(item => item.active !== false && item.deviceTokenHash && safeEqual(item.deviceTokenHash, tokenHash)) || null;
+}
+
+function sendEmployeeCookie(res, token, body) {
+  securityHeaders(res);
+  const secure = process.env.ARCADI_DESKTOP === '1' ? '' : '; Secure';
+  res.writeHead(200, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+    'Set-Cookie': `arcadi_employee_device=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=31536000${secure}`
+  });
+  res.end(JSON.stringify(body));
+}
+
 function adminConfigured() {
   return process.env.ARCADI_DESKTOP === '1' || Boolean(process.env.ADMIN_USER && process.env.ADMIN_PASSWORD);
 }
@@ -625,16 +657,72 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { ok: true, ...result });
     }
 
+    const employeeActivationMatch = pathname.match(/^\/api\/employees\/([^/]+)\/device-activation$/);
+    if (employeeActivationMatch && req.method === 'POST') {
+      if (!requireAdmin(req, res)) return;
+      const employeeId = decodeURIComponent(employeeActivationMatch[1]);
+      const activation = await mutateData(data => {
+        const employee = (data.employees || []).find(item => item.id === employeeId);
+        if (!employee) return null;
+        const code = String(crypto.randomInt(100000, 1000000));
+        employee.deviceActivationHash = hashSecret(code);
+        employee.deviceActivationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        employee.deviceActivationCreatedAt = new Date().toISOString();
+        return { code, employee: { id: employee.id, code: employee.code, name: employee.name, phone: employee.phone || '' }, expiresAt: employee.deviceActivationExpiresAt };
+      });
+      if (!activation) return send(res, 404, { error: 'Empleat no trobat' });
+      return send(res, 200, { ok: true, ...activation });
+    }
+
+    const employeeUnlinkMatch = pathname.match(/^\/api\/employees\/([^/]+)\/device-unlink$/);
+    if (employeeUnlinkMatch && req.method === 'POST') {
+      if (!requireAdmin(req, res)) return;
+      const employeeId = decodeURIComponent(employeeUnlinkMatch[1]);
+      const unlinked = await mutateData(data => {
+        const employee = (data.employees || []).find(item => item.id === employeeId);
+        if (!employee) return false;
+        delete employee.deviceTokenHash;
+        delete employee.deviceActivatedAt;
+        delete employee.deviceActivationHash;
+        delete employee.deviceActivationExpiresAt;
+        return true;
+      });
+      if (!unlinked) return send(res, 404, { error: 'Empleat no trobat' });
+      return send(res, 200, { ok: true });
+    }
+
+    if (pathname === '/api/device-activate' && req.method === 'POST') {
+      const input = await bodyJson(req);
+      const result = await mutateData(data => {
+        const employee = (data.employees || []).find(item => String(item.code) === String(input.code) && item.active !== false);
+        const activationHash = hashSecret(String(input.activationCode || ''));
+        if (!employee || !employee.deviceActivationHash || !safeEqual(employee.deviceActivationHash, activationHash)) return null;
+        if (!employee.deviceActivationExpiresAt || Date.parse(employee.deviceActivationExpiresAt) <= Date.now()) return null;
+        const token = crypto.randomBytes(32).toString('base64url');
+        employee.deviceTokenHash = hashSecret(token);
+        employee.deviceActivatedAt = new Date().toISOString();
+        delete employee.deviceActivationHash;
+        delete employee.deviceActivationExpiresAt;
+        delete employee.deviceActivationCreatedAt;
+        delete employee.schedulePin;
+        return { token, employee: { code: employee.code, name: employee.name } };
+      });
+      if (!result) return send(res, 401, { error: 'Codi d’empleat o activació incorrecte o caducat' });
+      return sendEmployeeCookie(res, result.token, { ok: true, employee: result.employee });
+    }
+
+    if (pathname === '/api/device-session' && req.method === 'GET') {
+      const data = readData();
+      const employee = authenticatedEmployee(data, req);
+      if (!employee) return send(res, 401, { error: 'Dispositiu no activat' });
+      return send(res, 200, { ok: true, employee: { code: employee.code, name: employee.name, level: employee.level || '', role: employee.role || employee.roleBase || '' } });
+    }
+
     if (pathname === '/api/employee-schedule' && req.method === 'POST') {
       const input = await bodyJson(req);
-      const code = String(input.code || '').trim();
-      const pin = String(input.pin || '').trim();
-      if (!code || !pin) return send(res, 400, { error: 'Cal indicar codi i PIN' });
       const data = readData();
-      const employee = (data.employees || []).find(item => String(item.code) === code && item.active !== false);
-      if (!employee || !employee.schedulePin || !safeEqual(pin, employee.schedulePin)) {
-        return send(res, 401, { error: 'Codi o PIN incorrectes' });
-      }
+      const employee = authenticatedEmployee(data, req);
+      if (!employee) return send(res, 401, { error: 'Aquest dispositiu no està activat' });
       const from = String(input.from || new Date().toISOString().slice(0, 10));
       const to = String(input.to || from);
       const items = (data.schedules || [])
@@ -651,10 +739,8 @@ const server = http.createServer(async (req, res) => {
       const input = await bodyJson(req);
       const result = await mutateData(data => {
         data.punches = data.punches || [];
-        const employee = (data.employees || []).find(item => String(item.code) === String(input.code) && item.active !== false);
-        if (!employee || !employee.schedulePin || !safeEqual(String(input.pin || ''), employee.schedulePin)) {
-          return { error: 'Codi o PIN incorrectes', status: 401 };
-        }
+        const employee = authenticatedEmployee(data, req);
+        if (!employee) return { error: 'Aquest dispositiu no està activat', status: 401 };
         if (!['ENTRADA', 'PAUSA', 'TORNAR', 'SORTIDA'].includes(String(input.type || ''))) {
           return { error: 'Tipus de fitxatge no vàlid', status: 400 };
         }
