@@ -36,6 +36,7 @@ const BACKUPS = path.join(DATA_DIR, 'backups');
 const PORT = Number(process.env.PORT || 3210);
 const HOST = process.env.HOST || '0.0.0.0';
 const stripeTestSessions = new Map();
+const deviceActivationAttempts = new Map();
 
 function ensureStorage() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -85,6 +86,26 @@ function cookieValue(req, name) {
     if (item.slice(0, separator).trim() === name) return decodeURIComponent(item.slice(separator + 1).trim());
   }
   return '';
+}
+
+function activationAttemptKey(req, code) {
+  const forwarded = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  return `${forwarded || req.socket?.remoteAddress || 'unknown'}:${String(code || '')}`;
+}
+
+function activationBlocked(req, code) {
+  const key = activationAttemptKey(req, code);
+  const current = deviceActivationAttempts.get(key);
+  if (!current) return false;
+  if (current.resetAt <= Date.now()) { deviceActivationAttempts.delete(key); return false; }
+  return current.count >= 8;
+}
+
+function recordActivationFailure(req, code) {
+  const key = activationAttemptKey(req, code);
+  const current = deviceActivationAttempts.get(key);
+  if (!current || current.resetAt <= Date.now()) deviceActivationAttempts.set(key, { count: 1, resetAt: Date.now() + 15 * 60 * 1000 });
+  else current.count += 1;
 }
 
 function authenticatedEmployee(data, req) {
@@ -693,6 +714,7 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname === '/api/device-activate' && req.method === 'POST') {
       const input = await bodyJson(req);
+      if (activationBlocked(req, input.code)) return send(res, 429, { error: 'Massa intents. Torna-ho a provar d’aquí a 15 minuts.' });
       const result = await mutateData(data => {
         const employee = (data.employees || []).find(item => String(item.code) === String(input.code) && item.active !== false);
         const activationHash = hashSecret(String(input.activationCode || ''));
@@ -707,7 +729,11 @@ const server = http.createServer(async (req, res) => {
         delete employee.schedulePin;
         return { token, employee: { code: employee.code, name: employee.name } };
       });
-      if (!result) return send(res, 401, { error: 'Codi d’empleat o activació incorrecte o caducat' });
+      if (!result) {
+        recordActivationFailure(req, input.code);
+        return send(res, 401, { error: 'Codi d’empleat o activació incorrecte o caducat' });
+      }
+      deviceActivationAttempts.delete(activationAttemptKey(req, input.code));
       return sendEmployeeCookie(res, result.token, { ok: true, employee: result.employee });
     }
 
