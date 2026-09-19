@@ -1,12 +1,12 @@
 {
-  "migration": "dish_recipe_proposals_2026_09_19_v1",
+  "migration": "dish_recipe_proposals_2026_09_19_v2_validated",
   "generatedAt": "2026-09-19",
-  "warning": "Propostes no validades. No substitueixen la decisió del cap de cuina.",
+  "warning": "Receptes validades per direcció a partir de les propostes tècniques. Qualsevol ajust posterior es conserva des de la fitxa del plat.",
   "recipes": [
     {
       "id": "dish_vascocat_1",
       "name": "Gilda de l’Empordà",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -29,14 +29,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar i porcionar tots els components en fred. Amanir al moment del servei, comprovar el punt de sal i muntar evitant excés de líquid.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_2",
       "name": "Esqueixada de bacallà al pil-pil verd",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -65,14 +65,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_3",
       "name": "Txangurro gratinat amb allioli de safrà",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -101,14 +101,14 @@
         }
       ],
       "allergens": "Crustacis, Ous",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar la base, disposar-la en la ració i cobrir amb l’acabat indicat. Gratinar al moment fins daurar sense assecar.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_4",
       "name": "Porrusalda de calçots fumats",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -137,14 +137,14 @@
         }
       ],
       "allergens": "",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Sofregir la base vegetal, mullar amb el fons corresponent i coure fins integrar sabors. Afegir el producte principal al final per respectar-ne el punt.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_5",
       "name": "Marmitako suau de romesco",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -173,14 +173,14 @@
         }
       ],
       "allergens": "Fruits de closca",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Sofregir la base vegetal, mullar amb el fons corresponent i coure fins integrar sabors. Afegir el producte principal al final per respectar-ne el punt.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_6",
       "name": "Pebrots de Gernika amb anxoves de l’Escala",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -209,14 +209,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_7",
       "name": "Coca cruixent de xistorra i ceba de Figueres",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -245,14 +245,14 @@
         }
       ],
       "allergens": "Gluten",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_8",
       "name": "Croquetes de txuletón i ceps",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -287,14 +287,14 @@
         }
       ],
       "allergens": "Gluten, làctics",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Temperar la peça, marcar a la brasa fins al punt demanat i deixar reposar. Escalfar la guarnició i la salsa per separat. Rectificar i servir immediatament.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_9",
       "name": "Truita de bacallà amb samfaina",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -329,14 +329,14 @@
         }
       ],
       "allergens": "Peix, Ous",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar la guarnició, incorporar l’ou i quallar deixant l’interior melós. Elaborar al moment i servir calent.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_10",
       "name": "Amanida de mongeta del ganxet, bonítol i piparres",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -365,14 +365,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar i porcionar tots els components en fred. Amanir al moment del servei, comprovar el punt de sal i muntar evitant excés de líquid.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_11",
       "name": "Arròs melós de txipirons i picada catalana",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -413,14 +413,14 @@
         }
       ],
       "allergens": "Mol·luscs",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Sofregir la base, nacarar l’arròs o rossejar els fideus i mullar amb el fons calent. Coure controlant l’absorció i incorporar els elements principals al seu punt.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_12",
       "name": "Caneló de txangurro amb biscaïna de nyores",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -455,14 +455,14 @@
         }
       ],
       "allergens": "Crustacis, Gluten, ous",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar el farcit, refredar-lo i porcionar-lo. Formar o farcir la peça, coure-la fins al punt i acabar amb la salsa indicada. Regenerar sense ressecar.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_13",
       "name": "Brandada de bacallà amb Idiazabal gratinat",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -497,14 +497,14 @@
         }
       ],
       "allergens": "Peix, Làctics, làctics",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar la base, disposar-la en la ració i cobrir amb l’acabat indicat. Gratinar al moment fins daurar sense assecar.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_14",
       "name": "Xipirons farcits de botifarra negra",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -533,14 +533,14 @@
         }
       ],
       "allergens": "Mol·luscs",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar el farcit, refredar-lo i porcionar-lo. Formar o farcir la peça, coure-la fins al punt i acabar amb la salsa indicada. Regenerar sense ressecar.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_15",
       "name": "Carxofes confitades amb kokotxes al pil-pil",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -575,14 +575,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar i porcionar. Confitar suaument amb temperatura controlada fins al punt, escórrer i acabar al moment amb la salsa i guarnició.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_16",
       "name": "Talo cruixent d’escalivada i formatge Idiazabal",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -617,14 +617,14 @@
         }
       ],
       "allergens": "Làctics",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_17",
       "name": "Bunyols de bacallà amb maionesa de piparra",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -659,14 +659,14 @@
         }
       ],
       "allergens": "Peix, Gluten, ous",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar la massa amb el farcit, refredar i reposar. Porcionar, arrebossar si correspon i fregir a temperatura controlada fins que quedi daurat.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_18",
       "name": "Sopa de peix de Getaria amb picada d’avellanes",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -689,14 +689,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Sofregir la base vegetal, mullar amb el fons corresponent i coure fins integrar sabors. Afegir el producte principal al final per respectar-ne el punt.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_19",
       "name": "Fideus rossejats amb txangurro",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -725,14 +725,14 @@
         }
       ],
       "allergens": "Crustacis, Gluten",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Sofregir la base, nacarar l’arròs o rossejar els fideus i mullar amb el fons calent. Coure controlant l’absorció i incorporar els elements principals al seu punt.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_20",
       "name": "Musclos a la sidra amb herbes del Pirineu",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -761,14 +761,14 @@
         }
       ],
       "allergens": "Mol·luscs, Sulfits",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_21",
       "name": "Escalivada tèbia amb Idiazabal i nous",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -809,14 +809,14 @@
         }
       ],
       "allergens": "Ous, Làctics, Fruits de closca",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar la guarnició, incorporar l’ou i quallar deixant l’interior melós. Elaborar al moment i servir calent.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_22",
       "name": "Ous a baixa temperatura amb xistorra i parmentier de nyora",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -851,14 +851,14 @@
         }
       ],
       "allergens": "Ous, Làctics",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar la guarnició, incorporar l’ou i quallar deixant l’interior melós. Elaborar al moment i servir calent.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_23",
       "name": "Tomàquet de Montserrat amb ventresca i piparres",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -887,14 +887,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_24",
       "name": "Raviolis de cua de bou amb salsa biscaïna",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -929,14 +929,14 @@
         }
       ],
       "allergens": "Ous, Gluten, ous",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar el farcit, refredar-lo i porcionar-lo. Formar o farcir la peça, coure-la fins al punt i acabar amb la salsa indicada. Regenerar sense ressecar.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_25",
       "name": "Favetes a la catalana amb bacallà confitat",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -965,14 +965,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar i porcionar. Confitar suaument amb temperatura controlada fins al punt, escórrer i acabar al moment amb la salsa i guarnició.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_26",
       "name": "Bacallà al pil-pil de romesco",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1007,14 +1007,14 @@
         }
       ],
       "allergens": "Peix, Fruits de closca",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_27",
       "name": "Txuletón amb patates emmascarades",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1043,14 +1043,14 @@
         }
       ],
       "allergens": "",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Temperar la peça, marcar a la brasa fins al punt demanat i deixar reposar. Escalfar la guarnició i la salsa per separat. Rectificar i servir immediatament.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_28",
       "name": "Kokotxes amb samfaina blanca",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1079,14 +1079,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_29",
       "name": "Xai del Pirineu amb salsa biscaïna",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1115,14 +1115,14 @@
         }
       ],
       "allergens": "",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_30",
       "name": "Lluç a la donostiarra amb picada catalana",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1145,14 +1145,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_31",
       "name": "Botifarra de perol amb pebrots de Gernika",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1181,14 +1181,14 @@
         }
       ],
       "allergens": "",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_32",
       "name": "Ànec rostit a la sidra amb prunes",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1223,14 +1223,14 @@
         }
       ],
       "allergens": "Sulfits",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Daurar la peça, incorporar la base aromàtica i coure lentament fins que quedi tendra. Colar o reduir el suc, porcionar i regenerar suaument per al servei.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_33",
       "name": "Galtes de vedella al txakolí amb ceps",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1265,14 +1265,14 @@
         }
       ],
       "allergens": "Sulfits",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Daurar la peça, incorporar la base aromàtica i coure lentament fins que quedi tendra. Colar o reduir el suc, porcionar i regenerar suaument per al servei.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_34",
       "name": "Tonyina a la brasa amb escalivada i piparres",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1301,14 +1301,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Temperar la peça, marcar a la brasa fins al punt demanat i deixar reposar. Escalfar la guarnició i la salsa per separat. Rectificar i servir immediatament.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_35",
       "name": "Pollastre de pagès farcit de xistorra",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1337,14 +1337,14 @@
         }
       ],
       "allergens": "",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar el farcit, refredar-lo i porcionar-lo. Formar o farcir la peça, coure-la fins al punt i acabar amb la salsa indicada. Regenerar sense ressecar.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_36",
       "name": "Orada a la brasa amb suquet de Getaria",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1367,14 +1367,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Temperar la peça, marcar a la brasa fins al punt demanat i deixar reposar. Escalfar la guarnició i la salsa per separat. Rectificar i servir immediatament.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_37",
       "name": "Fricandó de vedella amb Idiazabal",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1403,14 +1403,14 @@
         }
       ],
       "allergens": "Làctics",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Daurar la peça, incorporar la base aromàtica i coure lentament fins que quedi tendra. Colar o reduir el suc, porcionar i regenerar suaument per al servei.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_38",
       "name": "Rap amb cloïsses i pil-pil d’avellanes",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1445,14 +1445,14 @@
         }
       ],
       "allergens": "Peix, Mol·luscs",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_39",
       "name": "Secret ibèric amb salsa de sidra i ratafia",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1487,14 +1487,14 @@
         }
       ],
       "allergens": "Sulfits",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_40",
       "name": "Costella de porc lacada amb mel, txakolí i romaní",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1529,14 +1529,14 @@
         }
       ],
       "allergens": "Sulfits",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Daurar la peça, incorporar la base aromàtica i coure lentament fins que quedi tendra. Colar o reduir el suc, porcionar i regenerar suaument per al servei.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_41",
       "name": "Mandonguilles de vedella amb salsa biscaïna i bolets",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1571,14 +1571,14 @@
         }
       ],
       "allergens": "",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_42",
       "name": "Turbot a la brasa amb allioli de piparra",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1613,14 +1613,14 @@
         }
       ],
       "allergens": "Peix, Ous",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Temperar la peça, marcar a la brasa fins al punt demanat i deixar reposar. Escalfar la guarnició i la salsa per separat. Rectificar i servir immediatament.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_43",
       "name": "Conill rostit amb xistorra i castanyes",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1655,14 +1655,14 @@
         }
       ],
       "allergens": "",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Daurar la peça, incorporar la base aromàtica i coure lentament fins que quedi tendra. Colar o reduir el suc, porcionar i regenerar suaument per al servei.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_44",
       "name": "Peus de porc farcits de txangurro",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1697,14 +1697,14 @@
         }
       ],
       "allergens": "Crustacis",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar el farcit, refredar-lo i porcionar-lo. Formar o farcir la peça, coure-la fins al punt i acabar amb la salsa indicada. Regenerar sense ressecar.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_45",
       "name": "Magret d’ànec amb codonyat i reducció de sidra",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1739,14 +1739,14 @@
         }
       ],
       "allergens": "Sulfits",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_46",
       "name": "Llom de bacallà amb mongetes del ganxet i salsa verda",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1769,14 +1769,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_47",
       "name": "Cabrit rostit amb patates alabeses i picada catalana",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1805,14 +1805,14 @@
         }
       ],
       "allergens": "",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Daurar la peça, incorporar la base aromàtica i coure lentament fins que quedi tendra. Colar o reduir el suc, porcionar i regenerar suaument per al servei.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_48",
       "name": "Txipirons farcits de carn d’olla",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1841,14 +1841,14 @@
         }
       ],
       "allergens": "Mol·luscs",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Preparar el farcit, refredar-lo i porcionar-lo. Formar o farcir la peça, coure-la fins al punt i acabar amb la salsa indicada. Regenerar sense ressecar.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_49",
       "name": "Ventresca de tonyina amb samfaina de pebrots bascos",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1889,14 +1889,14 @@
         }
       ],
       "allergens": "Peix",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     },
     {
       "id": "dish_vascocat_50",
       "name": "Mar i muntanya de pollastre, llagostins i txangurro",
-      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "status": "VALIDADA / REVISADA",
       "servings": 1,
       "ingredients": [
         {
@@ -1931,7 +1931,7 @@
         }
       ],
       "allergens": "Crustacis",
-      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "desc": "Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.",
       "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
       "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
     }
