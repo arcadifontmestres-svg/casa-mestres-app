@@ -1,0 +1,1939 @@
+{
+  "migration": "dish_recipe_proposals_2026_09_19_v1",
+  "generatedAt": "2026-09-19",
+  "warning": "Propostes no validades. No substitueixen la decisió del cap de cuina.",
+  "recipes": [
+    {
+      "id": "dish_vascocat_1",
+      "name": "Gilda de l’Empordà",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Anxova",
+          "qty": 25,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar i porcionar tots els components en fred. Amanir al moment del servei, comprovar el punt de sal i muntar evitant excés de líquid.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_2",
+      "name": "Esqueixada de bacallà al pil-pil verd",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Bacallà",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Pil-pil",
+          "qty": 60,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_3",
+      "name": "Txangurro gratinat amb allioli de safrà",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Txangurro",
+          "qty": 120,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Allioli",
+          "qty": 35,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Crustacis, Ous",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar la base, disposar-la en la ració i cobrir amb l’acabat indicat. Gratinar al moment fins daurar sense assecar.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_4",
+      "name": "Porrusalda de calçots fumats",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Calçots",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Porro",
+          "qty": 150,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Sofregir la base vegetal, mullar amb el fons corresponent i coure fins integrar sabors. Afegir el producte principal al final per respectar-ne el punt.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_5",
+      "name": "Marmitako suau de romesco",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Salsa romesco",
+          "qty": 60,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Patata",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Fruits de closca",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Sofregir la base vegetal, mullar amb el fons corresponent i coure fins integrar sabors. Afegir el producte principal al final per respectar-ne el punt.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_6",
+      "name": "Pebrots de Gernika amb anxoves de l’Escala",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Pebrots",
+          "qty": 150,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Anxoves",
+          "qty": 40,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_7",
+      "name": "Coca cruixent de xistorra i ceba de Figueres",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Xistorra",
+          "qty": 100,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Coca / massa",
+          "qty": 100,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Gluten",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_8",
+      "name": "Croquetes de txuletón i ceps",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Txeletón",
+          "qty": 350,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Ceps",
+          "qty": 80,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Beixamel",
+          "qty": 120,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Gluten, làctics",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Temperar la peça, marcar a la brasa fins al punt demanat i deixar reposar. Escalfar la guarnició i la salsa per separat. Rectificar i servir immediatament.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_9",
+      "name": "Truita de bacallà amb samfaina",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Bacallà",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Ous",
+          "qty": 3,
+          "unit": "unitat",
+          "provisional": true
+        },
+        {
+          "name": "Samfaina",
+          "qty": 120,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix, Ous",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar la guarnició, incorporar l’ou i quallar deixant l’interior melós. Elaborar al moment i servir calent.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_10",
+      "name": "Amanida de mongeta del ganxet, bonítol i piparres",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Mongeta del ganxet",
+          "qty": 150,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Bonítol",
+          "qty": 100,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar i porcionar tots els components en fred. Amanir al moment del servei, comprovar el punt de sal i muntar evitant excés de líquid.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_11",
+      "name": "Arròs melós de txipirons i picada catalana",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Txipirons",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Txipirons",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Arròs",
+          "qty": 90,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Mel",
+          "qty": 20,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Mol·luscs",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Sofregir la base, nacarar l’arròs o rossejar els fideus i mullar amb el fons calent. Coure controlant l’absorció i incorporar els elements principals al seu punt.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_12",
+      "name": "Caneló de txangurro amb biscaïna de nyores",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Txangurro",
+          "qty": 120,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Salsa biscaïna",
+          "qty": 80,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Pasta de caneló",
+          "qty": 80,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Crustacis, Gluten, ous",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar el farcit, refredar-lo i porcionar-lo. Formar o farcir la peça, coure-la fins al punt i acabar amb la salsa indicada. Regenerar sense ressecar.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_13",
+      "name": "Brandada de bacallà amb Idiazabal gratinat",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Bacallà",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Formatge Idiazabal",
+          "qty": 40,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Brandada de bacallà",
+          "qty": 140,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix, Làctics, làctics",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar la base, disposar-la en la ració i cobrir amb l’acabat indicat. Gratinar al moment fins daurar sense assecar.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_14",
+      "name": "Xipirons farcits de botifarra negra",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Txipirons",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Botifarra",
+          "qty": 160,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Mol·luscs",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar el farcit, refredar-lo i porcionar-lo. Formar o farcir la peça, coure-la fins al punt i acabar amb la salsa indicada. Regenerar sense ressecar.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_15",
+      "name": "Carxofes confitades amb kokotxes al pil-pil",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Kokotxes",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Carxofes",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Pil-pil",
+          "qty": 60,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar i porcionar. Confitar suaument amb temperatura controlada fins al punt, escórrer i acabar al moment amb la salsa i guarnició.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_16",
+      "name": "Talo cruixent d’escalivada i formatge Idiazabal",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Formatge Idiazabal",
+          "qty": 40,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Escalivada",
+          "qty": 150,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Talo de blat de moro",
+          "qty": 1,
+          "unit": "unitat",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Làctics",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_17",
+      "name": "Bunyols de bacallà amb maionesa de piparra",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Bacallà",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Piparres",
+          "qty": 30,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Massa de bunyol",
+          "qty": 100,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix, Gluten, ous",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar la massa amb el farcit, refredar i reposar. Porcionar, arrebossar si correspon i fregir a temperatura controlada fins que quedi daurat.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_18",
+      "name": "Sopa de peix de Getaria amb picada d’avellanes",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Fumet de peix",
+          "qty": 300,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Sofregir la base vegetal, mullar amb el fons corresponent i coure fins integrar sabors. Afegir el producte principal al final per respectar-ne el punt.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_19",
+      "name": "Fideus rossejats amb txangurro",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Txangurro",
+          "qty": 120,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Fideus",
+          "qty": 90,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Crustacis, Gluten",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Sofregir la base, nacarar l’arròs o rossejar els fideus i mullar amb el fons calent. Coure controlant l’absorció i incorporar els elements principals al seu punt.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_20",
+      "name": "Musclos a la sidra amb herbes del Pirineu",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Musclos",
+          "qty": 300,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Sidra",
+          "qty": 80,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Mol·luscs, Sulfits",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_21",
+      "name": "Escalivada tèbia amb Idiazabal i nous",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Ous",
+          "qty": 2,
+          "unit": "unitat",
+          "provisional": true
+        },
+        {
+          "name": "Formatge Idiazabal",
+          "qty": 40,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Escalivada",
+          "qty": 150,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Nous",
+          "qty": 25,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Ous, Làctics, Fruits de closca",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar la guarnició, incorporar l’ou i quallar deixant l’interior melós. Elaborar al moment i servir calent.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_22",
+      "name": "Ous a baixa temperatura amb xistorra i parmentier de nyora",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Xistorra",
+          "qty": 100,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Ous",
+          "qty": 2,
+          "unit": "unitat",
+          "provisional": true
+        },
+        {
+          "name": "Patata",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Ous, Làctics",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar la guarnició, incorporar l’ou i quallar deixant l’interior melós. Elaborar al moment i servir calent.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_23",
+      "name": "Tomàquet de Montserrat amb ventresca i piparres",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Ventresca de tonyina",
+          "qty": 160,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Tomàquet",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_24",
+      "name": "Raviolis de cua de bou amb salsa biscaïna",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Ous",
+          "qty": 2,
+          "unit": "unitat",
+          "provisional": true
+        },
+        {
+          "name": "Salsa biscaïna",
+          "qty": 80,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Pasta de ravioli",
+          "qty": 120,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Ous, Gluten, ous",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar el farcit, refredar-lo i porcionar-lo. Formar o farcir la peça, coure-la fins al punt i acabar amb la salsa indicada. Regenerar sense ressecar.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_25",
+      "name": "Favetes a la catalana amb bacallà confitat",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Bacallà",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Favetes",
+          "qty": 160,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar i porcionar. Confitar suaument amb temperatura controlada fins al punt, escórrer i acabar al moment amb la salsa i guarnició.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_26",
+      "name": "Bacallà al pil-pil de romesco",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Bacallà",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Salsa romesco",
+          "qty": 60,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Pil-pil",
+          "qty": 60,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix, Fruits de closca",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_27",
+      "name": "Txuletón amb patates emmascarades",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Txeletón",
+          "qty": 350,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Patata",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Temperar la peça, marcar a la brasa fins al punt demanat i deixar reposar. Escalfar la guarnició i la salsa per separat. Rectificar i servir immediatament.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_28",
+      "name": "Kokotxes amb samfaina blanca",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Kokotxes",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Samfaina",
+          "qty": 120,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_29",
+      "name": "Xai del Pirineu amb salsa biscaïna",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Xai",
+          "qty": 220,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Salsa biscaïna",
+          "qty": 80,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_30",
+      "name": "Lluç a la donostiarra amb picada catalana",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Lluç",
+          "qty": 200,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_31",
+      "name": "Botifarra de perol amb pebrots de Gernika",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Botifarra",
+          "qty": 160,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Pebrots",
+          "qty": 150,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_32",
+      "name": "Ànec rostit a la sidra amb prunes",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Ànec",
+          "qty": 220,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Sidra",
+          "qty": 80,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Prunes",
+          "qty": 50,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Sulfits",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Daurar la peça, incorporar la base aromàtica i coure lentament fins que quedi tendra. Colar o reduir el suc, porcionar i regenerar suaument per al servei.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_33",
+      "name": "Galtes de vedella al txakolí amb ceps",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Vedella",
+          "qty": 200,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Ceps",
+          "qty": 80,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Txakolí",
+          "qty": 60,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Sulfits",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Daurar la peça, incorporar la base aromàtica i coure lentament fins que quedi tendra. Colar o reduir el suc, porcionar i regenerar suaument per al servei.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_34",
+      "name": "Tonyina a la brasa amb escalivada i piparres",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Tonyina",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Escalivada",
+          "qty": 150,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Temperar la peça, marcar a la brasa fins al punt demanat i deixar reposar. Escalfar la guarnició i la salsa per separat. Rectificar i servir immediatament.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_35",
+      "name": "Pollastre de pagès farcit de xistorra",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Pollastre",
+          "qty": 220,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Xistorra",
+          "qty": 100,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar el farcit, refredar-lo i porcionar-lo. Formar o farcir la peça, coure-la fins al punt i acabar amb la salsa indicada. Regenerar sense ressecar.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_36",
+      "name": "Orada a la brasa amb suquet de Getaria",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Orada",
+          "qty": 220,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Temperar la peça, marcar a la brasa fins al punt demanat i deixar reposar. Escalfar la guarnició i la salsa per separat. Rectificar i servir immediatament.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_37",
+      "name": "Fricandó de vedella amb Idiazabal",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Vedella",
+          "qty": 200,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Formatge Idiazabal",
+          "qty": 40,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Làctics",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Daurar la peça, incorporar la base aromàtica i coure lentament fins que quedi tendra. Colar o reduir el suc, porcionar i regenerar suaument per al servei.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_38",
+      "name": "Rap amb cloïsses i pil-pil d’avellanes",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Rap",
+          "qty": 200,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Cloïsses",
+          "qty": 120,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Pil-pil",
+          "qty": 60,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix, Mol·luscs",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_39",
+      "name": "Secret ibèric amb salsa de sidra i ratafia",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Secret ibèric",
+          "qty": 220,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Sidra",
+          "qty": 80,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Ratafia",
+          "qty": 30,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Sulfits",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_40",
+      "name": "Costella de porc lacada amb mel, txakolí i romaní",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Porc",
+          "qty": 220,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Txakolí",
+          "qty": 60,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Mel",
+          "qty": 20,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Sulfits",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Daurar la peça, incorporar la base aromàtica i coure lentament fins que quedi tendra. Colar o reduir el suc, porcionar i regenerar suaument per al servei.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_41",
+      "name": "Mandonguilles de vedella amb salsa biscaïna i bolets",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Vedella",
+          "qty": 200,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Bolets",
+          "qty": 80,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Salsa biscaïna",
+          "qty": 80,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_42",
+      "name": "Turbot a la brasa amb allioli de piparra",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Turbot",
+          "qty": 220,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Piparres",
+          "qty": 30,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Allioli",
+          "qty": 35,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix, Ous",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Temperar la peça, marcar a la brasa fins al punt demanat i deixar reposar. Escalfar la guarnició i la salsa per separat. Rectificar i servir immediatament.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_43",
+      "name": "Conill rostit amb xistorra i castanyes",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Conill",
+          "qty": 220,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Xistorra",
+          "qty": 100,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Castanyes",
+          "qty": 80,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Daurar la peça, incorporar la base aromàtica i coure lentament fins que quedi tendra. Colar o reduir el suc, porcionar i regenerar suaument per al servei.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_44",
+      "name": "Peus de porc farcits de txangurro",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Txangurro",
+          "qty": 120,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Porc",
+          "qty": 220,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Peus de porc",
+          "qty": 250,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Crustacis",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar el farcit, refredar-lo i porcionar-lo. Formar o farcir la peça, coure-la fins al punt i acabar amb la salsa indicada. Regenerar sense ressecar.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_45",
+      "name": "Magret d’ànec amb codonyat i reducció de sidra",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Ànec",
+          "qty": 220,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Sidra",
+          "qty": 80,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Codonyat",
+          "qty": 40,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Sulfits",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_46",
+      "name": "Llom de bacallà amb mongetes del ganxet i salsa verda",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Bacallà",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_47",
+      "name": "Cabrit rostit amb patates alabeses i picada catalana",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Cabrit",
+          "qty": 220,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Patata",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Daurar la peça, incorporar la base aromàtica i coure lentament fins que quedi tendra. Colar o reduir el suc, porcionar i regenerar suaument per al servei.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_48",
+      "name": "Txipirons farcits de carn d’olla",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Txipirons",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Txipirons",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Mol·luscs",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Preparar el farcit, refredar-lo i porcionar-lo. Formar o farcir la peça, coure-la fins al punt i acabar amb la salsa indicada. Regenerar sense ressecar.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_49",
+      "name": "Ventresca de tonyina amb samfaina de pebrots bascos",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Tonyina",
+          "qty": 180,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Ventresca de tonyina",
+          "qty": 160,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Pebrots",
+          "qty": 150,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Samfaina",
+          "qty": 120,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Peix",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    },
+    {
+      "id": "dish_vascocat_50",
+      "name": "Mar i muntanya de pollastre, llagostins i txangurro",
+      "status": "PROPOSTA PENDENT DE VALIDACIÓ",
+      "servings": 1,
+      "ingredients": [
+        {
+          "name": "Txangurro",
+          "qty": 120,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Llagostins",
+          "qty": 120,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Pollastre",
+          "qty": 220,
+          "unit": "g",
+          "provisional": true
+        },
+        {
+          "name": "Oli d’oliva verge extra",
+          "qty": 15,
+          "unit": "ml",
+          "provisional": true
+        },
+        {
+          "name": "Sal",
+          "qty": 2,
+          "unit": "g",
+          "provisional": true
+        }
+      ],
+      "allergens": "Crustacis",
+      "desc": "Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.",
+      "process": "Netejar, porcionar i preparar els components per separat. Cuinar el producte principal al punt, escalfar la salsa i la guarnició, rectificar de sal i muntar al moment.",
+      "plating": "Plat calent i net. Disposar el producte principal com a centre, la guarnició ordenada i la salsa sense cobrir-lo completament. Acabar amb oli d’oliva i l’element fresc corresponent."
+    }
+  ]
+}
