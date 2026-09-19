@@ -35,3 +35,5 @@
 @media(max-width:720px){.employeeWeek{grid-template-columns:1fr 1fr}.weeklySchedule th,.weeklySchedule td{min-width:112px}}
 
 .employeeTasks{margin-top:12px;padding:12px;border-left:4px solid #a55d19;background:#fff;border-radius:7px}.employeeTasks h3{margin-top:0}.employeeTasks p{white-space:pre-wrap;line-height:1.45}
+
+.activationCode{margin:16px auto;padding:14px;max-width:260px;border:2px dashed #a55d19;border-radius:10px;background:#fffaf2;text-align:center;font-size:34px;font-weight:900;letter-spacing:.18em;color:#285748}
