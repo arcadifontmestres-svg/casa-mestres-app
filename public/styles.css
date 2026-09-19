@@ -21,3 +21,15 @@
 @media print{.scheduleSlot{border:0;padding:2px;background:#fff;color:#000}}
 
 .scheduleSlot.empty{border-style:dashed;background:#faf8f3;color:#6e655c;text-align:center;font-weight:700}
+
+/* Quadrant setmanal amb criteris de torn */
+.weeklySchedule th,.weeklySchedule td{vertical-align:top;min-width:128px}
+.weeklySchedule th:first-child,.weeklySchedule td:first-child{min-width:190px;position:sticky;left:0;background:#fffaf2;z-index:1}
+.shiftSelect{width:100%;min-width:105px;padding:7px 5px;border:1px solid #cbbca9;border-radius:6px;background:#fff;font-weight:800}
+.shiftHours{margin-top:5px;font-size:12px;font-weight:800;color:#285748;text-align:center}
+.shiftHours.exception{color:#a33f32}
+.linkBtn{border:0;background:none;color:#a55d19;text-decoration:underline;cursor:pointer;font-size:11px;padding:4px}
+.employeeWeek{display:grid;grid-template-columns:repeat(7,minmax(90px,1fr));gap:5px}
+.employeeWeek>div{border:1px solid #d6c7b5;border-radius:7px;padding:7px;background:#fffaf2;display:flex;flex-direction:column;gap:4px}
+.employeeWeek span{font-weight:800;color:#285748}.employeeWeek small{color:#665f57}
+@media(max-width:720px){.employeeWeek{grid-template-columns:1fr 1fr}.weeklySchedule th,.weeklySchedule td{min-width:112px}}
