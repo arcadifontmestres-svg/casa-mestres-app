@@ -625,6 +625,28 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { ok: true, ...result });
     }
 
+    if (pathname === '/api/employee-schedule' && req.method === 'POST') {
+      const input = await bodyJson(req);
+      const code = String(input.code || '').trim();
+      const pin = String(input.pin || '').trim();
+      if (!code || !pin) return send(res, 400, { error: 'Cal indicar codi i PIN' });
+      const data = readData();
+      const employee = (data.employees || []).find(item => String(item.code) === code && item.active !== false);
+      if (!employee || !employee.schedulePin || !safeEqual(pin, employee.schedulePin)) {
+        return send(res, 401, { error: 'Codi o PIN incorrectes' });
+      }
+      const from = String(input.from || new Date().toISOString().slice(0, 10));
+      const to = String(input.to || from);
+      const items = (data.schedules || [])
+        .filter(item => item.employeeId === employee.id && item.date >= from && item.date <= to)
+        .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+        .map(item => ({ date: item.date, start: item.start || '', end: item.end || '', area: item.area || '', shiftCode: item.shiftCode || '', exception: item.exception === true, notes: item.notes || '' }));
+      return send(res, 200, {
+        employee: { code: employee.code, name: employee.name, level: employee.level || '', role: employee.role || employee.roleBase || '' },
+        from, to, items
+      });
+    }
+
     if (pathname === '/api/punch' && req.method === 'POST') {
       const input = await bodyJson(req);
       const result = await mutateData(data => {
