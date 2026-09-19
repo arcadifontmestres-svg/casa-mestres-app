@@ -48,6 +48,8 @@
     .logoBox img{max-width:100%;max-height:90px}
     .status{font-size:14px;color:#065f46;font-weight:800;margin-left:4px}
     .footerNote{font-size:12px;color:#6b7280;margin-top:10px;line-height:1.35}
+    .assignmentPanel{grid-column:1/-1;margin-top:18px;padding:16px;border:2px solid #285748;border-radius:12px;background:#f3fbf7}
+    .assignmentPanel h3{margin:0 0 8px;color:#285748}
     .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
     .searchbox{max-width:360px}
     .pill{display:inline-block;border:1px solid #99f6e4;background:#ccfbf1;color:#134e4a;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:800;margin:2px}
@@ -227,7 +229,17 @@
   function esc(s){ return String(s ?? '').replace(/[&<>\"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m]||m)); }
   function today(){ return new Date().toISOString().slice(0,10); }
   function nowTime(){ return new Date().toTimeString().slice(0,5); }
-  function fieldsOf(k){ return sections[k].fields || []; }
+  const ASSIGNMENT_KEYS = ['nivell_assignat','empleat_id','tasca_assignada'];
+  const ASSIGNMENT_FIELDS = [
+    ['nivell_assignat','Posició responsable','select:Sense assignar|C1|C2|C3|S1|S2|S3|Runner'],
+    ['empleat_id','Empleat responsable','selectdyn:employees'],
+    ['tasca_assignada','Tasca / responsabilitat assignada','textarea']
+  ];
+  function fieldsOf(k){
+    const base = sections[k].fields || [];
+    const existing = new Set(base.map(field=>field[0]));
+    return [...base, ...ASSIGNMENT_FIELDS.filter(field=>!existing.has(field[0]))];
+  }
   function getRecords(k){ if(!db.records[k]) db.records[k]=[]; return db.records[k]; }
 
   function buildMenu(){
@@ -298,8 +310,11 @@
 
   function renderSection(k){
     const s=sections[k], recs=getRecords(k);
-    const formFields = fieldsOf(k).map(f=>fieldHTML(f, editIndex!==null ? recs[editIndex][f[0]] : defaultValue(f))).join('');
-    const displayFields = fieldsOf(k).slice(0,7);
+    const allFields = fieldsOf(k);
+    const record = editIndex!==null ? recs[editIndex] : {};
+    const formFields = allFields.filter(f=>!ASSIGNMENT_KEYS.includes(f[0])).map(f=>fieldHTML(f, record[f[0]] ?? defaultValue(f))).join('');
+    const assignmentFields = allFields.filter(f=>ASSIGNMENT_KEYS.includes(f[0])).map(f=>fieldHTML(f, record[f[0]] ?? defaultValue(f))).join('');
+    const displayFields = [...allFields.filter(f=>!ASSIGNMENT_KEYS.includes(f[0])).slice(0,4), ...allFields.filter(f=>ASSIGNMENT_KEYS.includes(f[0]))];
     const rows = recs.map((r,i)=>`<tr>${displayFields.map(f=>`<td>${esc(r[f[0]])}</td>`).join('')}<td class="no-print"><button class="btn small light" onclick="window.__editRec(${i})">Editar</button> <button class="btn small danger" onclick="window.__delRec(${i})">Eliminar</button></td></tr>`).join('');
     const headers = displayFields.map(f=>`<th>${esc(f[1])}</th>`).join('') + '<th class="no-print">Accions</th>';
     const stat = sectionStats(k);
@@ -312,6 +327,11 @@
         ${s.confidential?'<div class="warning"><strong>Registre reservat.</strong> Recomanat imprimir i arxivar amb accés restringit.</div>':''}
         <div class="miniStats">${stat}</div>
         <div class="grid3">${formFields}</div>
+        <div class="assignmentPanel">
+          <h3>Assignació de responsabilitat</h3>
+          <div class="hint">Defineix quina posició és responsable del registre, quin empleat l’assumeix i quina tasca concreta ha de realitzar.</div>
+          <div class="grid3">${assignmentFields}</div>
+        </div>
         <div class="actions no-print">
           <button class="btn" id="saveRec">${editIndex!==null?'Actualitzar registre':'Guardar registre'}</button>
           <button class="btn light" id="newRec">Nou registre</button>
