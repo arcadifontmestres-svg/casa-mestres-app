@@ -381,7 +381,15 @@ function applyDishRecipeProposals() {
       || data.dishes.find(item => catalogName(item.name) === catalogName(proposal.name));
     if (!dish) continue;
     const alreadyDocumented = (dish.ingredients || []).length || (dish.baseUses || []).length || String(dish.process || '').trim();
-    if (alreadyDocumented) continue;
+    const generatedByRecipeMigration = String(dish.recipeProposalMigration || '').startsWith('dish_recipe_proposals_');
+    if (alreadyDocumented && !generatedByRecipeMigration) continue;
+    if (alreadyDocumented && generatedByRecipeMigration) {
+      dish.recipeStatus = proposal.status || 'VALIDADA / REVISADA';
+      dish.recipeProposalMigration = migrationId;
+      dish.desc = String(dish.desc || '').replace('Proposta tècnica inicial generada a partir del nom del plat. Cal validar gramatges i procés abans d’usar-la com a recepta definitiva.', 'Recepta tècnica validada. Els gramatges, el procés i l’emplatat es poden ajustar des de la fitxa sense perdre la recepta.');
+      updated += 1;
+      continue;
+    }
     dish.servings = dish.servings || proposal.servings || 1;
     dish.ingredients = (proposal.ingredients || []).map(item => {
       const product = ensureProduct(item);
