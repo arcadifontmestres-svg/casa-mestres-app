@@ -116,8 +116,10 @@
       ['dilucio','Dilució aplicada','text'],
       ['temps_contacte','Temps de contacte','text'],
       ['hora','Hora','time'],
+      ['nivell_assignat','Nivell responsable','select:Sense assignar|C1|C2|C3|S1|S2|S3|Runner'],
+      ['empleat_id','Empleat responsable','selectdyn:employees'],
       ['conforme','Conforme','select:Sí|No|Pendent'],
-      ['responsable','Responsable','text'],
+      ['responsable','Nom responsable / signatura','text'],
       ['observacions','Observacions','textarea'],
       ['accio','Acció correctiva','textarea']
     ]},
@@ -129,8 +131,10 @@
       ['producte','Producte utilitzat','selectdyn:productes'],
       ['dilucio','Dilució aplicada','text'],
       ['temps_contacte','Temps de contacte','text'],
+      ['nivell_assignat','Nivell responsable','select:Sense assignar|C1|C2|C3|S1|S2|S3|Runner'],
+      ['empleat_id','Empleat responsable','selectdyn:employees'],
       ['conforme','Conforme','select:Sí|No|Pendent'],
-      ['responsable','Responsable','text'],
+      ['responsable','Nom responsable / signatura','text'],
       ['observacions','Observacions','textarea'],
       ['accio','Acció correctiva','textarea']
     ]},
@@ -194,6 +198,7 @@
   };
 
   let db = loadDB();
+  let employees = [];
   let current = 'empresa';
   let editIndex = null;
 
@@ -346,7 +351,7 @@
   function sectionStats(k){
     const zones = getRecords('zones').filter(z=>z.actiu!=='No').length;
     const prod = getRecords('productes_neteja').filter(p=>p.actiu!=='No').length;
-    if(k==='neteja'||k==='neteja_setmanal') return `<span>Zones actives: ${zones}</span><span>Productes actius: ${prod}</span>`;
+    if(k==='neteja'||k==='neteja_setmanal') return `<span>Zones actives: ${zones}</span><span>Productes actius: ${prod}</span><span>Empleats actius: ${employees.filter(e=>e.active!==false).length}</span>`;
     if(k==='temperatures') return `<span>Zones/equips actius: ${zones}</span><span>Amb control temperatura: ${getZonesTemp().length}</span>`;
     if(k==='zones') return `<span>Total zones: ${getRecords('zones').length}</span><span>Actives: ${zones}</span>`;
     if(k==='productes_neteja') return `<span>Total productes: ${getRecords('productes_neteja').length}</span><span>Actius: ${prod}</span>`;
@@ -356,7 +361,7 @@
     const zones = getRecords('zones').filter(z=>z.actiu!=='No').length;
     const prod = getRecords('productes_neteja').filter(p=>p.actiu!=='No').length;
     if(!zones || !prod) return `<div class="warning"><strong>Recomanat:</strong> abans de fer registres de neteja, crea les zones del local i els productes de neteja. Així els camps Zona i Producte sortiran amb desplegables.</div>`;
-    return `<div class="okbox">Els camps Zona i Producte estan vinculats als catàlegs configurats.</div>`;
+    return `<div class="okbox">Zona i Producte estan vinculats als catàlegs. També pots assignar cada control a un nivell (C1, C2, C3, S1...) i a un empleat actiu del Back Office.</div>`;
   }
   function linkedHintTemperatures(){
     if(!getZonesTemp().length) return `<div class="warning"><strong>Recomanat:</strong> a Configuració del local marca “Control temperatures” a les cambres, congeladors o equips. Així apareixeran al desplegable.</div>`;
@@ -383,6 +388,7 @@
     if(listName==='zones') return getZones().map(z=>({value:z.nom || z.codi, label:zoneLabel(z)}));
     if(listName==='zones_temp') return getZonesTemp().map(z=>({value:z.nom || z.codi, label:zoneLabel(z)}));
     if(listName==='productes') return getProducts().map(p=>({value:p.producte, label:productLabel(p)}));
+    if(listName==='employees') return employees.filter(e=>e.active!==false).map(e=>({value:e.id,label:`${e.code||''} · ${e.name||''}${e.level?` · ${e.level}`:''}`}));
     return [];
   }
   function getZones(){ return getRecords('zones').filter(z=>z.actiu!=='No' && (z.nom || z.codi)); }
@@ -399,6 +405,15 @@
           const dil=document.getElementById('f_dilucio'); if(dil && !dil.value) dil.value=p.dilucio||'';
           const tc=document.getElementById('f_temps_contacte'); if(tc && !tc.value) tc.value=p.temps_contacte||'';
         }
+      };
+    }
+    const employeeSelect = document.getElementById('f_empleat_id');
+    if(employeeSelect){
+      employeeSelect.onchange = function(){
+        const employee=employees.find(e=>e.id===employeeSelect.value);
+        if(!employee) return;
+        const level=document.getElementById('f_nivell_assignat'); if(level) level.value=employee.level||'Sense assignar';
+        const responsible=document.getElementById('f_responsable'); if(responsible) responsible.value=employee.name||'';
       };
     }
     const equipSelect = document.getElementById('f_equip');
@@ -519,6 +534,7 @@
   }
   render();
   fetch('/api/control-state').then(r=>r.json()).then(remote=>{if(remote&&remote.records){db=normalizeDB(remote);localStorage.setItem(STORAGE_KEY,JSON.stringify(db));render();}}).catch(()=>{});
+  fetch('/api/data').then(r=>r.ok?r.json():Promise.reject()).then(appData=>{employees=Array.isArray(appData.employees)?appData.employees:[];render();}).catch(()=>{});
 })();
 </script>
 </body>
