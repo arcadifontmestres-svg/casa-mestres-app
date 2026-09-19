@@ -39,6 +39,14 @@ assert.match(read('mcp.js'), /function ensurePurchaseControlChain\(data, purchas
 assert.match(control, /APPCC - Recepció i traçabilitat de matèria primera/);
 assert.match(control, /'recepcio'/);
 assert.match(modules, /Pendent de recepció/);
+assert.match(modules, /purchaseAssistant/);
+assert.match(modules, /SpeechRecognition/);
+assert.match(modules, /publicationStudio/);
+assert.match(modules, /navigator\.share/);
+assert.match(read('public\/app.js'), /documentTemplateOptions/);
+assert.match(read('public\/app.js'), /designTemplate/);
+assert.match(control, /selectdyn:employees/);
+assert.match(control, /nivell_assignat/);
 
 assert.doesNotMatch(modules, /Math\.random\s*\(/, 'Els panells no poden mostrar dades aleatòries');
 assert.doesNotMatch(modules, /\/api\/assistant/, 'La IA ha de quedar aparcada');
