@@ -37,3 +37,17 @@
 .employeeTasks{margin-top:12px;padding:12px;border-left:4px solid #a55d19;background:#fff;border-radius:7px}.employeeTasks h3{margin-top:0}.employeeTasks p{white-space:pre-wrap;line-height:1.45}
 
 .activationCode{margin:16px auto;padding:14px;max-width:260px;border:2px dashed #a55d19;border-radius:10px;background:#fffaf2;text-align:center;font-size:34px;font-weight:900;letter-spacing:.18em;color:#285748}
+
+
+/* Plantilles configurables per a cartes, menús i pressupostos */
+.premiumDoc{--doc-accent:#9b7a3d;color:#203c34;max-width:760px;margin:auto;padding:42px;text-align:center;background:#fff}
+.premiumDoc .title{color:var(--doc-accent)}
+.premiumDoc.elegant{border:8px double var(--doc-accent);font-family:Georgia,serif}
+.premiumDoc.elegant .dish{padding:10px;border-bottom:1px solid color-mix(in srgb,var(--doc-accent) 35%,transparent)}
+.premiumDoc.classic{text-align:left;border-top:14px solid var(--doc-accent);border-bottom:4px solid var(--doc-accent);font-family:Georgia,serif}
+.premiumDoc.classic .title{text-align:left;text-transform:uppercase;letter-spacing:.06em}
+.premiumDoc.classic .dish{padding:9px 0;border-bottom:1px solid #d8d0c2}
+.premiumDoc.minimal{text-align:left;border-left:6px solid var(--doc-accent);font-family:Arial,sans-serif}
+.premiumDoc.minimal .title{text-align:left;font-weight:500;letter-spacing:-.03em}
+.premiumDoc.minimal .dish{padding:7px 0}
+@media print{.premiumDoc{box-sizing:border-box;min-height:90vh;box-shadow:none}.premiumDoc.elegant{border-color:var(--doc-accent)}}
