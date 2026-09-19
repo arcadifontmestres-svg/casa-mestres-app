@@ -31,7 +31,7 @@ assert.equal(catalog.dishes.length, 51);
 assert.equal(catalog.saleItems.length, 204);
 assert.equal(catalog.reservations.length, 2);
 assert.equal(dishRecipes.recipes.length, 50);
-assert.equal(dishRecipes.recipes.every(item => item.status === 'PROPOSTA PENDENT DE VALIDACIÓ'), true);
+assert.equal(dishRecipes.recipes.every(item => item.status === 'VALIDADA / REVISADA'), true);
 assert.equal(dishRecipes.recipes.every(item => item.ingredients.length >= 3 && item.process && item.plating), true);
 assert.equal(sarriera.products.filter(item => item.sourceMigration === 'sarriera_kitchen_bases_2026_09_07_v1').length, 27);
 assert.equal(sarriera.bases.length, 9);
