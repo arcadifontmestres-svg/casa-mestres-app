@@ -99,8 +99,8 @@
   });
 
   const sections = {
-    purchases: { label: 'Compres i logística', description: 'Proveïdors, GS-COMP, GS-REC i traçabilitat.', modules: ['supplierAdvanced', 'purchases', 'receipts', 'traceability'] },
-    customers: { label: 'Clients i comercial', description: 'CRM, reserves, carta, grups, experiències i fidelització.', modules: ['crm', 'reservationsAdvanced', 'digitalMenu', 'communications', 'marketing', 'groups', 'experiences', 'loyalty'] },
+    purchases: { label: 'Compres i logística', description: 'Proveïdors, GS-COMP, GS-REC i traçabilitat.', modules: ['supplierAdvanced', 'purchaseAssistant', 'purchases', 'receipts', 'traceability'] },
+    customers: { label: 'Clients i comercial', description: 'CRM, reserves, carta, grups, experiències i fidelització.', modules: ['crm', 'reservationsAdvanced', 'digitalMenu', 'publicationStudio', 'communications', 'marketing', 'groups', 'experiences', 'loyalty'] },
     operations: { label: 'Operacions', description: 'APPCC, manteniment, inventari, producció, sala i RRHH.', modules: ['appcc', 'maintenance', 'inventoryAdvanced', 'productionRecords', 'floorAdvanced', 'hrAdvanced', 'appccAdvanced'] },
     analysis: { label: 'Anàlisi i economia', description: 'Indicadors reals, costos i resultats.', modules: ['analytics', 'costs', 'economyAdvanced'] },
     ecosystem: { label: 'Ecosistema', description: 'Multi-restaurant, plataformes, mini apps i exportacions.', modules: ['restaurants', 'platforms', 'miniapps', 'exports'] },
@@ -150,6 +150,30 @@
       return `<button class="arcadiModuleCard" data-open-module="${e(key)}"><span>FASE ${e(item.phase)}</span><b>${e(item.label)}</b><small>${e(item.description)}</small></button>`;
     }).join('');
   }
+
+
+  function purchaseDraftsFromText(raw) {
+    const products = allProducts(), suppliers = A.state.suppliers || [], groups = new Map();
+    String(raw || '').split(/\n|,/).map(function(line){ return line.trim(); }).filter(Boolean).forEach(function(line){
+      const match=line.match(/^(\d+(?:[.,]\d+)?)?\s*(kg|g|l|ml|u|unitats?|caixes?)?\s*(?:de\s+)?(.+)$/i);
+      const qty=match && match[1] ? match[1].replace(',','.') : '1', unit=match && match[2] ? match[2] : '', requested=(match && match[3] ? match[3] : line).trim();
+      const product=products.find(function(item){ const name=String(item.name||'').toLowerCase(), ask=requested.toLowerCase(); return name.includes(ask)||ask.includes(name); });
+      const supplier=suppliers.find(function(item){ return item.id===product?.supplierId; }), key=supplier?.id||'pendent';
+      if(!groups.has(key)) groups.set(key,{supplier:supplier?.name||supplier?.tradeName||'Pendent d’assignar',lines:[]});
+      groups.get(key).lines.push(qty+(unit?' '+unit:'')+' · '+(product?.name||requested));
+    });
+    return Array.from(groups.values());
+  }
+  custom('purchaseAssistant',51,'purchases','Compres assistides','Crea propostes de compra des de text o veu i les agrupa per proveïdor.',function(){
+    return '<div class="panel"><div class="notice"><b>Entrada assistida:</b> escriu o dicta una llista. Es crearà una proposta en estat Preparada perquè la revisis abans d’enviar-la.</div><label>Nota de compra</label><textarea id="purchaseAssistantText" rows="8" placeholder="3 kg tomàquet&#10;2 caixes vi blanc"></textarea><div class="actions"><button class="btn secondary" data-purchase-dictate>🎙 Dictar</button><button class="btn" data-purchase-preview>Preparar proposta</button></div><div id="purchaseAssistantResult"></div></div>';
+  });
+  custom('publicationStudio',47,'customers','Estudi de publicacions','Prepara novetats per Instagram, Google, Facebook o web des de contingut existent.',function(){
+    const sources=(A.state.documents||[]).map(function(item){return {id:'document:'+item.id,label:(item.type||'Document')+' · '+(item.title||'Sense títol'),title:item.title||'',content:[item.subtitle,item.notes,item.footer].filter(Boolean).join('\n\n')};});
+    window.__arcadiPublicationSources=sources;
+    const options=sources.map(function(item){return '<option value="'+e(item.id)+'">'+e(item.label)+'</option>';}).join('');
+    const drafts=(A.state.marketingCampaigns||[]).filter(function(item){return item.status==='Preparada';}).map(function(item){return '<div class="notice"><b>'+e(item.title)+'</b> · '+e(item.channel)+'<br>'+e(item.content||'')+'<div class="actions"><button class="btn secondary" data-share-campaign="'+e(item.id)+'">Compartir</button><button class="btn light" data-open-module="marketing">Editar</button></div></div>';}).join('');
+    return '<div class="panel"><div class="notice"><b>Publicació segura:</b> crea un esborrany des de cartes o menús. La publicació externa sempre queda sota confirmació humana amb el menú Compartir.</div><div class="grid"><div><label>Origen</label><select id="publicationSource">'+(options||'<option>Primer crea una carta o menú</option>')+'</select></div><div><label>Canal</label><select id="publicationChannel"><option>Instagram</option><option>Google</option><option>Facebook</option><option>Web</option></select></div></div><div class="actions"><button class="btn" data-publication-create '+(sources.length?'':'disabled')+'>Crear esborrany</button></div></div><div class="panel"><h3>Esborranys preparats</h3>'+(drafts||'<p class="muted">Encara no hi ha publicacions preparades.</p>')+'</div>';
+  });
 
   custom('supplierAdvanced', 51, 'purchases', 'Proveïdors avançats', 'Fitxa mestra, productes associats i accés a les tarifes.', () => {
     const suppliers = A.state.suppliers || [];
@@ -327,6 +351,27 @@
     document.querySelectorAll('[data-open-module]').forEach(button => { button.onclick = () => open(button.dataset.openModule); });
     document.querySelectorAll('[data-core]').forEach(button => { button.onclick = () => A.goCore(button.dataset.core); });
     document.querySelectorAll('[data-export]').forEach(button => { button.onclick = () => exportData(button.dataset.export); });
+
+    document.querySelector('[data-purchase-dictate]')?.addEventListener('click',function(){
+      const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(!Recognition)return alert('Aquest navegador no permet dictat. Pots escriure la nota manualment.');
+      const recognition=new Recognition(); recognition.lang='ca-ES'; recognition.interimResults=false;
+      recognition.onresult=function(event){const input=document.getElementById('purchaseAssistantText');input.value=[input.value,event.results[0][0].transcript].filter(Boolean).join('\n');};
+      recognition.onerror=function(){alert('No s’ha pogut completar el dictat. Pots continuar escrivint.');}; recognition.start();
+    });
+    document.querySelector('[data-purchase-preview]')?.addEventListener('click',function(){
+      const raw=document.getElementById('purchaseAssistantText')?.value||'',drafts=purchaseDraftsFromText(raw),result=document.getElementById('purchaseAssistantResult');
+      if(!drafts.length){result.innerHTML='<div class="errBox">Escriu almenys un producte.</div>';return;}
+      result.innerHTML=drafts.map(function(draft,index){return '<div class="notice"><b>'+e(draft.supplier)+'</b><br>'+draft.lines.map(e).join('<br>')+'<div class="actions"><button class="btn" data-purchase-save="'+index+'">Crear comanda preparada</button></div></div>';}).join('');
+      result.querySelectorAll('[data-purchase-save]').forEach(function(button){button.onclick=async function(){const draft=drafts[Number(button.dataset.purchaseSave)],orders=A.collection('purchaseOrders'),stamp=new Date().toISOString().slice(0,10).replaceAll('-','');orders.push({id:A.uid('purchaseOrders'),code:'GS-COMP-'+stamp+'-'+String(orders.length+1).padStart(2,'0'),date:new Date().toISOString().slice(0,10),supplier:draft.supplier,status:'Preparada',responsible:'',lines:draft.lines.join('\n'),notes:'Proposta creada des d’una nota assistida.\n\nNota original:\n'+raw,source:'assistant',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});await A.save('COMANDA PREPARADA');button.disabled=true;button.textContent='Creada';};});
+    });
+    document.querySelector('[data-publication-create]')?.addEventListener('click',async function(){
+      const source=(window.__arcadiPublicationSources||[]).find(function(item){return item.id===document.getElementById('publicationSource')?.value;}); if(!source)return;
+      const channel=document.getElementById('publicationChannel')?.value||'Instagram',campaigns=A.collection('marketingCampaigns');
+      campaigns.push({id:A.uid('marketingCampaigns'),title:source.title||'Novetat Casa Mestres',channel:channel,date:new Date().toISOString().slice(0,10),status:'Preparada',content:source.content||source.title,sourceId:source.id,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
+      await A.save('ESBORRANY PREPARAT');open('publicationStudio');
+    });
+    document.querySelectorAll('[data-share-campaign]').forEach(function(button){button.onclick=async function(){const campaign=(A.state.marketingCampaigns||[]).find(function(item){return item.id===button.dataset.shareCampaign;});if(!campaign)return;if(navigator.share)await navigator.share({title:campaign.title,text:campaign.content||campaign.title});else{await navigator.clipboard.writeText(campaign.title+'\n\n'+(campaign.content||''));alert('Text copiat. Ja el pots enganxar al canal corresponent.');}};});
     if (!definition?.collection) return;
     document.querySelector('[data-new-record]')?.addEventListener('click', () => A.openRecordForm(definition));
     document.querySelectorAll('[data-edit-record]').forEach(button => { button.onclick = () => A.openRecordForm(definition, button.dataset.editRecord); });
