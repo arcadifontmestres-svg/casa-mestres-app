@@ -651,15 +651,27 @@ const server = http.createServer(async (req, res) => {
       const input = await bodyJson(req);
       const result = await mutateData(data => {
         data.punches = data.punches || [];
-        const employee = (data.employees || []).find(item => String(item.code) === String(input.code));
-        if (!employee) return { error: 'Codi d’empleat no trobat', status: 404 };
-        const gps = data.company?.gps || {};
-        let distance = null;
-        let status = 'GPS NO DISPONIBLE';
-        if ([input.lat, input.lng, gps.lat, gps.lng].every(value => Number.isFinite(Number(value)))) {
-          distance = haversine(Number(input.lat), Number(input.lng), Number(gps.lat), Number(gps.lng));
-          status = distance <= Number(gps.radius || 60) ? 'DINS DE ZONA' : 'FORA DE ZONA';
+        const employee = (data.employees || []).find(item => String(item.code) === String(input.code) && item.active !== false);
+        if (!employee || !employee.schedulePin || !safeEqual(String(input.pin || ''), employee.schedulePin)) {
+          return { error: 'Codi o PIN incorrectes', status: 401 };
         }
+        if (!['ENTRADA', 'PAUSA', 'TORNAR', 'SORTIDA'].includes(String(input.type || ''))) {
+          return { error: 'Tipus de fitxatge no vàlid', status: 400 };
+        }
+        const gps = data.company?.gps || {};
+        if (![input.lat, input.lng, gps.lat, gps.lng].every(value => Number.isFinite(Number(value)))) {
+          return { error: 'No es pot fitxar sense una ubicació GPS vàlida', status: 400 };
+        }
+        const accuracy = Number(input.accuracy);
+        if (!Number.isFinite(accuracy) || accuracy > 100) {
+          return { error: 'La precisió del GPS és insuficient. Apropa’t al local i torna-ho a provar.', status: 400 };
+        }
+        const distance = haversine(Number(input.lat), Number(input.lng), Number(gps.lat), Number(gps.lng));
+        const radius = Number(gps.radius || 60);
+        if (distance > radius) {
+          return { error: `Fitxatge bloquejat: ets a ${Math.round(distance)} m del local (radi autoritzat: ${radius} m).`, status: 403 };
+        }
+        const status = 'DINS DE ZONA';
         const punch = {
           id: `punch_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
           employeeId: employee.id,
