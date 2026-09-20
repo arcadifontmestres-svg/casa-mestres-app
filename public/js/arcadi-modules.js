@@ -80,10 +80,16 @@
     columns: [['date', 'Data'], ['item', 'Plat / base'], ['quantity', 'Quantitat'], ['station', 'Partida'], ['status', 'Estat']]
   });
   register({
+    key: 'organizations', phase: 62, section: 'ecosystem', label: 'Empreses del grup', singular: 'empresa',
+    description: 'Empreses independents administrades des del mateix centre de comandament.', collection: 'organizations',
+    fields: [text('name', 'Nom de l’empresa', true), text('legalName', 'Raó social'), text('taxId', 'CIF / NIF'), select('status', 'Estat', ['Activa', 'En preparació', 'Inactiva']), area('notes', 'Configuració / notes')],
+    columns: [['name', 'Empresa'], ['legalName', 'Raó social'], ['taxId', 'CIF / NIF'], ['status', 'Estat']]
+  });
+  register({
     key: 'restaurants', phase: 62, section: 'ecosystem', label: 'Multi-restaurant', singular: 'restaurant',
     description: 'Centres gestionats des del mateix ERP. Casa Mestres és el centre principal.', collection: 'restaurants',
-    fields: [text('name', 'Nom del centre', true), text('address', 'Adreça'), text('phone', 'Telèfon'), select('status', 'Estat', ['Actiu', 'En preparació', 'Inactiu']), area('notes', 'Configuració / notes')],
-    columns: [['name', 'Centre'], ['address', 'Adreça'], ['phone', 'Telèfon'], ['status', 'Estat']]
+    fields: [select('organizationId', 'Empresa', state => (state.organizations || []).map(x => ({ value: x.id, label: x.name }))), text('name', 'Nom del centre', true), text('address', 'Adreça'), text('phone', 'Telèfon'), number('gpsLat', 'Latitud GPS', '0.000001'), number('gpsLng', 'Longitud GPS', '0.000001'), number('gpsRadius', 'Radi GPS (m)', '1'), select('status', 'Estat', ['Actiu', 'En preparació', 'Inactiu']), area('notes', 'Configuració / notes')],
+    columns: [['name', 'Centre'], ['organizationId', 'Empresa'], ['address', 'Adreça'], ['phone', 'Telèfon'], ['status', 'Estat']]
   });
   register({
     key: 'platforms', phase: 63, section: 'ecosystem', label: 'Multi-plataforma', singular: 'plataforma',
@@ -103,13 +109,32 @@
     customers: { label: 'Clients i comercial', description: 'CRM, reserves, carta, grups, experiències i fidelització.', modules: ['crm', 'reservationsAdvanced', 'digitalMenu', 'publicationStudio', 'communications', 'marketing', 'groups', 'experiences', 'loyalty'] },
     operations: { label: 'Operacions', description: 'APPCC, manteniment, inventari, producció, sala i RRHH.', modules: ['criteriaStandards', 'appcc', 'maintenance', 'inventoryAdvanced', 'productionRecords', 'floorAdvanced', 'hrAdvanced', 'appccAdvanced'] },
     analysis: { label: 'Anàlisi i economia', description: 'Indicadors reals, costos i resultats.', modules: ['analytics', 'costs', 'economyAdvanced'] },
-    ecosystem: { label: 'Ecosistema', description: 'Multi-restaurant, plataformes, mini apps i exportacions.', modules: ['restaurants', 'platforms', 'miniapps', 'exports'] },
+    ecosystem: { label: 'Ecosistema', description: 'Empreses, centres, plataformes, mini apps i exportacions.', modules: ['commandCenter', 'organizations', 'restaurants', 'platforms', 'miniapps', 'exports'] },
     system: { label: 'Sistema', description: 'Backoffice, configuració, control final i assistència IA.', modules: ['backoffice', 'system', 'finalization', 'assistant'] }
   };
 
   const custom = (key, phase, section, label, description, renderer) => register({ key, phase, section, label, description, renderer });
 
-  function allProducts() { return A.state.products || []; }
+  custom('commandCenter', 62, 'ecosystem', 'Centre de comandament', 'Visió corporativa i seguiment de cada centre de treball.', () => {
+    const companyId = A.context?.companyId || '';
+    const centres = A.centres ? A.centres(companyId) : (A.state.restaurants || []);
+    const criteria = (A.state.governanceCriteria || []).filter(x => !companyId || x.companyId === companyId);
+    const tasks = (A.state.governanceTasks || []).filter(x => !companyId || x.companyId === companyId);
+    const deployments = (A.state.criterionDeployments || []).filter(x => !companyId || x.companyId === companyId);
+    const centreRows = centres.map(centre => {
+      const pending = tasks.filter(x => x.centreId === centre.id && x.status !== 'COMPLETADA').length;
+      const adopted = deployments.filter(x => x.centreId === centre.id && x.status === 'ADOPTAT').length;
+      const waiting = deployments.filter(x => x.centreId === centre.id && x.status !== 'ADOPTAT').length;
+      return `<tr><td><b>${e(centre.name)}</b></td><td>${pending}</td><td>${adopted}</td><td>${waiting}</td><td><button class="btn small secondary" data-work-centre="${e(centre.id)}">Treballar en aquest centre</button></td></tr>`;
+    }).join('');
+    return `<div class="arcadiStats">
+      ${stat(centres.length, 'Centres actius')}${stat(criteria.filter(x => !['IMPLANTADA','REBUTJADA','SUBSTITUIDA'].includes(x.state)).length, 'Criteris oberts')}
+      ${stat(tasks.filter(x => x.status !== 'COMPLETADA').length, 'Tasques pendents')}${stat(deployments.filter(x => x.status !== 'ADOPTAT').length, 'Implantacions pendents')}
+    </div><div class="panel"><h3>Situació per centre</h3><div class="tableWrap"><table><thead><tr><th>Centre</th><th>Tasques</th><th>Adoptats</th><th>Pendents d’adopció</th><th></th></tr></thead><tbody>${centreRows || '<tr><td colspan="5">Aquesta empresa encara no té centres assignats.</td></tr>'}</tbody></table></div></div>
+    <div class="notice"><b>Regla de treball:</b> selecciona «Tot el grup» per dirigir i comparar. Selecciona un centre concret abans de crear inventari, personal, APPCC, reserves o producció local.</div>`;
+  });
+
+  function allProducts() { return A.scopedCollection ? A.scopedCollection('products') : (A.state.products || []); }
   function stockValue() { return allProducts().reduce((sum, item) => sum + A.num(item.stock) * A.num(item.price), 0); }
   function lowStock() { return allProducts().filter(item => A.num(item.stock) <= A.num(item.min) && item.active !== false); }
   function orderTotal(order) { return (order.lines || []).reduce((sum, line) => sum + A.num(line.qty) * A.num(line.price), 0); }
@@ -293,7 +318,7 @@
     <div class="panel"><h3>Usos previstos</h3><ul><li>Preparar esborranys de llistes de compra a partir dels plats.</li><li>Proposar textos d’incidències i accions correctores APPCC.</li><li>Resumir dades del restaurant quan Arcadi ho demani.</li></ul><button class="btn secondary" type="button" disabled>Activació pendent</button></div>`);
 
   function genericView(definition) {
-    const records = A.collection(definition.collection);
+    const records = A.scopedCollection ? A.scopedCollection(definition.collection) : A.collection(definition.collection);
     const columns = definition.columns || definition.fields.slice(0, 4).map(field => [field.key, field.label]);
     const header = columns.map(([, label]) => `<th>${e(label)}</th>`).join('');
     const rows = records.map(record => `<tr>${columns.map(([key]) => `<td>${key.toLowerCase().includes('date') ? e(record[key] || '—') : e(record[key] ?? '—')}</td>`).join('')}<td class="arcadiRowActions"><button class="btn small secondary" data-edit-record="${e(record.id)}">Editar</button><button class="btn small bad" data-remove-record="${e(record.id)}">Eliminar</button></td></tr>`).join('');
@@ -353,6 +378,9 @@
     document.querySelectorAll('[data-open-module]').forEach(button => { button.onclick = () => open(button.dataset.openModule); });
     document.querySelectorAll('[data-core]').forEach(button => { button.onclick = () => A.goCore(button.dataset.core); });
     document.querySelectorAll('[data-export]').forEach(button => { button.onclick = () => exportData(button.dataset.export); });
+    document.querySelectorAll('[data-work-centre]').forEach(button => {
+      button.onclick = () => A.setContext(A.context.companyId, button.dataset.workCentre);
+    });
     if (definition?.key === 'criteriaStandards') window.ArcadiCriteria.bind();
 
     document.querySelector('[data-purchase-dictate]')?.addEventListener('click',function(){

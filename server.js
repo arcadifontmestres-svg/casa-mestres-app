@@ -169,7 +169,7 @@ function normalizeArcadiData(data) {
   data.arcadiSchema = data.arcadiSchema || 'ARCADI_GESTIO_RESTAURANT_V1';
   const collections = [
     'maintenanceRecords', 'communications', 'crmContacts', 'marketingCampaigns',
-    'groupEvents', 'experiences', 'loyaltyAccounts', 'organizations', 'governanceCriteria', 'corporateStandards', 'governanceTasks', 'communicationReads', 'purchaseOrders',
+    'groupEvents', 'experiences', 'loyaltyAccounts', 'organizations', 'governanceCriteria', 'corporateStandards', 'governanceTasks', 'criterionDeployments', 'communicationReads', 'appccTemplates', 'operatingProtocols', 'productStandards', 'supplierStandards', 'purchaseOrders',
     'goodsReceipts', 'traceabilityRecords', 'productionRecords', 'restaurants',
     'platformProfiles', 'miniApps', 'dailyOperations', 'appliedMigrations'
   ];
@@ -243,6 +243,70 @@ function mutateData(change) {
   });
   mutationQueue = job.catch(() => {});
   return job;
+}
+
+const CRITERION_TARGETS = {
+  BASE_RECIPE: { collection: 'bases', prefix: 'base', kind: 'Base o recepta' },
+  DISH_RECIPE: { collection: 'dishes', prefix: 'dish', kind: 'Fitxa de plat' },
+  APPCC_TEMPLATE: { collection: 'appccTemplates', prefix: 'appcc_template', kind: 'Plantilla APPCC' },
+  PRODUCT_STANDARD: { collection: 'productStandards', prefix: 'product_standard', kind: 'Producte homologat' },
+  SUPPLIER_STANDARD: { collection: 'supplierStandards', prefix: 'supplier_standard', kind: 'Proveïdor homologat' },
+  OPERATING_PROTOCOL: { collection: 'operatingProtocols', prefix: 'protocol', kind: 'Protocol operatiu' }
+};
+
+function deployCriterion(data, criterion, actor) {
+  const target = CRITERION_TARGETS[criterion.targetType];
+  if (!target) throw Object.assign(new Error('Cal definir el tipus de resultat abans d’implantar'), { statusCode: 400 });
+  const centreIds = Array.isArray(criterion.centreIds) ? criterion.centreIds : [];
+  if (!centreIds.length) throw Object.assign(new Error('Cal seleccionar almenys un centre afectat'), { statusCode: 400 });
+  data[target.collection] = data[target.collection] || [];
+  data.criterionDeployments = data.criterionDeployments || [];
+  const now = new Date().toISOString();
+  const results = [];
+  for (const centreId of centreIds) {
+    let deployment = data.criterionDeployments.find(item =>
+      item.criterionId === criterion.id && item.criterionVersion === criterion.version && item.centreId === centreId
+    );
+    if (!deployment) {
+      const operationalId = target.prefix + '_' + crypto.randomUUID();
+      const operationalRecord = {
+        id: operationalId,
+        companyId: criterion.companyId,
+        centreId,
+        scope: 'CENTRE',
+        name: criterion.title,
+        title: criterion.title,
+        description: criterion.problem,
+        process: criterion.proposal,
+        notes: criterion.proposal,
+        status: 'PENDENT_VALIDACIO_LOCAL',
+        sourceType: 'criterion',
+        sourceId: criterion.id,
+        sourceVersion: criterion.version,
+        createdAt: now,
+        updatedAt: now
+      };
+      data[target.collection].push(operationalRecord);
+      deployment = {
+        id: 'deployment_' + crypto.randomUUID(),
+        criterionId: criterion.id,
+        criterionVersion: criterion.version,
+        companyId: criterion.companyId,
+        centreId,
+        targetType: criterion.targetType,
+        targetCollection: target.collection,
+        operationalId,
+        status: 'PENDENT_ADOPCIO',
+        createdBy: actor,
+        createdAt: now,
+        updatedAt: now,
+        history: [{ at: now, actor, action: 'GENERAT' }]
+      };
+      data.criterionDeployments.push(deployment);
+    }
+    results.push(deployment);
+  }
+  return results;
 }
 
 const SARRIERA_MIGRATION = 'sarriera_kitchen_bases_2026_09_07_v1';
@@ -815,6 +879,7 @@ const server = http.createServer(async (req, res) => {
         }
 
         if (updated.state === 'EN_IMPLANTACIO') {
+          deployCriterion(data, updated, actor);
           for (const centreId of updated.centreIds || []) {
             if (data.governanceTasks.some(item => item.criterionId === updated.id && item.centreId === centreId && item.type === 'IMPLANTACIO')) continue;
             data.governanceTasks.push({
@@ -834,6 +899,51 @@ const server = http.createServer(async (req, res) => {
         return updated;
       });
       return send(res, 200, { ok: true, criterion });
+    }
+
+    const criterionExecuteMatch = pathname.match(/^\/api\/criteria\/([^/]+)\/execute$/);
+    if (criterionExecuteMatch && req.method === 'POST') {
+      if (!requireAdmin(req, res)) return;
+      const actor = String(process.env.ADMIN_USER || 'direccio');
+      const deployments = await mutateData(data => {
+        const found = (data.governanceCriteria || []).find(item => item.id === decodeURIComponent(criterionExecuteMatch[1]));
+        if (!found) throw Object.assign(new Error('Criteri no trobat'), { statusCode: 404 });
+        if (!['PUBLICADA', 'EN_IMPLANTACIO', 'IMPLANTADA'].includes(found.state)) {
+          throw Object.assign(new Error('El criteri s’ha de publicar abans de generar fitxes operatives'), { statusCode: 409 });
+        }
+        return deployCriterion(data, found, actor);
+      });
+      return send(res, 200, { ok: true, deployments });
+    }
+
+    const adoptionMatch = pathname.match(/^\/api\/criteria\/([^/]+)\/centres\/([^/]+)\/adoption$/);
+    if (adoptionMatch && req.method === 'POST') {
+      if (!requireAdmin(req, res)) return;
+      const input = await bodyJson(req);
+      const actor = String(process.env.ADMIN_USER || 'direccio');
+      const deployment = await mutateData(data => {
+        const criterionId = decodeURIComponent(adoptionMatch[1]);
+        const centreId = decodeURIComponent(adoptionMatch[2]);
+        const found = (data.criterionDeployments || []).find(item => item.criterionId === criterionId && item.centreId === centreId);
+        if (!found) throw Object.assign(new Error('Implantació de centre no trobada'), { statusCode: 404 });
+        const status = input.adopted === false ? 'REBUTJAT_LOCALMENT' : 'ADOPTAT';
+        found.status = status;
+        found.confirmedBy = String(input.confirmedBy || actor);
+        found.confirmedAt = new Date().toISOString();
+        found.notes = String(input.notes || '').trim();
+        found.updatedAt = found.confirmedAt;
+        found.history = found.history || [];
+        found.history.push({ at: found.confirmedAt, actor, action: status, notes: found.notes });
+        const operational = (data[found.targetCollection] || []).find(item => item.id === found.operationalId);
+        if (operational) {
+          operational.status = status === 'ADOPTAT' ? 'VIGENT' : 'REVISIO_NECESSARIA';
+          operational.updatedAt = found.updatedAt;
+        }
+        const task = (data.governanceTasks || []).find(item => item.criterionId === criterionId && item.centreId === centreId && item.type === 'IMPLANTACIO');
+        if (task && status === 'ADOPTAT') task.status = 'COMPLETADA';
+        return found;
+      });
+      return send(res, 200, { ok: true, deployment });
     }
 
     if (pathname === '/api/control-state' && req.method === 'GET') {
