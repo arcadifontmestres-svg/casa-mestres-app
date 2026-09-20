@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const { exec } = require('child_process');
 const { handleMcpRequest } = require('./mcp.js');
 const { authenticateBearer, handleOAuthRequest, oauthChallenge } = require('./oauth.js');
+const { createCriterion, updateCriterion, transitionCriterion } = require('./criteria.js');
 
 const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, 'public');
@@ -168,7 +169,7 @@ function normalizeArcadiData(data) {
   data.arcadiSchema = data.arcadiSchema || 'ARCADI_GESTIO_RESTAURANT_V1';
   const collections = [
     'maintenanceRecords', 'communications', 'crmContacts', 'marketingCampaigns',
-    'groupEvents', 'experiences', 'loyaltyAccounts', 'purchaseOrders',
+    'groupEvents', 'experiences', 'loyaltyAccounts', 'governanceCriteria', 'purchaseOrders',
     'goodsReceipts', 'traceabilityRecords', 'productionRecords', 'restaurants',
     'platformProfiles', 'miniApps', 'dailyOperations', 'appliedMigrations'
   ];
@@ -685,6 +686,60 @@ const server = http.createServer(async (req, res) => {
         return current;
       });
       return send(res, 200, { ok: true, state });
+    }
+
+    if (pathname === '/api/criteria' && req.method === 'GET') {
+      if (!requireAdmin(req, res)) return;
+      const data = readData();
+      const companyId = String(url.searchParams.get('companyId') || '').trim();
+      const centreId = String(url.searchParams.get('centreId') || '').trim();
+      const state = String(url.searchParams.get('state') || '').trim().toUpperCase();
+      const items = (data.governanceCriteria || []).filter(item => {
+        if (companyId && item.companyId !== companyId) return false;
+        if (centreId && !(item.centreIds || []).includes(centreId) && !(item.optionalCentreIds || []).includes(centreId)) return false;
+        if (state && item.state !== state) return false;
+        return true;
+      });
+      return send(res, 200, { items });
+    }
+
+    if (pathname === '/api/criteria' && req.method === 'POST') {
+      if (!requireAdmin(req, res)) return;
+      const input = await bodyJson(req);
+      const actor = String(process.env.ADMIN_USER || 'direccio');
+      const criterion = await mutateData(data => {
+        data.governanceCriteria = data.governanceCriteria || [];
+        const created = createCriterion(input, actor);
+        data.governanceCriteria.push(created);
+        return created;
+      });
+      return send(res, 201, { ok: true, criterion });
+    }
+
+    const criterionMatch = pathname.match(/^\/api\/criteria\/([^/]+)$/);
+    if (criterionMatch && req.method === 'PUT') {
+      if (!requireAdmin(req, res)) return;
+      const input = await bodyJson(req);
+      const actor = String(process.env.ADMIN_USER || 'direccio');
+      const criterion = await mutateData(data => {
+        const found = (data.governanceCriteria || []).find(item => item.id === decodeURIComponent(criterionMatch[1]));
+        if (!found) throw Object.assign(new Error('Criteri no trobat'), { statusCode: 404 });
+        return updateCriterion(found, input, actor);
+      });
+      return send(res, 200, { ok: true, criterion });
+    }
+
+    const criterionTransitionMatch = pathname.match(/^\/api\/criteria\/([^/]+)\/transition$/);
+    if (criterionTransitionMatch && req.method === 'POST') {
+      if (!requireAdmin(req, res)) return;
+      const input = await bodyJson(req);
+      const actor = String(process.env.ADMIN_USER || 'direccio');
+      const criterion = await mutateData(data => {
+        const found = (data.governanceCriteria || []).find(item => item.id === decodeURIComponent(criterionTransitionMatch[1]));
+        if (!found) throw Object.assign(new Error('Criteri no trobat'), { statusCode: 404 });
+        return transitionCriterion(found, input.state, actor, input.note);
+      });
+      return send(res, 200, { ok: true, criterion });
     }
 
     if (pathname === '/api/control-state' && req.method === 'GET') {
