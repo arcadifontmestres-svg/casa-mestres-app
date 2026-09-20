@@ -26,3 +26,7 @@
 #arcadiAssistantPrompt{min-height:130px;margin-bottom:10px}
 [data-arcadi-navigation] button{padding-left:18px}
 @media(max-width:700px){.arcadiFormGrid,.arcadiKeyValue{grid-template-columns:1fr}.arcadiKeyValue b{border-bottom:0}.arcadiModuleNav{align-items:flex-start;flex-direction:column}.arcadiStats{grid-template-columns:repeat(2,1fr)}}
+
+.arcadiCheckList{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;padding:10px 0}
+.arcadiCheckOption{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--paper)}
+.arcadiCheckOption input{width:18px;height:18px;margin:0}

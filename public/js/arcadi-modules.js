@@ -101,7 +101,7 @@
   const sections = {
     purchases: { label: 'Compres i logística', description: 'Proveïdors, GS-COMP, GS-REC i traçabilitat.', modules: ['supplierAdvanced', 'purchaseAssistant', 'purchases', 'receipts', 'traceability'] },
     customers: { label: 'Clients i comercial', description: 'CRM, reserves, carta, grups, experiències i fidelització.', modules: ['crm', 'reservationsAdvanced', 'digitalMenu', 'publicationStudio', 'communications', 'marketing', 'groups', 'experiences', 'loyalty'] },
-    operations: { label: 'Operacions', description: 'APPCC, manteniment, inventari, producció, sala i RRHH.', modules: ['appcc', 'maintenance', 'inventoryAdvanced', 'productionRecords', 'floorAdvanced', 'hrAdvanced', 'appccAdvanced'] },
+    operations: { label: 'Operacions', description: 'APPCC, manteniment, inventari, producció, sala i RRHH.', modules: ['criteriaStandards', 'appcc', 'maintenance', 'inventoryAdvanced', 'productionRecords', 'floorAdvanced', 'hrAdvanced', 'appccAdvanced'] },
     analysis: { label: 'Anàlisi i economia', description: 'Indicadors reals, costos i resultats.', modules: ['analytics', 'costs', 'economyAdvanced'] },
     ecosystem: { label: 'Ecosistema', description: 'Multi-restaurant, plataformes, mini apps i exportacions.', modules: ['restaurants', 'platforms', 'miniapps', 'exports'] },
     system: { label: 'Sistema', description: 'Backoffice, configuració, control final i assistència IA.', modules: ['backoffice', 'system', 'finalization', 'assistant'] }
@@ -259,6 +259,8 @@
     return `<div class="arcadiStats">${stat(A.money(stockValue()), 'Mercaderia en stock')}${stat(scheduledHours().toFixed(1), 'Hores programades')}${stat(A.money(closedSales()), 'Vendes tancades')}</div><div class="panel"><h3>Escandalls per percentatge de cost</h3><div class="tableWrap"><table><thead><tr><th>Plat</th><th>Cost</th><th>Venda</th><th>% cost</th></tr></thead><tbody>${rows || '<tr><td colspan="4">Encara no hi ha fitxes de plats.</td></tr>'}</tbody></table></div></div>`;
   }
 
+  custom('criteriaStandards', 68, 'operations', 'Criteris i estàndards', 'Estudi, prova, aprovació, publicació i implantació dels criteris corporatius.', () => window.ArcadiCriteria.render());
+
   custom('exports', 65, 'ecosystem', 'Exportació corporativa', 'Còpia completa i exportacions CSV per treballar amb Excel o Power BI.', () => `
     <div class="panel"><h3>Exportar sense alterar les dades</h3><p class="muted">Els fitxers es generen al teu ordinador. No s’envien a cap servei extern.</p><div class="actions"><button class="btn" data-export="backup">Còpia JSON completa</button><button class="btn secondary" data-export="products">Productes CSV</button><button class="btn secondary" data-export="dishes">Plats CSV</button><button class="btn secondary" data-export="reservations">Reserves CSV</button><button class="btn secondary" data-export="employees">RRHH CSV</button></div></div>`);
 
@@ -351,6 +353,7 @@
     document.querySelectorAll('[data-open-module]').forEach(button => { button.onclick = () => open(button.dataset.openModule); });
     document.querySelectorAll('[data-core]').forEach(button => { button.onclick = () => A.goCore(button.dataset.core); });
     document.querySelectorAll('[data-export]').forEach(button => { button.onclick = () => exportData(button.dataset.export); });
+    if (definition?.key === 'criteriaStandards') window.ArcadiCriteria.bind();
 
     document.querySelector('[data-purchase-dictate]')?.addEventListener('click',function(){
       const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;

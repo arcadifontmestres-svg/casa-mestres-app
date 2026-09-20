@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const { exec } = require('child_process');
 const { handleMcpRequest } = require('./mcp.js');
 const { authenticateBearer, handleOAuthRequest, oauthChallenge } = require('./oauth.js');
+const { createCriterion, updateCriterion, transitionCriterion } = require('./criteria.js');
 
 const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, 'public');
@@ -168,7 +169,7 @@ function normalizeArcadiData(data) {
   data.arcadiSchema = data.arcadiSchema || 'ARCADI_GESTIO_RESTAURANT_V1';
   const collections = [
     'maintenanceRecords', 'communications', 'crmContacts', 'marketingCampaigns',
-    'groupEvents', 'experiences', 'loyaltyAccounts', 'purchaseOrders',
+    'groupEvents', 'experiences', 'loyaltyAccounts', 'organizations', 'governanceCriteria', 'corporateStandards', 'governanceTasks', 'communicationReads', 'purchaseOrders',
     'goodsReceipts', 'traceabilityRecords', 'productionRecords', 'restaurants',
     'platformProfiles', 'miniApps', 'dailyOperations', 'appliedMigrations'
   ];
@@ -188,6 +189,16 @@ function normalizeArcadiData(data) {
       notes: 'Centre principal'
     });
   }
+  if (!data.organizations.some(item => item.id === 'company_casa_mestres')) {
+    data.organizations.unshift({
+      id: 'company_casa_mestres',
+      name: data.company?.name || 'Casa Mestres',
+      status: 'Activa',
+      createdAt: new Date().toISOString()
+    });
+  }
+  const casaMestresCentre = data.restaurants.find(item => item.id === 'restaurant_casa_mestres');
+  if (casaMestresCentre && !casaMestresCentre.organizationId) casaMestresCentre.organizationId = 'company_casa_mestres';
   const defaultMiniApps = [
     { id: 'miniapp_reserves', name: 'Reserves', type: 'Reserves', path: '/reserves.html', status: 'Activa', notes: 'Mini app pública existent' },
     { id: 'miniapp_fitxatges', name: 'Fitxatges', type: 'RRHH', path: '/fitxatges.html', status: 'Activa', notes: 'Mini app de personal existent' }
@@ -680,11 +691,149 @@ const server = http.createServer(async (req, res) => {
         const reservations = current.reservations || [];
         const punches = current.punches || [];
         const dailyOperations = current.dailyOperations || [];
+        const governanceCriteria = current.governanceCriteria || [];
+        const corporateStandards = current.corporateStandards || [];
+        const governanceTasks = current.governanceTasks || [];
         for (const key of Object.keys(current)) delete current[key];
-        Object.assign(current, incoming, { reservations, punches, dailyOperations });
+        Object.assign(current, incoming, {
+          reservations,
+          punches,
+          dailyOperations,
+          governanceCriteria,
+          corporateStandards,
+          governanceTasks
+        });
         return current;
       });
       return send(res, 200, { ok: true, state });
+    }
+
+    if (pathname === '/api/criteria' && req.method === 'GET') {
+      if (!requireAdmin(req, res)) return;
+      const data = readData();
+      const companyId = String(url.searchParams.get('companyId') || '').trim();
+      const centreId = String(url.searchParams.get('centreId') || '').trim();
+      const state = String(url.searchParams.get('state') || '').trim().toUpperCase();
+      const items = (data.governanceCriteria || []).filter(item => {
+        if (companyId && item.companyId !== companyId) return false;
+        if (centreId && !(item.centreIds || []).includes(centreId) && !(item.optionalCentreIds || []).includes(centreId)) return false;
+        if (state && item.state !== state) return false;
+        return true;
+      });
+      return send(res, 200, { items });
+    }
+
+    if (pathname === '/api/criteria' && req.method === 'POST') {
+      if (!requireAdmin(req, res)) return;
+      const input = await bodyJson(req);
+      const actor = String(process.env.ADMIN_USER || 'direccio');
+      const criterion = await mutateData(data => {
+        data.governanceCriteria = data.governanceCriteria || [];
+        const created = createCriterion(input, actor);
+        data.governanceCriteria.push(created);
+        data.governanceTasks = data.governanceTasks || [];
+        data.governanceTasks.push({
+          id: 'criterion_task_' + crypto.randomUUID(),
+          criterionId: created.id,
+          companyId: created.companyId,
+          centreId: '',
+          title: created.nextStep || ('Definir criteri: ' + created.title),
+          responsible: created.ownerId || '',
+          dueDate: created.dueDate || '',
+          status: 'PENDENT',
+          type: 'PREPARACIO_CRITERI',
+          createdAt: new Date().toISOString()
+        });
+        return created;
+      });
+      return send(res, 201, { ok: true, criterion });
+    }
+
+    const criterionMatch = pathname.match(/^\/api\/criteria\/([^/]+)$/);
+    if (criterionMatch && req.method === 'PUT') {
+      if (!requireAdmin(req, res)) return;
+      const input = await bodyJson(req);
+      const actor = String(process.env.ADMIN_USER || 'direccio');
+      const criterion = await mutateData(data => {
+        const found = (data.governanceCriteria || []).find(item => item.id === decodeURIComponent(criterionMatch[1]));
+        if (!found) throw Object.assign(new Error('Criteri no trobat'), { statusCode: 404 });
+        return updateCriterion(found, input, actor);
+      });
+      return send(res, 200, { ok: true, criterion });
+    }
+
+    const criterionTransitionMatch = pathname.match(/^\/api\/criteria\/([^/]+)\/transition$/);
+    if (criterionTransitionMatch && req.method === 'POST') {
+      if (!requireAdmin(req, res)) return;
+      const input = await bodyJson(req);
+      const actor = String(process.env.ADMIN_USER || 'direccio');
+      const criterion = await mutateData(data => {
+        const found = (data.governanceCriteria || []).find(item => item.id === decodeURIComponent(criterionTransitionMatch[1]));
+        if (!found) throw Object.assign(new Error('Criteri no trobat'), { statusCode: 404 });
+        const updated = transitionCriterion(found, input.state, actor, input.note);
+        data.corporateStandards = data.corporateStandards || [];
+        data.communications = data.communications || [];
+        data.governanceTasks = data.governanceTasks || [];
+
+        if (updated.state === 'APROVADA') {
+          const existing = data.corporateStandards.find(item => item.criterionId === updated.id);
+          const standard = {
+            id: existing?.id || ('standard_' + crypto.randomUUID()),
+            criterionId: updated.id,
+            companyId: updated.companyId,
+            centreIds: updated.centreIds || [],
+            optionalCentreIds: updated.optionalCentreIds || [],
+            type: updated.targetType || 'OPERATING_PROTOCOL',
+            title: updated.title,
+            content: updated.proposal,
+            version: updated.version,
+            status: 'APROVADA',
+            effectiveAt: updated.effectiveAt,
+            updatedAt: new Date().toISOString()
+          };
+          if (existing) Object.assign(existing, standard);
+          else data.corporateStandards.push(standard);
+        }
+
+        if (updated.state === 'PUBLICADA' && !data.communications.some(item => item.sourceType === 'criterion' && item.sourceId === updated.id && item.criterionVersion === updated.version)) {
+          data.communications.push({
+            id: 'communication_' + crypto.randomUUID(),
+            companyId: updated.companyId,
+            centreIds: updated.centreIds || [],
+            subject: 'Nou criteri publicat: ' + updated.title,
+            channel: 'Intern',
+            recipient: 'Centres afectats',
+            status: 'Enviat',
+            priority: updated.priority,
+            message: updated.proposal,
+            requiresAcknowledgement: true,
+            sourceType: 'criterion',
+            sourceId: updated.id,
+            criterionVersion: updated.version,
+            createdAt: new Date().toISOString()
+          });
+        }
+
+        if (updated.state === 'EN_IMPLANTACIO') {
+          for (const centreId of updated.centreIds || []) {
+            if (data.governanceTasks.some(item => item.criterionId === updated.id && item.centreId === centreId && item.type === 'IMPLANTACIO')) continue;
+            data.governanceTasks.push({
+              id: 'criterion_task_' + crypto.randomUUID(),
+              criterionId: updated.id,
+              companyId: updated.companyId,
+              centreId,
+              title: 'Implantar: ' + updated.title,
+              responsible: '',
+              dueDate: updated.dueDate || '',
+              status: 'PENDENT',
+              type: 'IMPLANTACIO',
+              createdAt: new Date().toISOString()
+            });
+          }
+        }
+        return updated;
+      });
+      return send(res, 200, { ok: true, criterion });
     }
 
     if (pathname === '/api/control-state' && req.method === 'GET') {
