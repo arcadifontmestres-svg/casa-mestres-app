@@ -30,3 +30,8 @@
 .arcadiCheckList{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;padding:10px 0}
 .arcadiCheckOption{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--paper)}
 .arcadiCheckOption input{width:18px;height:18px;margin:0}
+.arcadiContextBar{display:grid;grid-template-columns:minmax(180px,1fr) minmax(220px,1.3fr) minmax(220px,1.4fr);gap:12px;margin:0 0 18px;padding:12px 16px;background:var(--green);color:#fff;border-radius:14px;box-shadow:var(--shadow)}
+.arcadiContextBar>div{display:flex;flex-direction:column;gap:5px}.arcadiContextBar small{font-size:10px;letter-spacing:.8px;font-weight:900;opacity:.78}
+.arcadiContextBar select{width:100%;background:#fff;color:var(--ink);border:0;border-radius:9px;padding:9px 10px;font-weight:800}
+.arcadiContextCurrent{justify-content:center}.arcadiContextCurrent b{line-height:1.25}
+@media(max-width:850px){.arcadiContextBar{grid-template-columns:1fr}.arcadiContextCurrent{display:none!important}}

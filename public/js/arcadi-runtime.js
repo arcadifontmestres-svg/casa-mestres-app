@@ -87,7 +87,8 @@
         return `<div class="arcadiField arcadiFieldWide"><label>${esc(field.label)}</label><textarea name="${esc(field.key)}" ${required}>${esc(value)}</textarea></div>`;
       }
       if (field.type === 'select') {
-        const options = (field.options || []).map(option => {
+        const sourceOptions = typeof field.options === 'function' ? field.options(this.state) : (field.options || []);
+        const options = sourceOptions.map(option => {
           const item = typeof option === 'string' ? { value: option, label: option } : option;
           return `<option value="${esc(item.value)}" ${String(item.value) === String(value) ? 'selected' : ''}>${esc(item.label)}</option>`;
         }).join('');
@@ -108,7 +109,9 @@
       byId('arcadiRecordForm').onsubmit = async event => {
         event.preventDefault();
         const values = Object.fromEntries(new FormData(event.currentTarget).entries());
-        const next = { ...record, id: record.id || uid(definition.collection), updatedAt: new Date().toISOString() };
+        const next = this.contextRecord
+          ? this.contextRecord({ ...record, id: record.id || uid(definition.collection), updatedAt: new Date().toISOString() })
+          : { ...record, id: record.id || uid(definition.collection), updatedAt: new Date().toISOString() };
         for (const field of definition.fields) {
           next[field.key] = field.type === 'number' ? num(values[field.key]) : String(values[field.key] ?? '').trim();
         }

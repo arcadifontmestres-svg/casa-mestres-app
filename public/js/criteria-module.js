@@ -39,20 +39,28 @@
   }
 
   function render() {
-    const criteria = A.state.governanceCriteria || [];
+    const context = A.context || {};
+    const criteria = (A.state.governanceCriteria || []).filter(item =>
+      (!context.companyId || item.companyId === context.companyId) &&
+      (!context.centreId || (item.centreIds || []).includes(context.centreId))
+    );
     const standards = A.state.corporateStandards || [];
     const tasks = A.state.governanceTasks || [];
     const communications = A.state.communications || [];
+    const deployments = A.state.criterionDeployments || [];
     const centreName = id => (A.state.restaurants || []).find(item => item.id === id)?.name || id;
     const rows = [...criteria].sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || ''))).map(item => {
       const centres = (item.centreIds || []).map(centreName).join(', ') || 'Per determinar';
+      const deployed = deployments.filter(x => x.criterionId === item.id);
+      const deploymentText = deployed.length ? `${deployed.filter(x => x.status === 'ADOPTAT').length}/${deployed.length} adoptats` : 'Sense executar';
       return `<tr>
         <td><b>${e(item.title)}</b><br><span class="muted">${e(item.area || 'Operacions')}</span></td>
         <td>${e(centres)}</td>
         <td><span class="badge">${e(STATES[item.state] || item.state)}</span></td>
         <td>v${e(item.version || 1)}</td>
         <td>${e(item.ownerId || 'Per assignar')}</td>
-        <td class="arcadiRowActions"><button class="btn small secondary" data-criterion-edit="${e(item.id)}">Obrir</button></td>
+        <td>${e(deploymentText)}</td>
+        <td class="arcadiRowActions"><button class="btn small secondary" data-criterion-edit="${e(item.id)}">Obrir</button>${['PUBLICADA','EN_IMPLANTACIO','IMPLANTADA'].includes(item.state) ? ` <button class="btn small" data-criterion-execute="${e(item.id)}">Executar</button>` : ''}</td>
       </tr>`;
     }).join('');
 
@@ -66,8 +74,8 @@
       </div>
       <div class="panel">
         <div class="toolbar"><button class="btn" data-criterion-new>Nou criteri</button><button class="btn secondary" data-criterion-refresh>Actualitzar</button></div>
-        <div class="tableWrap"><table><thead><tr><th>Criteri</th><th>Centres</th><th>Estat</th><th>Versió</th><th>Responsable</th><th></th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="6">Encara no hi ha criteris. Crea el primer quan detectis una qüestió que Direcció ha de definir.</td></tr>'}</tbody></table></div>
+        <div class="tableWrap"><table><thead><tr><th>Criteri</th><th>Centres</th><th>Estat</th><th>Versió</th><th>Responsable</th><th>Implantació</th><th></th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="7">Encara no hi ha criteris en aquest context. Crea el primer quan Direcció detecti una qüestió que cal definir.</td></tr>'}</tbody></table></div>
       </div>
       <div class="panel">
         <h3>Connexions del sistema</h3>
@@ -157,12 +165,27 @@
         await window.ArcadiModules.open('criteriaStandards');
       };
     });
+    document.querySelectorAll('[data-adopt-centre]').forEach(button => {
+      button.onclick = async () => {
+        const notes = prompt('Observacions de la implantació (opcional):', '') || '';
+        await A.api(`/api/criteria/${encodeURIComponent(id)}/centres/${encodeURIComponent(button.dataset.adoptCentre)}/adoption`, {
+          method: 'POST',
+          body: JSON.stringify({ adopted: true, notes })
+        });
+        A.closeModal();
+        await window.ArcadiModules.open('criteriaStandards');
+      };
+    });
   }
 
   function transitionPanel(criterion) {
     const buttons = (NEXT[criterion.state] || []).map(state => `<button type="button" class="btn secondary" data-criterion-transition="${e(state)}">${e(STATES[state])}</button>`).join('');
     const history = [...(criterion.history || [])].reverse().slice(0, 12).map(item => `<tr><td>${e(new Date(item.at).toLocaleString('ca-ES'))}</td><td>${e(item.actor)}</td><td>${e(item.action)}</td></tr>`).join('');
+    const deployments = (A.state.criterionDeployments || []).filter(x => x.criterionId === criterion.id);
+    const centres = A.state.restaurants || [];
+    const deploymentRows = deployments.map(item => `<tr><td>${e(centres.find(x => x.id === item.centreId)?.name || item.centreId)}</td><td>${e(item.status)}</td><td>${e(item.targetCollection)}</td><td>${item.status === 'ADOPTAT' ? '<span class="badge ok">Confirmat</span>' : `<button type="button" class="btn small" data-adopt-centre="${e(item.centreId)}">Confirmar adopció</button>`}</td></tr>`).join('');
     return `<div class="panel"><h3>Canviar l'estat</h3><label>Nota de decisió</label><textarea id="criterionTransitionNote" rows="3"></textarea><div class="actions">${buttons || '<span class="muted">No hi ha transicions disponibles.</span>'}</div></div>
+      <div class="panel"><h3>Implantació per centre</h3><div class="tableWrap"><table><thead><tr><th>Centre</th><th>Estat</th><th>Fitxa creada</th><th></th></tr></thead><tbody>${deploymentRows || '<tr><td colspan="4">Les fitxes es generaran en passar a implantació o amb el botó Executar.</td></tr>'}</tbody></table></div></div>
       <div class="panel"><h3>Historial immutable</h3><div class="tableWrap"><table><thead><tr><th>Data</th><th>Persona</th><th>Acció</th></tr></thead><tbody>${history}</tbody></table></div></div>`;
   }
 
@@ -170,6 +193,11 @@
     document.querySelector('[data-criterion-new]')?.addEventListener('click', () => openForm());
     document.querySelector('[data-criterion-refresh]')?.addEventListener('click', () => window.ArcadiModules.open('criteriaStandards'));
     document.querySelectorAll('[data-criterion-edit]').forEach(button => button.onclick = () => openForm(button.dataset.criterionEdit));
+    document.querySelectorAll('[data-criterion-execute]').forEach(button => button.onclick = async () => {
+      if (!confirm('Generar o actualitzar les fitxes operatives pendents per als centres seleccionats?')) return;
+      await A.api(`/api/criteria/${encodeURIComponent(button.dataset.criterionExecute)}/execute`, { method: 'POST', body: '{}' });
+      await window.ArcadiModules.open('criteriaStandards');
+    });
   }
 
   window.ArcadiCriteria = { render, bind };
