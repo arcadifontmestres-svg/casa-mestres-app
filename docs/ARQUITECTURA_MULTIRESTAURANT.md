@@ -31,6 +31,54 @@ Cada centre disposa d'un espai de dades operatives independent. No es barregen:
 
 El codi JavaScript és compartit i únic. No es creen còpies de l'aplicació per centre.
 
+## Biblioteca corporativa i operativa local
+
+Direcció pot crear productes homologats, bases, receptes, proveïdors i plantilles APPCC corporatives. Cada centre activa els elements que utilitza i manté de manera independent preus, existències, produccions, costos, cartes i registres.
+
+Les variants locals no modifiquen la fitxa corporativa. Una diferència de gramatura, composició, rendiment o procés ha de quedar identificada i, quan correspongui, aprovada per Direcció.
+
+## Criteris pendents i governança
+
+L'arquitectura de l'aplicació no pressuposa que tots els criteris corporatius ja estiguin definits. Ha de permetre registrar una necessitat de criteri com una tasca pendent i gestionar-ne el procés fins a l'aprovació.
+
+Cada proposta de criteri ha de poder conservar:
+
+- empresa, àrea i centres afectats;
+- títol i problema detectat;
+- dades o exemples dels centres;
+- proposta tècnica;
+- responsable de preparar-la;
+- persones que l'han de revisar;
+- prioritat, termini i pròxim pas;
+- estat: detectada, en estudi, en prova, pendent d'aprovació, aprovada, rebutjada o substituïda;
+- versió, data d'entrada en vigor i historial de decisions;
+- documents, proves i observacions;
+- centres obligats, centres opcionals i excepcions autoritzades.
+
+Quan el criteri s'aprova, es converteix en una fitxa, plantilla, protocol o configuració corporativa publicable. Els centres afectats reben una notificació i Direcció pot comprovar-ne l'adopció.
+
+Exemples de criteris gestionables:
+
+- composició i rendiment estàndard d'un fons o fumet;
+- gramatura autoritzada d'un plat per centre;
+- productes bàsics homologats;
+- controls APPCC comuns i controls específics;
+- toleràncies de producció, minves i costos;
+- criteris de torns, tasques i responsabilitats.
+
+## Producció i valoració d'existències
+
+Cada producció registra la fitxa i versió utilitzades, ingredients reals, lots, quantitat obtinguda, minva, cost real, responsable, lot de producció, caducitat i stock resultant.
+
+La direcció pot consultar per centre, selecció de centres o total d'empresa:
+
+- compres;
+- existències de matèries primeres;
+- existències processades;
+- cost teòric i real;
+- rendiments i desviacions;
+- minves i diferències entre centres.
+
 ## Dades corporatives
 
 El registre d'empleats és corporatiu per empresa. Cada empleat té:
@@ -90,5 +138,6 @@ Rols inicials:
 3. Traslladar o crear dades de Grup Tràfec només amb confirmació del centre d'origen.
 4. Afegir selector d'empresa i centre.
 5. Adaptar API, MCP, Back Office i miniapp.
-6. Verificar aïllament, permisos, còpies i restauració.
-7. Integrar a main i desplegar una única versió Render.
+6. Implementar la gestió de criteris pendents, aprovacions i publicació corporativa.
+7. Verificar aïllament, permisos, còpies i restauració.
+8. Integrar a main i desplegar una única versió Render.
