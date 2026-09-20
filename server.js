@@ -758,6 +758,15 @@ const server = http.createServer(async (req, res) => {
         const governanceCriteria = current.governanceCriteria || [];
         const corporateStandards = current.corporateStandards || [];
         const governanceTasks = current.governanceTasks || [];
+        const criterionDeployments = current.criterionDeployments || [];
+        const appccTemplates = current.appccTemplates || [];
+        const operatingProtocols = current.operatingProtocols || [];
+        const productStandards = current.productStandards || [];
+        const supplierStandards = current.supplierStandards || [];
+        const managedBases = (current.bases || []).filter(item => item.sourceType === 'criterion');
+        const managedDishes = (current.dishes || []).filter(item => item.sourceType === 'criterion');
+        incoming.bases = [...(incoming.bases || []).filter(item => item.sourceType !== 'criterion'), ...managedBases];
+        incoming.dishes = [...(incoming.dishes || []).filter(item => item.sourceType !== 'criterion'), ...managedDishes];
         for (const key of Object.keys(current)) delete current[key];
         Object.assign(current, incoming, {
           reservations,
@@ -765,7 +774,12 @@ const server = http.createServer(async (req, res) => {
           dailyOperations,
           governanceCriteria,
           corporateStandards,
-          governanceTasks
+          governanceTasks,
+          criterionDeployments,
+          appccTemplates,
+          operatingProtocols,
+          productStandards,
+          supplierStandards
         });
         return current;
       });
