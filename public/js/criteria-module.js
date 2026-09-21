@@ -35,7 +35,7 @@
   }
 
   function centresFor(companyId) {
-    return (A.state.restaurants || []).filter(item => !companyId || !item.organizationId || item.organizationId === companyId);
+    return (A.state.restaurants || []).filter(item => item.kind !== 'GROUP' && (!companyId || !item.organizationId || item.organizationId === companyId));
   }
 
   function render() {

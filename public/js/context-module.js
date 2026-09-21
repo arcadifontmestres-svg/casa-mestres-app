@@ -19,7 +19,7 @@
 
   A.centres = function (companyId = this.context.companyId) {
     return (this.state?.restaurants || []).filter(x =>
-      x.status !== 'Inactiu' && (!companyId || x.organizationId === companyId)
+      x.kind !== 'GROUP' && x.status !== 'Inactiu' && (!companyId || x.organizationId === companyId)
     );
   };
 
@@ -53,6 +53,7 @@
     this.context = { companyId: String(companyId || ''), centreId: String(centreId || '') };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(this.context));
     renderSelector();
+    if (typeof window.applyCoreContext === 'function') window.applyCoreContext();
     const hash = location.hash.slice(1);
     if (hash.startsWith('arcadi-') && window.ArcadiModules) {
       const key = hash.replace('arcadi-', '');
