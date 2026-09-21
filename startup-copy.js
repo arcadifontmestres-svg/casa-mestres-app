@@ -39,6 +39,7 @@ function applyStartupCopy() {
 
 if (require.main === module) {
   applyStartupCopy();
+  require('./commercial-brand.js');
   require('./commercial-server.js');
   applyStartupCopy();
 }
