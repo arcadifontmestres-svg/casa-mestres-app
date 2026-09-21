@@ -85,34 +85,45 @@ test('MIME rejects header injection and preserves Catalan content', () => {
   assert.match(raw,new RegExp(Buffer.from('Menú català').toString('base64')));
 });
 
-test('Direction UI connects in one action and sends only validated proposals in their own centre', async () => {
+test('Direction UI opens a prepared Gmail only for validated proposals and records manual confirmation', async () => {
   const vm = require('node:vm');
   const source=fs.readFileSync(path.join(__dirname,'../public/js/commercial-email-settings.js'),'utf8');
-  let configured=false, destination='', calls=[], messages=[], confirms=[];
-  const proposal={id:'p',code:'PROP',status:'VALIDADA',clientEmail:'client@example.com',companyId:'own-company',centreId:'own-centre'};
-  const app={state:{commercialProposals:[proposal]},context:{companyId:'other-company',centreId:'other-centre'},
-    load:async()=>{},api:async(url,options)=>{
-      calls.push({url,options});
-      if(url.startsWith('/api/commercial-email-status'))return {configured,from:'director@gmail.com'};
-      if(url==='/api/gmail/connect')return {url:'https://accounts.google.com/o/oauth2/v2/auth?state=test'};
-      return {message:'Enviada'};
-    }};
-  const context={window:{ArcadiERP:app,ArcadiCommercial:{},ArcadiModules:{open:()=>{}}},
-    document:{readyState:'loading',addEventListener:()=>{}},URLSearchParams,sessionStorage:{setItem:()=>{}},
-    location:{hash:'#arcadi-groups',assign:url=>{destination=url;}},alert:x=>messages.push(x),confirm:x=>{confirms.push(x);return true;}};
+  let opened='', modalHtml='', messages=[], saved=[];
+  const proposal={
+    id:'p',code:'PROP-2026-0001',status:'VALIDADA',clientName:'Client prova',clientEmail:'client@example.com',
+    companyId:'own-company',centreId:'own-centre',eventDate:'2026-10-04',pax:10,menuName:'MENU HIVERN',
+    pricePerPerson:55,totalAmount:550,menuSummary:'Primer\nSegon\nPostres'
+  };
+  const app={
+    state:{commercialProposals:[proposal],restaurants:[{id:'own-centre',name:'SARRIERA 1930'}],organizations:[]},
+    context:{companyId:'own-company',centreId:'own-centre'},
+    modal:(title,html)=>{modalHtml=html;}, closeModal:()=>{}, save:async label=>{saved.push(label);}, esc:value=>String(value || '')
+  };
+  const fakeButton={onclick:null};
+  const context={
+    window:{ArcadiERP:app,ArcadiCommercial:{},ArcadiModules:{open:()=>{}},open:url=>{opened=url;return {}; }},
+    document:{readyState:'loading',addEventListener:()=>{},getElementById:()=>fakeButton,querySelectorAll:()=>[]},
+    location:{hash:'#arcadi-groups'},alert:x=>messages.push(x),URLSearchParams
+  };
   vm.runInNewContext(source,context);
   const ui=context.window.ArcadiCommercialEmailSettings;
-  await ui.sendProposal('p');
-  assert.match(destination,/accounts.google.com/);
-  assert.equal(calls.some(x=>x.url.endsWith('/send')),false);
-  assert.deepEqual(JSON.parse(calls.find(x=>x.url==='/api/gmail/connect').options.body),{companyId:'own-company',centreId:'own-centre'});
-  configured=true;calls=[];
-  await ui.sendProposal('p');
-  assert.equal(calls.filter(x=>x.url.endsWith('/send')).length,1);
-  assert.equal(confirms.length,1);
-  assert.match(confirms[0],/director@gmail.com/);
-  proposal.status='ESBORRANY';calls=[];
-  await ui.sendProposal('p');
-  assert.equal(calls.length,0);
+
+  ui.sendProposal('p');
+  const compose=new URL(opened);
+  assert.equal(compose.hostname,'mail.google.com');
+  assert.equal(compose.searchParams.get('to'),'client@example.com');
+  assert.match(compose.searchParams.get('su'),/PROP-2026-0001/);
+  assert.match(compose.searchParams.get('body'),/MENU HIVERN/);
+  assert.match(modalHtml,/Ja l.he enviat|Ja l’he enviat/);
+
+  await ui.confirmSent('p');
+  assert.equal(proposal.status,'ENVIADA');
+  assert.equal(proposal.sendHistory.length,1);
+  assert.equal(proposal.sendHistory[0].provider,'gmail-compose');
+  assert.deepEqual(saved,['PROPOSTA ENVIADA']);
+
+  proposal.status='ESBORRANY'; opened=''; messages=[];
+  ui.sendProposal('p');
+  assert.equal(opened,'');
   assert.match(messages.at(-1),/validar/);
 });
