@@ -5,6 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { spawn } = require('child_process');
+const { normalizeGoogleAppPassword, createMessage } = require('../commercial-smtp.js');
 
 const root = path.resolve(__dirname, '..');
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'arcadi-commercial-test-'));
@@ -20,7 +21,10 @@ const child = spawn(process.execPath, ['commercial-server.js'], {
     NO_OPEN: '1',
     DATA_DIR: dataDir,
     RESEND_API_KEY: '',
-    COMMERCIAL_FROM_EMAIL: ''
+    COMMERCIAL_FROM_EMAIL: '',
+    COMMERCIAL_EMAIL_PROVIDER: '',
+    GMAIL_SMTP_USER: '',
+    GMAIL_APP_PASSWORD: ''
   },
   stdio: ['ignore', 'pipe', 'pipe']
 });
@@ -38,6 +42,11 @@ async function request(pathname, options = {}) {
 }
 
 async function main() {
+  assert.equal(normalizeGoogleAppPassword('abcd efgh ijkl mnop'), 'abcdefghijklmnop');
+  const message = createMessage({ user: 'restaurant@gmail.com', fromName: 'Restaurant', to: 'client@example.com', subject: 'Prova', html: '<b>Hola</b>', text: 'Hola' });
+  assert.match(message.raw, /multipart\/alternative/);
+  assert.match(message.raw, /restaurant@gmail\.com/);
+
   for (let i = 0; i < 60; i += 1) {
     try { if ((await request('/api/health')).response.ok) break; } catch {}
     await wait(100);
@@ -46,7 +55,8 @@ async function main() {
   const emailStatus = await request('/api/commercial-email-status');
   assert.equal(emailStatus.response.status, 200, logs);
   assert.equal(emailStatus.data.configured, false);
-  assert.equal(emailStatus.data.hasApiKey, false);
+  assert.equal(emailStatus.data.provider, 'gmail');
+  assert.equal(emailStatus.data.hasAppPassword, false);
 
   const state = await request('/api/state');
   assert.equal(state.response.status, 200, logs);
@@ -61,42 +71,51 @@ async function main() {
   assert.equal(sendBeforeConfig.response.status, 503);
   assert.match(sendBeforeConfig.data.error, /Configurar correu|configurat/i);
 
-  const badConfig = await request('/api/commercial-email-config', {
+  const badGmail = await request('/api/commercial-email-config', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ apiKey: 'incorrecta', email: 'restaurant@example.com' })
+    body: JSON.stringify({ provider: 'gmail', appPassword: 'curta', email: 'restaurant@gmail.com' })
   });
-  assert.equal(badConfig.response.status, 400);
+  assert.equal(badGmail.response.status, 400);
+  assert.match(badGmail.data.error, /16 caràcters/);
 
   const configured = await request('/api/commercial-email-config', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ apiKey: 're_test_1234567890', email: 'restaurant@example.com', name: 'Restaurant Prova', replyTo: 'direccio@example.com' })
+    body: JSON.stringify({ provider: 'gmail', appPassword: 'abcd efgh ijkl mnop', email: 'restaurant@gmail.com', name: 'Restaurant Prova', replyTo: 'direccio@example.com' })
   });
   assert.equal(configured.response.status, 200, logs);
   assert.equal(configured.data.configured, true);
-  assert.equal(configured.data.from, 'restaurant@example.com');
-  assert.equal(configured.data.hasApiKey, true);
+  assert.equal(configured.data.provider, 'gmail');
+  assert.equal(configured.data.from, 'restaurant@gmail.com');
+  assert.equal(configured.data.hasAppPassword, true);
   assert.equal(configured.data.source, 'stored');
-  assert.equal(Object.prototype.hasOwnProperty.call(configured.data, 'apiKey'), false, 'La clau no s’ha de retornar mai al navegador');
+  assert.equal(Object.prototype.hasOwnProperty.call(configured.data, 'appPassword'), false, 'La contrasenya no s’ha de retornar mai al navegador');
 
   const configPath = path.join(dataDir, 'commercial-email.json');
   assert.ok(fs.existsSync(configPath), 'La configuració s’ha de desar al directori persistent');
   const persisted = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  assert.equal(persisted.apiKey, 're_test_1234567890');
-  assert.equal(persisted.email, 'restaurant@example.com');
+  assert.equal(persisted.provider, 'gmail');
+  assert.equal(persisted.appPassword, 'abcdefghijklmnop');
+  assert.equal(persisted.email, 'restaurant@gmail.com');
 
   const statusAfter = await request('/api/commercial-email-status');
   assert.equal(statusAfter.response.status, 200);
   assert.equal(statusAfter.data.configured, true);
-  assert.match(statusAfter.data.apiKeyMasked, /^re_te.*7890$/);
+  assert.equal(statusAfter.data.appPasswordMasked, '•••• •••• •••• ••••');
 
-  const keepKey = await request('/api/commercial-email-config', {
+  const keepPassword = await request('/api/commercial-email-config', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ apiKey: '', email: 'nou@example.com', name: 'Restaurant Prova 2' })
+    body: JSON.stringify({ provider: 'gmail', appPassword: '', email: 'restaurant@gmail.com', name: 'Restaurant Prova 2' })
   });
-  assert.equal(keepKey.response.status, 200);
+  assert.equal(keepPassword.response.status, 200);
   const persistedAgain = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  assert.equal(persistedAgain.apiKey, 're_test_1234567890', 'Deixar la clau buida ha de conservar la clau actual');
-  assert.equal(persistedAgain.email, 'nou@example.com');
+  assert.equal(persistedAgain.appPassword, 'abcdefghijklmnop', 'Deixar el camp buit ha de conservar la contrasenya actual');
+
+  const invalidResendGmail = await request('/api/commercial-email-config', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ provider: 'resend', apiKey: 're_test_1234567890', email: 'restaurant@gmail.com' })
+  });
+  assert.equal(invalidResendGmail.response.status, 400);
+  assert.match(invalidResendGmail.data.error, /gmail\.com/i);
 
   console.log('OK commercial-server.test.js');
 }
