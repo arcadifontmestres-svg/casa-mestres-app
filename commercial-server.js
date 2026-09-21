@@ -20,9 +20,13 @@ function send(res,status,body){ securityHeaders(res); res.writeHead(status,{'Con
 function readJsonBody(req,limit=64*1024){ return new Promise((resolve,reject)=>{ let body=''; req.on('data',c=>{body+=c;if(Buffer.byteLength(body)>limit){const e=new Error('Petició massa gran');e.statusCode=413;reject(e);req.destroy();}}); req.on('end',()=>{if(!body.trim())return resolve({});try{resolve(JSON.parse(body));}catch{const e=new Error('JSON no vàlid');e.statusCode=400;reject(e);}}); req.on('error',reject); }); }
 
 function userId() { return process.env.ARCADI_DESKTOP === '1' ? 'desktop-direction' : String(process.env.ADMIN_USER); }
+function centreHint(input = {}) {
+  return String(input.centreId || input.menuSnapshot?.centreId || input.menuSnapshot?.restaurantId || input.restaurantId || '').trim();
+}
 function resolveScope(data, input = {}) {
-  const companyId = String(input.companyId || 'company_casa_mestres');
-  const centreId = String(input.centreId || (companyId === 'company_casa_mestres' ? 'restaurant_casa_mestres' : ''));
+  const companyId = String(input.companyId || input.menuSnapshot?.companyId || 'company_casa_mestres');
+  const hintedCentre = centreHint(input);
+  const centreId = hintedCentre || (companyId === 'company_casa_mestres' ? 'restaurant_casa_mestres' : '');
   if (!(data.organizations || []).some(x => x.id === companyId)) throw Object.assign(new Error('Empresa no trobada.'), {statusCode:404});
   if (centreId && !(data.restaurants || []).some(x => x.id === centreId && x.organizationId === companyId && x.kind !== 'GROUP')) throw Object.assign(new Error('Centre no trobat dins d’aquesta empresa.'), {statusCode:404});
   return { userId: userId(), companyId, centreId };
@@ -33,11 +37,25 @@ function sameOrigin(req) {
   const expected = gmail.googleConfig()?.origin || String(process.env.APP_BASE_URL || '').replace(/\/$/, '');
   return Boolean(expected) && req.headers.origin === expected;
 }
+function firstText(...values) {
+  for (const value of values) if (typeof value === 'string' && value.trim()) return value.trim();
+  return '';
+}
 function proposalCompany(data, proposal) {
-  const org = (data.organizations || []).find(x => x.id === proposal.companyId);
-  const centre = (data.restaurants || []).find(x => x.id === proposal.centreId);
-  return { name: centre?.name || org?.name || data.company?.name || 'ARCADI GESTIO RESTAURANT',
-    phone: centre?.phone || data.company?.phone || '', email: centre?.email || data.company?.email || '' };
+  const companyId = proposal.companyId || proposal.menuSnapshot?.companyId || 'company_casa_mestres';
+  const inferredCentreId = centreHint(proposal);
+  const org = (data.organizations || []).find(x => x.id === companyId);
+  const centre = inferredCentreId ? (data.restaurants || []).find(x => x.id === inferredCentreId) : null;
+  const legacy = data.company || {};
+  const name = centre?.name || org?.name || legacy.name || 'ARCADI GESTIO RESTAURANT';
+  return {
+    name,
+    phone: firstText(centre?.phone, org?.phone, legacy.phone),
+    email: firstText(centre?.email, org?.email, legacy.email),
+    address: firstText(centre?.address, centre?.postalAddress, org?.address, legacy.address),
+    tagline: firstText(centre?.tagline, centre?.subtitle, org?.tagline),
+    logoUrl: firstText(centre?.logoUrl, centre?.logo, centre?.brandLogo, org?.logoUrl, org?.logo, legacy.logoUrl)
+  };
 }
 async function sendProposal(data, proposal) {
   if (!['VALIDADA', 'ENVIADA'].includes(String(proposal.status || ''))) throw Object.assign(new Error('Direcció ha de validar la proposta abans de poder-la enviar.'), {statusCode:409});
@@ -97,8 +115,8 @@ async function handleCommercialRequest(req, res) {
       const snapshot = JSON.stringify(proposal);
       const result = await sendProposal(data, proposal);
       const now = new Date().toISOString();
-      const record = {at:now, to:proposal.clientEmail, from:result.from, provider:'gmail', providerId:result.id, userId:userId(), companyId:proposal.companyId || 'company_casa_mestres', centreId:resolveScope(data, proposal).centreId};
-      // Use the shared write queue and fresh data after Google responds.
+      const scope = resolveScope(data, proposal);
+      const record = {at:now, to:proposal.clientEmail, from:result.from, provider:'gmail', providerId:result.id, userId:userId(), companyId:scope.companyId, centreId:scope.centreId};
       await exported.mutateData(latest => {
         const current = (latest.commercialProposals || []).find(x => x.id === proposalId);
         if (current) {
