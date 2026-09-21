@@ -32,7 +32,7 @@ async function start() {
 
   const { applyStartupCopy } = require('../startup-copy.js');
   applyStartupCopy();
-  localServer = require('../server.js').server;
+  localServer = require('../commercial-server.js').server;
   applyStartupCopy();
   await new Promise((resolve, reject) => {
     if (localServer.listening) return resolve();

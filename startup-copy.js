@@ -39,7 +39,7 @@ function applyStartupCopy() {
 
 if (require.main === module) {
   applyStartupCopy();
-  require('./server.js');
+  require('./commercial-server.js');
   applyStartupCopy();
 }
 
