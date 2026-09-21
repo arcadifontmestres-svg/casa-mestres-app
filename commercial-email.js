@@ -1,7 +1,5 @@
 'use strict';
 
-const https = require('https');
-
 function esc(value) {
   return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 }
@@ -47,32 +45,4 @@ function proposalHtml(proposal, company = {}) {
   return `<!doctype html><html><body style="margin:0;background:#f4eee3;font-family:Arial,sans-serif;color:#1f302a"><div style="max-width:760px;margin:24px auto;background:#fffaf2;border:1px solid #d9cbb9;border-radius:16px;padding:28px"><div style="display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #234d40;padding-bottom:16px"><div><div style="font-size:12px;letter-spacing:.08em;color:#6b625a">PROPOSTA COMERCIAL</div><h1 style="margin:5px 0 0;font-size:26px">${esc(proposal.code || '')}</h1></div><div style="text-align:right"><b>${esc(company.name || 'ARCADI GESTIO RESTAURANT')}</b></div></div><div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><small>CLIENT</small><br><b>${esc(proposal.clientName || '')}</b></div><div><small>DATA SERVEI</small><br><b>${esc(proposal.eventDate || '—')}</b></div><div><small>GRUP / SERVEI</small><br><b>${esc(proposal.eventName || '—')}</b></div><div><small>PERSONES</small><br><b>${Number(proposal.pax || 0)}</b></div></div><div style="margin-top:22px;border:1px solid #d9cbb9;border-radius:12px;padding:18px;background:#fff"><h2 style="margin-top:0">${esc(proposal.menuName || 'Menú')}</h2><div style="line-height:1.55">${menu || 'Menú seleccionat a l’aplicació.'}</div></div><div style="margin:22px 0;padding:16px 0;border-top:1px solid #d9cbb9;border-bottom:1px solid #d9cbb9;display:flex;justify-content:space-between"><span>${Number(proposal.pax || 0)} pax × ${money(proposal.pricePerPerson)}</span><strong style="font-size:22px">${money(proposal.totalAmount)}</strong></div>${notes}${validity}<div style="margin-top:26px;padding-top:16px;border-top:1px solid #e6ddd1;color:#6b625a;font-size:13px">${company.phone ? `Tel. ${esc(company.phone)} · ` : ''}${company.email ? esc(company.email) : ''}</div></div></body></html>`;
 }
 
-function sendResend({ apiKey, from, to, replyTo, subject, html, text }) {
-  return new Promise((resolve, reject) => {
-    const payload = JSON.stringify({ from, to: [to], subject, html, text, ...(replyTo ? { reply_to: replyTo } : {}) });
-    const req = https.request({
-      hostname: 'api.resend.com',
-      path: '/emails',
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload)
-      }
-    }, res => {
-      let body = '';
-      res.on('data', chunk => { body += chunk; });
-      res.on('end', () => {
-        let parsed = {};
-        try { parsed = body ? JSON.parse(body) : {}; } catch { parsed = { message: body }; }
-        if (res.statusCode >= 200 && res.statusCode < 300) resolve(parsed);
-        else reject(new Error(parsed.message || parsed.error || `Error d’enviament ${res.statusCode}`));
-      });
-    });
-    req.on('error', reject);
-    req.write(payload);
-    req.end();
-  });
-}
-
-module.exports = { esc, money, proposalSubject, proposalText, proposalHtml, sendResend };
+module.exports = { esc, money, proposalSubject, proposalText, proposalHtml };

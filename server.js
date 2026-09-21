@@ -812,6 +812,9 @@ const server = http.createServer(async (req, res) => {
           ok: true,
           app: 'ARCADI GESTIO RESTAURANT',
           connectorVersion: '0.5.1',
+          buildCommit: String(process.env.RENDER_GIT_COMMIT || ''),
+          commercialEmail: 'gmail-oauth',
+          gmailOAuthReady: Boolean(require('./gmail-oauth.js').googleConfig()),
           serverTime: new Date().toISOString()
         }),
         challenge: (scope, error, description) => oauthChallenge(baseUrl, scope, error, description)
@@ -852,6 +855,11 @@ const server = http.createServer(async (req, res) => {
       if (!incoming || typeof incoming !== 'object') return send(res, 400, { error: 'Dades no vàlides' });
       const state = await mutateData(current => {
         const reservations = current.reservations || [];
+        const commercialSendHistory = current.commercialSendHistory || [];
+        for (const proposal of incoming.commercialProposals || []) {
+          const saved = (current.commercialProposals || []).find(item => item.id === proposal.id);
+          proposal.sendHistory = saved?.sendHistory || [];
+        }
         const punches = current.punches || [];
         const dailyOperations = current.dailyOperations || [];
         const governanceCriteria = current.governanceCriteria || [];
@@ -869,6 +877,7 @@ const server = http.createServer(async (req, res) => {
         for (const key of Object.keys(current)) delete current[key];
         Object.assign(current, incoming, {
           reservations,
+          commercialSendHistory,
           punches,
           dailyOperations,
           governanceCriteria,
@@ -1498,4 +1507,4 @@ server.listen(PORT, HOST, () => {
   }
 });
 
-module.exports = { server };
+module.exports = { server, mutateData, requireAdmin, readData };
