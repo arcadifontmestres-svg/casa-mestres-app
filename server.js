@@ -812,6 +812,9 @@ const server = http.createServer(async (req, res) => {
           ok: true,
           app: 'ARCADI GESTIO RESTAURANT',
           connectorVersion: '0.5.1',
+          buildCommit: String(process.env.RENDER_GIT_COMMIT || ''),
+          commercialEmail: 'gmail-oauth',
+          gmailOAuthReady: Boolean(require('./gmail-oauth.js').googleConfig()),
           serverTime: new Date().toISOString()
         }),
         challenge: (scope, error, description) => oauthChallenge(baseUrl, scope, error, description)

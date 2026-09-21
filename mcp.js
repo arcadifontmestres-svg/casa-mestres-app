@@ -414,7 +414,7 @@ async function createArcadiMcpServer(context) {
     title: 'Comprovar connexió amb ARCADI',
     description: 'Comprova que ChatGPT pot comunicar-se amb el servidor d’ARCADI GESTIO RESTAURANT. No consulta ni modifica dades del restaurant.',
     inputSchema: {},
-    outputSchema: { ok: z.boolean(), app: z.string(), connectorVersion: z.string(), serverTime: z.string() },
+    outputSchema: { ok: z.boolean(), app: z.string(), connectorVersion: z.string(), serverTime: z.string(), buildCommit: z.string(), commercialEmail: z.string(), gmailOAuthReady: z.boolean() },
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     securitySchemes: [{ type: 'noauth' }],
     _meta: { securitySchemes: [{ type: 'noauth' }] }

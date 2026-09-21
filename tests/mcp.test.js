@@ -193,6 +193,9 @@ async function main() {
   const status = await anonymousClient.callTool({ name: 'get_system_status', arguments: {} });
   assert.equal(status.structuredContent.ok, true);
   assert.equal(status.structuredContent.connectorVersion, '0.5.1');
+  assert.equal(status.structuredContent.commercialEmail, 'gmail-oauth');
+  assert.equal(typeof status.structuredContent.gmailOAuthReady, 'boolean');
+  assert.equal(typeof status.structuredContent.buildCommit, 'string');
   const blocked = await anonymousClient.callTool({ name: 'get_daily_status', arguments: { date: '2026-09-05' } });
   assert.equal(blocked.isError, true);
   assert.ok(blocked._meta['mcp/www_authenticate'][0].includes('error="insufficient_scope"'));
