@@ -338,6 +338,82 @@ function cloneJson(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+const BACKUP_SCOPED_COLLECTIONS = [
+  'suppliers', 'products', 'bases', 'dishes', 'saleItems', 'documents', 'employees',
+  'shiftTemplates', 'schedules', 'punches', 'reservations', 'maintenanceRecords',
+  'communications', 'crmContacts', 'marketingCampaigns', 'groupEvents', 'experiences',
+  'loyaltyAccounts', 'purchaseOrders', 'goodsReceipts', 'traceabilityRecords',
+  'productionRecords', 'financialEntries', 'permissions', 'permissionAudit',
+  'governanceCriteria', 'governanceTasks', 'criterionDeployments', 'corporateStandards'
+];
+
+function recordMatchesScope(item, companyId, centreId = '') {
+  if (!item || typeof item !== 'object') return false;
+  const recordCompanyId = item.companyId || 'company_casa_mestres';
+  if (recordCompanyId !== companyId) return false;
+  if (!centreId) return true;
+  if (item.scope === 'COMPANY' || item.scope === 'CORPORATE') return false;
+  const recordCentreId = item.centreId || (recordCompanyId === 'company_casa_mestres' ? 'restaurant_casa_mestres' : '');
+  return recordCentreId === centreId || (Array.isArray(item.centreIds) && item.centreIds.includes(centreId));
+}
+
+function scopedControlRecords(controlNormatiu, companyId, centreId) {
+  const records = {};
+  for (const [key, list] of Object.entries(controlNormatiu?.records || {})) {
+    records[key] = Array.isArray(list) ? list.filter(item => recordMatchesScope(item, companyId, centreId)).map(cloneJson) : [];
+  }
+  return records;
+}
+
+function buildScopedBackup(data, scope, companyId, centreId = '') {
+  const organization = (data.organizations || []).find(item => item.id === companyId);
+  if (!organization) throw Object.assign(new Error('Empresa no trobada'), { statusCode: 404 });
+  let centre = null;
+  if (scope === 'centre') {
+    centre = (data.restaurants || []).find(item => item.id === centreId && item.organizationId === companyId);
+    if (!centre) throw Object.assign(new Error('Centre de treball no trobat'), { statusCode: 404 });
+  }
+  const collections = {};
+  for (const key of BACKUP_SCOPED_COLLECTIONS) {
+    collections[key] = (data[key] || []).filter(item => recordMatchesScope(item, companyId, scope === 'centre' ? centreId : '')).map(cloneJson);
+  }
+  return {
+    arcadiBackupVersion: 1,
+    kind: 'ARCADI_SCOPED_BACKUP',
+    scope,
+    createdAt: new Date().toISOString(),
+    company: { id: organization.id, name: organization.name || '' },
+    centre: centre ? { id: centre.id, name: centre.name || '' } : null,
+    restaurants: scope === 'company'
+      ? (data.restaurants || []).filter(item => item.organizationId === companyId).map(cloneJson)
+      : [cloneJson(centre)],
+    collections,
+    controlNormatiu: { records: scopedControlRecords(data.controlNormatiu, companyId, scope === 'centre' ? centreId : '') }
+  };
+}
+
+function restoreScopedBackup(data, backup) {
+  const scope = backup.scope;
+  const companyId = String(backup.company?.id || '');
+  const centreId = scope === 'centre' ? String(backup.centre?.id || '') : '';
+  if (!['company', 'centre'].includes(scope) || !companyId || (scope === 'centre' && !centreId)) {
+    throw Object.assign(new Error('Àmbit de còpia no vàlid'), { statusCode: 400 });
+  }
+  for (const key of BACKUP_SCOPED_COLLECTIONS) {
+    const incoming = Array.isArray(backup.collections?.[key]) ? backup.collections[key].map(cloneJson) : [];
+    data[key] = (data[key] || []).filter(item => !recordMatchesScope(item, companyId, centreId));
+    data[key].push(...incoming.map(item => ({ ...item, companyId: item.companyId || companyId, ...(centreId && !item.centreId ? { centreId } : {}) })));
+  }
+  data.controlNormatiu = data.controlNormatiu || {};
+  data.controlNormatiu.records = data.controlNormatiu.records || {};
+  for (const [key, incoming] of Object.entries(backup.controlNormatiu?.records || {})) {
+    const current = Array.isArray(data.controlNormatiu.records[key]) ? data.controlNormatiu.records[key] : [];
+    data.controlNormatiu.records[key] = current.filter(item => !recordMatchesScope(item, companyId, centreId));
+    data.controlNormatiu.records[key].push(...(Array.isArray(incoming) ? incoming.map(cloneJson) : []));
+  }
+  return data;
+}
+
 function catalogName(value) {
   return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
@@ -1367,18 +1443,36 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/restore' && req.method === 'POST') {
       if (!requireAdmin(req, res)) return;
       const incoming = await bodyJson(req);
+      if (incoming.kind === 'ARCADI_SCOPED_BACKUP' && incoming.arcadiBackupVersion === 1) {
+        const restored = restoreScopedBackup(readData(), incoming);
+        writeData(restored);
+        return send(res, 200, { ok: true, scope: incoming.scope, companyId: incoming.company?.id || '', centreId: incoming.centre?.id || '' });
+      }
       if (!incoming.schema || !incoming.company) return send(res, 400, { error: 'La còpia no correspon a l’app consolidada' });
       writeData(incoming);
-      return send(res, 200, { ok: true });
+      return send(res, 200, { ok: true, scope: 'full' });
     }
 
     if (pathname === '/api/backup' && req.method === 'GET') {
       if (!requireAdmin(req, res)) return;
-      const content = fs.readFileSync(DATA);
+      const scope = String(url.searchParams.get('scope') || 'full');
+      const companyId = String(url.searchParams.get('companyId') || '');
+      const centreId = String(url.searchParams.get('centreId') || '');
+      let content;
+      let filename;
+      if (scope === 'company' || scope === 'centre') {
+        const backup = buildScopedBackup(readData(), scope, companyId, centreId);
+        content = Buffer.from(JSON.stringify(backup, null, 2), 'utf8');
+        const label = String(backup.centre?.name || backup.company?.name || scope).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').toUpperCase();
+        filename = `ARCADI_${scope === 'centre' ? 'CENTRE' : 'EMPRESA'}_${label}_${new Date().toISOString().slice(0, 10)}.json`;
+      } else {
+        content = fs.readFileSync(DATA);
+        filename = `ARCADI_SISTEMA_COMPLET_${new Date().toISOString().slice(0, 10)}.json`;
+      }
       securityHeaders(res);
       res.writeHead(200, {
         'Content-Type': 'application/json; charset=utf-8',
-        'Content-Disposition': `attachment; filename="CASA_MESTRES_BACKUP_${new Date().toISOString().slice(0, 10)}.json"`,
+        'Content-Disposition': `attachment; filename="${filename}"`,
         'Cache-Control': 'no-store'
       });
       return res.end(content);
