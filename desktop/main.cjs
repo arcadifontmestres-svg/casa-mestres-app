@@ -30,7 +30,10 @@ async function start() {
   process.env.NO_OPEN = '1';
   process.env.DATA_DIR = path.join(app.getPath('userData'), 'dades');
 
+  const { applyStartupCopy } = require('../startup-copy.js');
+  applyStartupCopy();
   localServer = require('../server.js').server;
+  applyStartupCopy();
   await new Promise((resolve, reject) => {
     if (localServer.listening) return resolve();
     localServer.once('listening', resolve);
