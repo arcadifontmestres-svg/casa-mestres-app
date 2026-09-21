@@ -170,7 +170,7 @@ function normalizeArcadiData(data) {
   const collections = [
     'maintenanceRecords', 'communications', 'crmContacts', 'marketingCampaigns', 'financialEntries',
     'groupEvents', 'experiences', 'loyaltyAccounts', 'organizations', 'governanceCriteria', 'corporateStandards', 'governanceTasks', 'criterionDeployments', 'communicationReads', 'appccTemplates', 'operatingProtocols', 'productStandards', 'supplierStandards', 'purchaseOrders',
-    'goodsReceipts', 'traceabilityRecords', 'productionRecords', 'restaurants',
+    'goodsReceipts', 'traceabilityRecords', 'productionRecords', 'restaurants', 'permissions', 'permissionAudit',
     'platformProfiles', 'miniApps', 'dailyOperations', 'appliedMigrations'
   ];
   for (const key of collections) if (!Array.isArray(data[key])) data[key] = [];
