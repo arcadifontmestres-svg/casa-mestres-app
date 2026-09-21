@@ -8,11 +8,17 @@ const { proposalSubject, proposalText, proposalHtml, sendResend } = require('./c
 
 const ROOT = __dirname;
 const originalCreateServer = http.createServer;
+const MAIL_CONFIG_FILE = 'commercial-email.json';
 
 function dataPaths() {
   const configured = String(process.env.DATA_DIR || '').trim();
   const dataDir = configured ? path.resolve(configured) : ROOT;
-  return { dataFile: path.join(dataDir, 'data.json'), backupsDir: path.join(dataDir, 'backups') };
+  return {
+    dataDir,
+    dataFile: path.join(dataDir, 'data.json'),
+    backupsDir: path.join(dataDir, 'backups'),
+    mailConfigFile: path.join(dataDir, MAIL_CONFIG_FILE)
+  };
 }
 
 function securityHeaders(res) {
@@ -58,6 +64,31 @@ function requireAdmin(req, res) {
   return false;
 }
 
+function readJsonBody(req, limit = 64 * 1024) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk;
+      if (Buffer.byteLength(body) > limit) {
+        const error = new Error('Petició massa gran');
+        error.statusCode = 413;
+        reject(error);
+        req.destroy();
+      }
+    });
+    req.on('end', () => {
+      if (!body.trim()) return resolve({});
+      try { resolve(JSON.parse(body)); }
+      catch {
+        const error = new Error('JSON no vàlid');
+        error.statusCode = 400;
+        reject(error);
+      }
+    });
+    req.on('error', reject);
+  });
+}
+
 function readData() {
   const { dataFile } = dataPaths();
   if (!fs.existsSync(dataFile)) throw new Error('No s’ha trobat el fitxer de dades');
@@ -77,18 +108,98 @@ function writeData(data, label = 'commercial') {
   fs.renameSync(temporary, dataFile);
 }
 
+function readStoredMailConfig() {
+  const { mailConfigFile } = dataPaths();
+  try {
+    if (!fs.existsSync(mailConfigFile)) return {};
+    const value = JSON.parse(fs.readFileSync(mailConfigFile, 'utf8'));
+    return value && typeof value === 'object' ? value : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeStoredMailConfig(config) {
+  const { dataDir, mailConfigFile } = dataPaths();
+  fs.mkdirSync(dataDir, { recursive: true });
+  const temporary = `${mailConfigFile}.tmp`;
+  fs.writeFileSync(temporary, JSON.stringify(config, null, 2), { encoding: 'utf8', mode: 0o600 });
+  fs.renameSync(temporary, mailConfigFile);
+  try { fs.chmodSync(mailConfigFile, 0o600); } catch {}
+}
+
 function senderConfig() {
-  const apiKey = String(process.env.RESEND_API_KEY || '').trim();
-  const email = String(process.env.COMMERCIAL_FROM_EMAIL || '').trim();
-  const name = String(process.env.COMMERCIAL_FROM_NAME || 'ARCADI GESTIO RESTAURANT').trim();
-  const replyTo = String(process.env.COMMERCIAL_REPLY_TO || '').trim();
+  const stored = readStoredMailConfig();
+  const envApiKey = String(process.env.RESEND_API_KEY || '').trim();
+  const envEmail = String(process.env.COMMERCIAL_FROM_EMAIL || '').trim();
+  const envName = String(process.env.COMMERCIAL_FROM_NAME || '').trim();
+  const envReplyTo = String(process.env.COMMERCIAL_REPLY_TO || '').trim();
+
+  const apiKey = envApiKey || String(stored.apiKey || '').trim();
+  const email = envEmail || String(stored.email || '').trim();
+  const name = envName || String(stored.name || 'ARCADI GESTIO RESTAURANT').trim();
+  const replyTo = envReplyTo || String(stored.replyTo || '').trim();
+  const source = envApiKey || envEmail ? 'environment' : (apiKey || email ? 'stored' : 'none');
+
   return {
     configured: Boolean(apiKey && email),
     apiKey,
     email,
-    from: email.includes('<') ? email : `${name} <${email}>`,
-    replyTo
+    name,
+    from: email ? (email.includes('<') ? email : `${name} <${email}>`) : '',
+    replyTo,
+    source
   };
+}
+
+function publicSenderConfig() {
+  const config = senderConfig();
+  return {
+    configured: config.configured,
+    provider: 'resend',
+    from: config.email,
+    name: config.name,
+    replyTo: config.replyTo,
+    source: config.source,
+    hasApiKey: Boolean(config.apiKey),
+    apiKeyMasked: config.apiKey ? `${config.apiKey.slice(0, 5)}••••••${config.apiKey.slice(-4)}` : ''
+  };
+}
+
+function saveSenderConfig(input = {}) {
+  const current = readStoredMailConfig();
+  const envLocked = Boolean(String(process.env.RESEND_API_KEY || '').trim() || String(process.env.COMMERCIAL_FROM_EMAIL || '').trim());
+  if (envLocked) {
+    const error = new Error('La configuració de correu està definida a les variables del servidor i no es pot substituir des de l’app.');
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const next = {
+    provider: 'resend',
+    apiKey: input.clearApiKey === true ? '' : (String(input.apiKey || '').trim() || String(current.apiKey || '').trim()),
+    email: String(input.email ?? current.email ?? '').trim(),
+    name: String(input.name ?? current.name ?? 'ARCADI GESTIO RESTAURANT').trim() || 'ARCADI GESTIO RESTAURANT',
+    replyTo: String(input.replyTo ?? current.replyTo ?? '').trim(),
+    updatedAt: new Date().toISOString()
+  };
+  if (next.email && !/^\S+@\S+\.\S+$/.test(next.email)) {
+    const error = new Error('L’email remitent no és vàlid.');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (next.replyTo && !/^\S+@\S+\.\S+$/.test(next.replyTo)) {
+    const error = new Error('L’email de resposta no és vàlid.');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (next.apiKey && !/^re_[A-Za-z0-9_\-]+$/.test(next.apiKey)) {
+    const error = new Error('La clau de Resend no té el format esperat (re_...).');
+    error.statusCode = 400;
+    throw error;
+  }
+  writeStoredMailConfig(next);
+  return publicSenderConfig();
 }
 
 function proposalCompany(data, proposal) {
@@ -104,7 +215,7 @@ function proposalCompany(data, proposal) {
 async function sendProposal(data, proposal) {
   const config = senderConfig();
   if (!config.configured) {
-    const error = new Error('L’enviament directe encara no està configurat. Cal RESEND_API_KEY i COMMERCIAL_FROM_EMAIL al servidor.');
+    const error = new Error('L’enviament directe no està configurat. Obre “Configurar correu” a Propostes comercials i introdueix la clau de Resend i l’email remitent.');
     error.statusCode = 503;
     throw error;
   }
@@ -139,13 +250,69 @@ async function sendProposal(data, proposal) {
   return result;
 }
 
+async function sendTestEmail(to) {
+  const config = senderConfig();
+  if (!config.configured) {
+    const error = new Error('Configura primer la clau de Resend i l’email remitent.');
+    error.statusCode = 503;
+    throw error;
+  }
+  const recipient = String(to || '').trim();
+  if (!/^\S+@\S+\.\S+$/.test(recipient)) {
+    const error = new Error('Indica un email de prova vàlid.');
+    error.statusCode = 400;
+    throw error;
+  }
+  return sendResend({
+    apiKey: config.apiKey,
+    from: config.from,
+    to: recipient,
+    replyTo: config.replyTo,
+    subject: 'Prova d’enviament · ARCADI GESTIO RESTAURANT',
+    html: '<div style="font-family:Arial,sans-serif"><h2>ARCADI GESTIO RESTAURANT</h2><p>L’enviament directe de propostes comercials està configurat correctament.</p></div>',
+    text: 'ARCADI GESTIO RESTAURANT\n\nL’enviament directe de propostes comercials està configurat correctament.'
+  });
+}
+
 async function handleCommercialRequest(req, res) {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+
   if (url.pathname === '/api/commercial-email-status' && req.method === 'GET') {
     if (!requireAdmin(req, res)) return true;
-    const config = senderConfig();
-    send(res, 200, { configured: config.configured, provider: 'resend', from: config.configured ? config.email : '' });
+    send(res, 200, publicSenderConfig());
     return true;
+  }
+
+  if (url.pathname === '/api/commercial-email-config' && req.method === 'GET') {
+    if (!requireAdmin(req, res)) return true;
+    send(res, 200, publicSenderConfig());
+    return true;
+  }
+
+  if (url.pathname === '/api/commercial-email-config' && req.method === 'POST') {
+    if (!requireAdmin(req, res)) return true;
+    try {
+      const body = await readJsonBody(req);
+      const config = saveSenderConfig(body);
+      send(res, 200, { ok: true, ...config, message: config.configured ? 'Correu comercial configurat.' : 'Configuració guardada, però encara falten dades.' });
+      return true;
+    } catch (error) {
+      send(res, error.statusCode || 500, { error: error.message || 'No s’ha pogut guardar la configuració.' });
+      return true;
+    }
+  }
+
+  if (url.pathname === '/api/commercial-email-test' && req.method === 'POST') {
+    if (!requireAdmin(req, res)) return true;
+    try {
+      const body = await readJsonBody(req);
+      const result = await sendTestEmail(body.to);
+      send(res, 200, { ok: true, providerId: result.id || '', message: `Email de prova enviat a ${String(body.to || '').trim()}.` });
+      return true;
+    } catch (error) {
+      send(res, error.statusCode || 500, { error: error.message || 'No s’ha pogut enviar la prova.' });
+      return true;
+    }
   }
 
   const match = url.pathname.match(/^\/api\/commercial-proposals\/([^/]+)\/send$/);
@@ -181,4 +348,14 @@ try {
   http.createServer = originalCreateServer;
 }
 
-module.exports = { ...exported, handleCommercialRequest, senderConfig, proposalCompany, sendProposal };
+module.exports = {
+  ...exported,
+  handleCommercialRequest,
+  senderConfig,
+  publicSenderConfig,
+  saveSenderConfig,
+  proposalCompany,
+  sendProposal,
+  sendTestEmail,
+  readStoredMailConfig
+};
