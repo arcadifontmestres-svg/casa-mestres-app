@@ -4,6 +4,9 @@ const path = require('path');
 const net = require('net');
 const { app, BrowserWindow, dialog } = require('electron');
 
+const CENTRAL_URL = String(process.env.ARCADI_CENTRAL_URL || 'https://casa-mestres-restaurant-app.onrender.com').replace(/\/$/, '');
+const OFFLINE_MODE = process.env.ARCADI_OFFLINE === '1';
+
 let mainWindow;
 let localServer;
 
@@ -22,7 +25,7 @@ function freePort(start = 3210) {
   });
 }
 
-async function start() {
+async function localUrl() {
   const port = await freePort();
   process.env.ARCADI_DESKTOP = '1';
   process.env.HOST = '127.0.0.1';
@@ -39,7 +42,28 @@ async function start() {
     localServer.once('listening', resolve);
     localServer.once('error', reject);
   });
+  return `http://127.0.0.1:${port}`;
+}
 
+async function loadCentralDatabase() {
+  try {
+    await mainWindow.loadURL(CENTRAL_URL);
+  } catch (error) {
+    const choice = await dialog.showMessageBox(mainWindow, {
+      type: 'error',
+      title: 'ARCADI GESTIO RESTAURANT',
+      message: 'No s’ha pogut connectar amb la base central.',
+      detail: 'No s’obrirà una còpia local diferent perquè podria duplicar o desquadrar les dades. Comprova Internet i torna-ho a provar.',
+      buttons: ['Tornar-ho a provar', 'Tancar'],
+      defaultId: 0,
+      cancelId: 1
+    });
+    if (choice.response === 0) return loadCentralDatabase();
+    app.quit();
+  }
+}
+
+async function start() {
   mainWindow = new BrowserWindow({
     width: 1500,
     height: 940,
@@ -54,7 +78,12 @@ async function start() {
       nodeIntegration: false
     }
   });
-  await mainWindow.loadURL(`http://127.0.0.1:${port}`);
+
+  if (OFFLINE_MODE) {
+    await mainWindow.loadURL(await localUrl());
+  } else {
+    await loadCentralDatabase();
+  }
   mainWindow.on('closed', () => { mainWindow = null; });
 }
 
@@ -67,4 +96,3 @@ app.on('window-all-closed', () => app.quit());
 app.on('before-quit', () => {
   if (localServer?.listening) localServer.close();
 });
-
