@@ -192,7 +192,7 @@ async function main() {
 
   const status = await anonymousClient.callTool({ name: 'get_system_status', arguments: {} });
   assert.equal(status.structuredContent.ok, true);
-  assert.equal(status.structuredContent.connectorVersion, '0.5.0');
+  assert.equal(status.structuredContent.connectorVersion, '0.5.1');
   const blocked = await anonymousClient.callTool({ name: 'get_daily_status', arguments: { date: '2026-09-05' } });
   assert.equal(blocked.isError, true);
   assert.ok(blocked._meta['mcp/www_authenticate'][0].includes('error="insufficient_scope"'));
