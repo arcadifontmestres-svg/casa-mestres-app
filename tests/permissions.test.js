@@ -12,6 +12,8 @@ assert.match(app, /const PERMISSION_ACTIONS=\['Consultar','Crear','Editar','Elim
   'Falten accions de la matriu');
 assert.match(app, /permissionAudit\.push\(/,
   'Falta historial de canvis de permisos');
+assert.match(app, /Object\.assign\(window,\{openPermission\}\)/,
+  'El botó del formulari no pot accedir a openPermission');
 assert.match(server, /'permissions', 'permissionAudit'/,
   'El servidor no normalitza permisos i historial');
 assert.match(server, /if \(pathname === '\/api\/state' && req\.method === 'GET'\) \{\s*if \(!requireAdmin\(req, res\)\) return;/,
