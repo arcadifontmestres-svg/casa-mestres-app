@@ -9,7 +9,7 @@
     "desktop": "electron .",
     "build:windows": "electron-builder --win portable",
     "check": "node --check server.js && node --check criteria.js && node --check mcp.js && node --check oauth.js && node --check public/app.js && node --check public/js/arcadi-runtime.js && node --check public/js/context-module.js && node --check public/js/arcadi-modules.js && node --check public/js/criteria-module.js && node --check desktop/main.cjs",
-    "test": "node tests/structure.test.js && node tests/integration.test.js && node tests/desktop-mode.test.js && node tests/mcp.test.js && node tests/criteria.test.js && node tests/criteria-integration.test.js && node tests/multicentre-command.test.js && node tests/permissions.test.js && node tests/employee-activation.test.js"
+    "test": "node tests/structure.test.js && node tests/integration.test.js && node tests/desktop-mode.test.js && node tests/mcp.test.js && node tests/criteria.test.js && node tests/criteria-integration.test.js && node tests/multicentre-command.test.js && node tests/permissions.test.js && node tests/employee-activation.test.js && node tests/scoped-backup.test.js"
   },
   "engines": {
     "node": ">=22.12"
