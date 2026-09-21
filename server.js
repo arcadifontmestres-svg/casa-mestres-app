@@ -168,7 +168,7 @@ function requireAdmin(req, res) {
 function normalizeArcadiData(data) {
   data.arcadiSchema = data.arcadiSchema || 'ARCADI_GESTIO_RESTAURANT_V1';
   const collections = [
-    'maintenanceRecords', 'communications', 'crmContacts', 'marketingCampaigns',
+    'maintenanceRecords', 'communications', 'crmContacts', 'marketingCampaigns', 'financialEntries',
     'groupEvents', 'experiences', 'loyaltyAccounts', 'organizations', 'governanceCriteria', 'corporateStandards', 'governanceTasks', 'criterionDeployments', 'communicationReads', 'appccTemplates', 'operatingProtocols', 'productStandards', 'supplierStandards', 'purchaseOrders',
     'goodsReceipts', 'traceabilityRecords', 'productionRecords', 'restaurants',
     'platformProfiles', 'miniApps', 'dailyOperations', 'appliedMigrations'
@@ -196,6 +196,29 @@ function normalizeArcadiData(data) {
       status: 'Activa',
       createdAt: new Date().toISOString()
     });
+  }
+  if (!data.organizations.some(item => item.id === 'company_grup_trafec')) {
+    data.organizations.push({
+      id: 'company_grup_trafec',
+      name: 'Grup Tràfec',
+      status: 'Activa',
+      notes: 'Empresa corporativa dels centres Tràfec',
+      createdAt: new Date().toISOString()
+    });
+  }
+  const trafecNames = [
+    'SARRIERA', 'SARRIERA1930', 'TRÀFEC', 'TRAFEC', 'L’ARBOÇ', "L'ARBOÇ",
+    'LA GRANADA', 'SITGES', 'TRÀFEC MAR', 'HOSPITALET', 'PISCINA', 'CAN CARTRÓ', 'CAN CARTRO'
+  ];
+  for (const centre of data.restaurants) {
+    const name = String(centre.name || '').toUpperCase();
+    if (name.includes('GRUP TRÀFEC') || name.includes('GRUP TRAFEC')) {
+      centre.organizationId = 'company_grup_trafec';
+      centre.kind = 'GROUP';
+      centre.status = centre.status || 'Actiu';
+      continue;
+    }
+    if (trafecNames.some(token => name.includes(token))) centre.organizationId = 'company_grup_trafec';
   }
   const casaMestresCentre = data.restaurants.find(item => item.id === 'restaurant_casa_mestres');
   if (casaMestresCentre && !casaMestresCentre.organizationId) casaMestresCentre.organizationId = 'company_casa_mestres';
@@ -1104,7 +1127,12 @@ const server = http.createServer(async (req, res) => {
         .map(item => ({ date: item.date, start: item.start || '', end: item.end || '', area: item.area || '', shiftCode: item.shiftCode || '', exception: item.exception === true, notes: item.notes || '' }));
       return send(res, 200, {
         employee: { code: employee.code, name: employee.name, level: employee.level || '', role: employee.role || employee.roleBase || '', tasks: employee.tasks || '', responsibilities: employee.responsibilities || '', notes: employee.notes || '' },
-        from, to, items
+        from, to, items,
+        communications: (data.communications || []).filter(item =>
+          item.status !== 'Arxivat' &&
+          (!item.companyId || item.companyId === employee.companyId) &&
+          (!Array.isArray(item.centreIds) || !item.centreIds.length || item.centreIds.includes(employee.centreId))
+        ).slice(-20).map(item => ({ subject: item.subject, message: item.message, priority: item.priority || '', createdAt: item.createdAt || '' }))
       });
     }
 
@@ -1117,7 +1145,10 @@ const server = http.createServer(async (req, res) => {
         if (!['ENTRADA', 'PAUSA', 'TORNAR', 'SORTIDA'].includes(String(input.type || ''))) {
           return { error: 'Tipus de fitxatge no vàlid', status: 400 };
         }
-        const gps = data.company?.gps || {};
+        const centre = (data.restaurants || []).find(item => item.id === employee.centreId);
+        const gps = centre && Number.isFinite(Number(centre.gpsLat)) && Number.isFinite(Number(centre.gpsLng))
+          ? { lat: centre.gpsLat, lng: centre.gpsLng, radius: centre.gpsRadius || 60 }
+          : (data.company?.gps || {});
         if (![input.lat, input.lng, gps.lat, gps.lng].every(value => Number.isFinite(Number(value)))) {
           return { error: 'No es pot fitxar sense una ubicació GPS vàlida', status: 400 };
         }
@@ -1136,6 +1167,9 @@ const server = http.createServer(async (req, res) => {
           employeeId: employee.id,
           employeeCode: employee.code,
           employeeName: employee.name,
+          companyId: employee.companyId || centre?.organizationId || 'company_casa_mestres',
+          centreId: employee.centreId || centre?.id || 'restaurant_casa_mestres',
+          scope: 'CENTRE',
           type: input.type,
           dateTime: new Date().toISOString(),
           lat: input.lat ?? null,
