@@ -1086,9 +1086,14 @@ const server = http.createServer(async (req, res) => {
       const input = await bodyJson(req);
       if (activationBlocked(req, input.code)) return send(res, 429, { error: 'Massa intents. Torna-ho a provar d’aquí a 15 minuts.' });
       const result = await mutateData(data => {
-        const employee = (data.employees || []).find(item => String(item.code) === String(input.code) && item.active !== false);
         const activationHash = hashSecret(String(input.activationCode || ''));
-        if (!employee || !employee.deviceActivationHash || !safeEqual(employee.deviceActivationHash, activationHash)) return null;
+        const employee = (data.employees || []).find(item =>
+          String(item.code) === String(input.code)
+          && item.active !== false
+          && item.deviceActivationHash
+          && safeEqual(item.deviceActivationHash, activationHash)
+        );
+        if (!employee) return null;
         if (!employee.deviceActivationExpiresAt || Date.parse(employee.deviceActivationExpiresAt) <= Date.now()) return null;
         const token = crypto.randomBytes(32).toString('base64url');
         employee.deviceTokenHash = hashSecret(token);
