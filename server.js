@@ -1116,7 +1116,15 @@ const server = http.createServer(async (req, res) => {
       const data = readData();
       const employee = authenticatedEmployee(data, req);
       if (!employee) return send(res, 401, { error: 'Dispositiu no activat' });
-      return send(res, 200, { ok: true, employee: { code: employee.code, name: employee.name, level: employee.level || '', role: employee.role || employee.roleBase || '' } });
+      const centre = (data.restaurants || []).find(item => item.id === employee.centreId) || null;
+      const companyId = employee.companyId || centre?.organizationId || '';
+      const company = (data.organizations || []).find(item => item.id === companyId) || null;
+      return send(res, 200, {
+        ok: true,
+        employee: { code: employee.code, name: employee.name, level: employee.level || '', role: employee.role || employee.roleBase || '' },
+        company: company ? { id: company.id, name: company.name || '' } : { id: companyId, name: '' },
+        centre: centre ? { id: centre.id, name: centre.name || '' } : { id: employee.centreId || '', name: '' }
+      });
     }
 
     if (pathname === '/api/employee-schedule' && req.method === 'POST') {
