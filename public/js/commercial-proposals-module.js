@@ -144,6 +144,7 @@
   function proposalActions(A, proposal, compact = false) {
     const id = A.esc(proposal.id);
     const buttons = [];
+    if (proposal.sendHistory?.length) buttons.push(`<button class="btn small secondary" onclick="ArcadiCommercial.showSendHistory('${id}')">Historial d’enviaments</button>`);
     if ([STATUS.DRAFT, STATUS.REVIEW, STATUS.VALIDATED].includes(proposal.status)) buttons.push(`<button class="btn small secondary" onclick="ArcadiCommercial.openProposal('${id}')">Editar</button>`);
     if (proposal.status === STATUS.DRAFT) buttons.push(`<button class="btn small" onclick="ArcadiCommercial.requestValidation('${id}')">Enviar a validació</button>`);
     if (proposal.status === STATUS.REVIEW) buttons.push(`<button class="btn small" onclick="ArcadiCommercial.validateProposal('${id}')">Validar</button>`);

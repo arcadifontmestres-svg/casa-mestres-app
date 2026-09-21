@@ -22,3 +22,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
+gmail-token.key
+gmail-connections.enc
+gmail-connections.enc.*.tmp
