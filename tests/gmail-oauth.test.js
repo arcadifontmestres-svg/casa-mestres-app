@@ -85,10 +85,12 @@ test('MIME rejects header injection and preserves Catalan content', () => {
   assert.match(raw,new RegExp(Buffer.from('Menú català').toString('base64')));
 });
 
-test('Direction UI opens a prepared Gmail only for validated proposals and records manual confirmation', async () => {
+test('Direction UI sends validated proposals through connected Gmail and blocks drafts', async () => {
   const vm = require('node:vm');
   const source=fs.readFileSync(path.join(__dirname,'../public/js/commercial-email-settings.js'),'utf8');
-  let opened='', modalHtml='', messages=[], saved=[];
+  const calls=[];
+  const messages=[];
+  let loaded=0;
   const proposal={
     id:'p',code:'PROP-2026-0001',status:'VALIDADA',clientName:'Client prova',clientEmail:'client@example.com',
     companyId:'own-company',centreId:'own-centre',eventDate:'2026-10-04',pax:10,menuName:'MENU HIVERN',
@@ -97,33 +99,36 @@ test('Direction UI opens a prepared Gmail only for validated proposals and recor
   const app={
     state:{commercialProposals:[proposal],restaurants:[{id:'own-centre',name:'SARRIERA 1930'}],organizations:[]},
     context:{companyId:'own-company',centreId:'own-centre'},
-    modal:(title,html)=>{modalHtml=html;}, closeModal:()=>{}, save:async label=>{saved.push(label);}, esc:value=>String(value || '')
+    api:async(pathname, options={})=>{
+      calls.push({pathname,options});
+      if(pathname.startsWith('/api/commercial-email-status?')) return {configured:true,ready:true,from:'direccio@sarriera1930.cat'};
+      if(pathname==='/api/commercial-proposals/p/send') return {ok:true,message:'Proposta enviada correctament.'};
+      throw new Error('Unexpected API '+pathname);
+    },
+    load:async()=>{loaded++;}, modal:()=>{}, closeModal:()=>{}, esc:value=>String(value || '')
   };
-  const fakeButton={onclick:null};
   const context={
-    window:{ArcadiERP:app,ArcadiCommercial:{},ArcadiModules:{open:()=>{}},open:url=>{opened=url;return {}; }},
-    document:{readyState:'loading',addEventListener:()=>{},getElementById:()=>fakeButton,querySelectorAll:()=>[]},
-    location:{hash:'#arcadi-groups'},alert:x=>messages.push(x),URLSearchParams
+    window:{ArcadiERP:app,ArcadiCommercial:{},ArcadiModules:{open:()=>{}}},
+    document:{readyState:'loading',addEventListener:()=>{},querySelectorAll:()=>[]},
+    location:{hash:'#arcadi-groups',search:'',pathname:'/'},
+    history:{replaceState:()=>{}},
+    alert:x=>messages.push(x),
+    confirm:()=>true,
+    URLSearchParams,
+    setTimeout
   };
   vm.runInNewContext(source,context);
   const ui=context.window.ArcadiCommercialEmailSettings;
 
-  ui.sendProposal('p');
-  const compose=new URL(opened);
-  assert.equal(compose.hostname,'mail.google.com');
-  assert.equal(compose.searchParams.get('to'),'client@example.com');
-  assert.match(compose.searchParams.get('su'),/PROP-2026-0001/);
-  assert.match(compose.searchParams.get('body'),/MENU HIVERN/);
-  assert.match(modalHtml,/Ja l.he enviat|Ja l’he enviat/);
+  await ui.sendProposal('p');
+  assert.ok(calls.some(call=>call.pathname.startsWith('/api/commercial-email-status?companyId=own-company&centreId=own-centre')));
+  assert.ok(calls.some(call=>call.pathname==='/api/commercial-proposals/p/send'));
+  assert.equal(loaded,1);
+  assert.match(messages.at(-1),/enviada/i);
 
-  await ui.confirmSent('p');
-  assert.equal(proposal.status,'ENVIADA');
-  assert.equal(proposal.sendHistory.length,1);
-  assert.equal(proposal.sendHistory[0].provider,'gmail-compose');
-  assert.deepEqual(saved,['PROPOSTA ENVIADA']);
-
-  proposal.status='ESBORRANY'; opened=''; messages=[];
-  ui.sendProposal('p');
-  assert.equal(opened,'');
+  proposal.status='ESBORRANY';
+  calls.length=0; messages.length=0;
+  await ui.sendProposal('p');
+  assert.equal(calls.length,0);
   assert.match(messages.at(-1),/validar/);
 });
