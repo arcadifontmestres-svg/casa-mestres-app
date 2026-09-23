@@ -1,0 +1,286 @@
+/* ==========================================================================
+   ARXIU D'ESTILS REPROGRAMAT - ESTIL DE DISSENY PREMIUM WEB "DARK MODE"
+   ========================================================================== */
+
+/* REINVENTEM LES VARIABLES DE COLOR GLOBALS PER CLONAR LA FOTO DE LA WEB */
+:root {
+    --bg-main: #0B1319;       /* El blau marí profund, gairebé negre, del fons */
+    --paper: #FFFFFF;         /* Blanc pur per a les targetes principals (Inventari, Compres...) */
+    --paper2: #11222C;        /* El fons fosc dels contenidors operatius (Espai de treball) */
+    --line: transparent;      /* Eliminem les línies divisòries rígides d'oficina */
+    --ink: #1A2B36;           /* Text fosc i elegant per a dins de les targetes blanques */
+    --muted: #71828E;         /* Gris blau mitjà per a subtítols i dades secundàries */
+    --accent-turquesa: #0E8388; /* El verd azulat/turquesa vibrant dels botons de la demo */
+    --shadow: 0px 4px 20px rgba(0, 0, 0, 0.25); /* Ombra premium per donar relleu */
+    --ok: #00A86B;
+}
+
+/* APLICACIÓ DEL FONS INTERN AUTOMÀTIC */
+body, [data-arcadi-navigation], main, #app {
+    background-color: var(--bg-main) !important;
+}
+
+/* CARREGADOR (LOADING) */
+.arcadiLoading {
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-weight: 800;
+}
+
+/* LA QUADRÍCULA DELS MÒDULS PRINCIPALS */
+.arcadiSectionGrid, .arcadiModuleGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px; /* Augmentem l'espaiat perquè respiri com a la foto */
+}
+
+/* LES 4 TARGETES MARES (Inventari, Compres, Producció, APPCC) */
+.arcadiSectionCard, .arcadiModuleCard {
+    border: none !important; /* Fora línies informàtiques */
+    background: var(--paper) !important; /* Blanc pur de la foto */
+    border-radius: 16px !important; /* Cantonades molt arrodonides i modernes */
+    padding: 22px !important; /* Més aire intern */
+    text-align: left;
+    cursor: pointer;
+    color: var(--ink) !important; /* Text fosc integrat */
+    box-shadow: var(--shadow) !important;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 150px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* EFECTE EN PASSAR EL RATOLÍ (HOVER) ELAGANT */
+.arcadiSectionCard:hover, .arcadiModuleCard:hover {
+    transform: translateY(-4px) !important; /* S'eleva de forma suau */
+    box-shadow: 0px 8px 30px rgba(14, 131, 136, 0.15) !important; /* Brillantor subtil turquesa */
+}
+
+/* TÍTOLS DELS MÒDULS DINS LES TARGETES BLANQUES */
+.arcadiSectionCard b, .arcadiModuleCard b {
+    font-family: 'Inter', system-ui, sans-serif !important; /* Fora lletra tipus premsa rígida */
+    color: var(--ink) !important; /* Text fosc, net i potent */
+    font-size: 22px !important;
+    font-weight: 800 !important;
+}
+
+/* DESCRIPCIONS (Ex: "Stock, mínims i compra") */
+.arcadiSectionCard span, .arcadiModuleCard small {
+    color: var(--muted) !important;
+    font-size: 13px !important;
+    line-height: 1.4;
+}
+
+/* INDICADORS DE SOTA DE CADA TARGETA */
+.arcadiSectionCard small {
+    margin-top: auto;
+    color: var(--accent-turquesa) !important; /* Text en turquesa de la web */
+    font-weight: 800 !important;
+}
+
+.arcadiModuleCard>span {
+    font-size: 10px;
+    letter-spacing: 1px;
+    font-weight: 900;
+    color: var(--accent-turquesa) !important;
+}
+
+/* NAVEGACIÓ */
+.arcadiModuleNav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+/* EL BLOC DE RESUM INFERIOR (Tasques, Pendents, Alertes) */
+.arcadiStats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+    background: var(--paper2) !important; /* El to fosc del "Cuadre operatiu" */
+    padding: 16px;
+    border-radius: 16px;
+}
+
+/* CADA DADA DEL BLOC INFERIOR */
+.arcadiStat {
+    background: transparent !important; /* S'integra netament al bloc fosc */
+    border: none !important;
+    border-radius: 0px;
+    padding: 10px;
+    box-shadow: none !important;
+    min-height: auto;
+}
+
+.arcadiStat strong {
+    display: block;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 32px !important; /* Números grans i clars */
+    color: #FFFFFF !important; /* Blanc per destacar sobre el fons fosc */
+}
+
+.arcadiStat b {
+    display: block;
+    color: var(--muted) !important; /* Etiqueta discreta */
+    margin-top: 4px;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+}
+
+.arcadiStat span {
+    display: block;
+    color: var(--accent-turquesa) !important;
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: bold;
+}
+
+/* FORMULARIS I CONTEXT */
+.arcadiForm { display: flex; flex-direction: column; gap: 16px; }
+.arcadiFormGrid { display: grid; grid-template-columns: repeat(2, minmax(210px, 1fr)); gap: 12px; }
+.arcadiFieldWide { grid-column: 1/-1; }
+.arcadiRowActions { white-space: nowrap; }
+
+/* TAULES DE DADES / CLAUS DEL RESUM */
+.arcadiKeyValue {
+    display: grid;
+    grid-template-columns: minmax(140px, 220px) 1fr;
+    border: none !important;
+    background: var(--paper2);
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 12px 0 18px;
+}
+
+.arcadiKeyValue b, .arcadiKeyValue span {
+    padding: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+}
+
+.arcadiKeyValue b {
+    background: rgba(0, 0, 0, 0.2) !important;
+    color: #FFFFFF !important;
+}
+
+.arcadiKeyValue span {
+    color: #E2ECE9 !important;
+}
+
+/* LLISTES DE VERIFICACIÓ (CHECKLISTS) */
+.arcadiCheck {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+}
+
+.arcadiCheck:last-child { border: 0; }
+.arcadiCheck.ok b { color: var(--ok) !important; }
+.arcadiCheck.warn b { color: #FFB020 !important; }
+.arcadiCheck span { font-size: 13px; color: #E2ECE9 !important; }
+
+/* TEXT DE L'ASSISTENT IA (ARCADI) */
+.arcadiAssistantText {
+    line-height: 1.6;
+    color: #E2ECE9;
+    font-size: 15px;
+}
+
+#arcadiAssistantPrompt {
+    min-height: 130px;
+    margin-bottom: 10px;
+    background: var(--paper2);
+    color: #FFF;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+[data-arcadi-navigation] button {
+    padding-left: 18px;
+}
+
+/* OPCIONS DE CHECKS */
+.arcadiCheckList {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.arcadiCheckOption {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: none !important;
+    border-radius: 12px;
+    padding: 12px;
+    background: var(--paper2) !important; /* Fons fosc per a opcions secundàries */
+    color: #FFF !important;
+}
+
+.arcadiCheckOption input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--accent-turquesa); /* Checkboxes turquesa */
+}
+
+/* BARRA DE CONTEXT SUPERIOR (SELECTORS D'EMPRESA / CENTRE) */
+.arcadiContextBar {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) minmax(220px, 1.3fr) minmax(220px, 1.4fr);
+    gap: 16px;
+    margin: 0 0 24px;
+    padding: 16px 20px;
+    background: var(--paper2) !important; /* Integrat al fons fosc, fora verd llampant */
+    color: #FFF !important;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+
+.arcadiContextBar>div { display: flex; flex-direction: column; gap: 6px; }
+.arcadiContextBar small {
+    font-size: 11px;
+    letter-spacing: .8px;
+    font-weight: 800;
+    color: var(--muted) !important;
+    text-transform: uppercase;
+}
+
+/* ELS SELECTORS DESPLEGABLES (DROPDOWNS) PREMUM */
+.arcadiContextBar select {
+    width: 100%;
+    background: #0B1319 !important; /* Fons fosc de l'app */
+    color: #FFFFFF !important; /* Lletra blanca */
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.arcadiContextCurrent { justify-content: center; }
+.arcadiContextCurrent b { line-height: 1.25; color: var(--accent-turquesa); }
+
+/* ADAPTACIÓ MÒBIL I RESPONSIVE */
+@media(max-width:850px){
+    .arcadiContextBar { grid-template-columns: 1fr; }
+    .arcadiContextCurrent { display: none !important; }
+}
+@media(max-width:700px){
+    .arcadiFormGrid, .arcadiKeyValue { grid-template-columns: 1fr; }
+    .arcadiKeyValue b { border-bottom: 0; }
+    .arcadiModuleNav { align-items: flex-start; flex-direction: column; }
+    .arcadiStats { grid-template-columns: repeat(2, 1fr); }
+}
