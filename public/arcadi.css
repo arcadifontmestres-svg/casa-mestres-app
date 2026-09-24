@@ -35,3 +35,127 @@
 .arcadiContextBar select{width:100%;background:#fff;color:var(--ink);border:0;border-radius:9px;padding:9px 10px;font-weight:800}
 .arcadiContextCurrent{justify-content:center}.arcadiContextCurrent b{line-height:1.25}
 @media(max-width:850px){.arcadiContextBar{grid-template-columns:1fr}.arcadiContextCurrent{display:none!important}}
+
+
+/* Disseny operatiu ARCADI 2026 */
+:root{
+  --bg:#f3f7f8;--paper:#ffffff;--paper2:#edf4f5;--ink:#142631;--muted:#6f7f88;
+  --green:#159c9d;--gold:#159c9d;--line:#dce5e8;--bad:#c54c4c;--ok:#23865f;
+  --navy:#071924;--navy2:#0d2b39;--teal:#1aa2a3;--teal-dark:#117f80;
+  --shadow:0 12px 30px rgba(18,38,49,.08)
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif}
+body{min-width:320px}
+.app{grid-template-columns:264px minmax(0,1fr)}
+aside{
+  background:var(--navy);border:0;padding:22px 16px;color:white;
+  box-shadow:8px 0 30px rgba(7,25,36,.10)
+}
+.brand{padding:0 8px 20px;margin:0 0 14px;border-bottom:1px solid rgba(255,255,255,.11)}
+.brandLogo{
+  width:48px;height:48px;border:0;border-radius:13px;background:var(--teal);
+  color:white;font-size:22px;box-shadow:none
+}
+.brand h1{font-family:Inter,Segoe UI,Arial,sans-serif;font-size:20px;color:#fff;letter-spacing:.5px}
+.brand p{font-size:10px;color:#95a9b2;letter-spacing:1.8px}
+.group{color:#75909c;margin:20px 10px 7px;font-size:10px;letter-spacing:1.4px}
+.nav button,.nav a{
+  color:#d8e3e7;border-radius:10px;padding:11px 12px;margin:3px 0;font-size:14px;
+  font-weight:650;transition:background .16s ease,color .16s ease,transform .16s ease
+}
+.nav button:hover,.nav a:hover{background:rgba(26,162,163,.15);color:#fff;transform:translateX(2px)}
+.nav button.active{background:var(--teal);color:#fff;box-shadow:0 8px 20px rgba(26,162,163,.22)}
+main{padding:0 28px 32px;background:var(--bg)}
+.top{
+  position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);
+  margin:0 -28px 24px;padding:20px 28px 18px;border-bottom:1px solid var(--line);
+  align-items:center;backdrop-filter:blur(12px)
+}
+.top h2{font-family:Inter,Segoe UI,Arial,sans-serif;font-size:28px;color:var(--ink);font-weight:800;letter-spacing:-.4px}
+.top p{font-size:14px;color:var(--muted);margin-top:5px}
+.badge{background:#e9f1f3;color:#49626d;padding:6px 10px;font-weight:750}
+.badge.ok{background:#dff4ec;color:#187354}.badge.warn{background:#fff0d2;color:#8a5c08}.badge.bad{background:#fde6e4;color:#a43c36}
+.panel{
+  border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);
+  margin-bottom:18px;background:var(--paper)
+}
+.panel h3{margin:0 0 15px;font-size:19px;color:var(--ink)}
+.notice{
+  background:#e8f7f7;border:1px solid #b8e2e2;color:#1c4e55;border-radius:14px;
+  padding:13px 15px;margin-bottom:16px;line-height:1.45
+}
+.cards{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.card{
+  min-height:150px;border:1px solid var(--line);border-radius:18px;padding:20px;background:#fff;
+  box-shadow:var(--shadow);transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease
+}
+.card:hover{transform:translateY(-3px);border-color:#8cd1d1;box-shadow:0 18px 36px rgba(18,38,49,.12)}
+.card strong{font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--teal);font-size:28px}
+.card b{color:var(--ink);font-size:18px;margin:12px 0 7px}.card span{color:var(--muted);font-size:13px;line-height:1.45}
+.toolbar,.actions{gap:10px}
+.btn{
+  background:var(--teal);color:#fff;border-radius:999px;padding:10px 17px;font-weight:750;
+  transition:background .16s ease,transform .16s ease,box-shadow .16s ease
+}
+.btn:hover{background:var(--teal-dark);transform:translateY(-1px);box-shadow:0 8px 18px rgba(26,162,163,.20)}
+.btn.secondary{background:#eaf0f2;color:#243943}.btn.secondary:hover{background:#dce7ea}
+.btn.gold{background:var(--navy2);color:#fff}.btn.gold:hover{background:var(--navy)}
+.btn.bad{background:#c84e4e}.btn.small{padding:7px 11px;font-size:12px}
+label{color:#4c626c;font-size:12px;margin-bottom:6px}
+input,select,textarea{
+  border:1px solid #cad8dc;border-radius:11px;padding:10px 12px;background:#fff;color:var(--ink);
+  min-height:42px;transition:border-color .15s ease,box-shadow .15s ease
+}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,162,163,.13)}
+textarea{min-height:100px}.search{min-width:240px}
+.tableWrap{border:1px solid var(--line);border-radius:14px;max-height:65vh;background:white}
+table{background:white}th,td{border-bottom:1px solid #e5ecee;padding:12px 13px;font-size:13px}
+th{background:#edf4f5;color:#38505b;font-size:11px;text-transform:uppercase;letter-spacing:.55px}
+tbody tr:hover td{background:#f7fbfb}.muted{color:var(--muted)}
+.modalBg{background:rgba(3,18,27,.68);backdrop-filter:blur(4px)}
+.modal{border:0;border-radius:22px;background:#fff;padding:22px;box-shadow:0 28px 90px rgba(3,18,27,.35)}
+.modalHead{padding-bottom:15px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.modalHead h3{font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink);font-size:23px}
+.lineRows{border-color:var(--line);border-radius:14px}.lineRow{border-color:var(--line);padding:11px}
+.okBox{background:#e7f7f1;border-color:#afe0cc;border-radius:13px;color:#205f4a}
+.errBox{border-radius:13px}
+.iframe{border-color:var(--line);border-radius:16px}
+.arcadiSectionGrid,.arcadiModuleGrid{gap:16px}
+.arcadiSectionCard,.arcadiModuleCard{
+  border:1px solid var(--line);border-radius:18px;padding:20px;min-height:160px;background:#fff;
+  box-shadow:var(--shadow);transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease
+}
+.arcadiSectionCard:hover,.arcadiModuleCard:hover{transform:translateY(-3px);border-color:#83cecf;box-shadow:0 18px 36px rgba(18,38,49,.12)}
+.arcadiSectionCard b,.arcadiModuleCard b{font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink);font-size:19px}
+.arcadiSectionCard span,.arcadiModuleCard small{color:var(--muted)}
+.arcadiSectionCard small,.arcadiModuleCard>span{color:var(--teal)}
+.arcadiStat{border-color:var(--line);border-radius:16px;box-shadow:none;background:var(--navy2);color:white}
+.arcadiStat strong{font-family:Inter,Segoe UI,Arial,sans-serif;color:#55d2cc}.arcadiStat b{color:#d8e7eb}
+.arcadiModuleNav{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 15px}
+.zoneTab{border-color:var(--line);background:#fff;color:var(--ink)}.zoneTab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.tableTile{border:1px solid var(--line);background:#fff;border-radius:18px}.tableTile strong{font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink)}
+.tableTile.occupied{background:#e9f7f2;border-color:#9cd7c2}.tableTile.bill{background:#fff4d9;border-color:#e3c374}
+.reservationCalendar{gap:12px}.calendarDay{border-color:var(--line);background:#f7fafb}
+.calendarDay strong{color:var(--teal)}
+.tpvPublish,.posCatalog{background:#f2f7f8;border-color:var(--line)}
+.familyBtn.active{background:var(--teal)}.productBtn span{color:var(--teal)}
+.orderTotal,.ticketTotal b{color:var(--teal)}.ticketTotal{border-color:var(--teal)}
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  aside{position:relative;height:auto;padding:14px}
+  .brand{padding-bottom:12px}
+  .nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+  .group{grid-column:1/-1;margin:12px 6px 3px}
+  main{padding:0 16px 24px}
+  .top{margin:0 -16px 18px;padding:16px}
+}
+@media(max-width:560px){
+  .nav{grid-template-columns:1fr}.cards{grid-template-columns:1fr}
+  .top{align-items:flex-start}.top h2{font-size:24px}
+  .panel{padding:15px;border-radius:15px}.card{min-height:125px}
+  .toolbar>*{width:100%}.search{min-width:0}
+}
+@media print{
+  .app,.modalBg{display:none!important}.printArea{display:block}
+}
