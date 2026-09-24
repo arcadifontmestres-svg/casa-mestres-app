@@ -129,10 +129,10 @@
       <div class="panel"><h3>Circuit de treball de Cuina</h3><div class="cards">
         <button class="card" data-core="dishes"><strong>${dishes.length}</strong><b>Plats</b><span>Recepta, elaboració i escandall automàtic</span></button>
         <button class="card" data-core="bases"><strong>${bases.length}</strong><b>Bases de cuina</b><span>Recepta, rendiment i cost valorat</span></button>
-        <button class="card" data-core="cuina"><strong>${dishes.length + bases.length}</strong><b>Escandalls</b><span>Consultar plats, bases o tots els escandalls</span></button>
-        <button class="card" data-core="cuina"><strong>${planned}</strong><b>Produccions i mise en place</b><span>Programar quantitats i generar la fitxa de producció</span></button>
-        <button class="card" data-core="cuina"><strong>${pending}</strong><b>Previsió de productes</b><span>Necessitats acumulades abans de l'autorització de compra</span></button>
-      </div><div class="actions"><button class="btn" data-core="cuina">Obrir Cuina completa</button></div></div>
+        <button class="card" data-kitchen-action="renderCostSheets"><strong>${dishes.length + bases.length}</strong><b>Escandalls</b><span>Consultar plats, bases o tots els escandalls</span></button>
+        <button class="card" data-kitchen-action="renderProductions"><strong>${planned}</strong><b>Produccions i mise en place</b><span>Programar quantitats i generar la fitxa de producció</span></button>
+        <button class="card" data-kitchen-action="renderForecast"><strong>${pending}</strong><b>Previsió de productes</b><span>Necessitats acumulades abans de l'autorització de compra</span></button>
+      </div><div class="actions"><button class="btn" data-kitchen-action="renderKitchen">Obrir Cuina completa</button></div></div>
       <div class="notice"><b>Dependències automàtiques:</b> producció programada → ingredients escalats → previsió de productes → registre APPCC, lot, etiqueta i traçabilitat. La compra queda pendent de revisió i autorització de Direcció.</div>`;
   });
 
@@ -398,6 +398,14 @@
     document.querySelectorAll('[data-open-section]').forEach(button => { button.onclick = () => openSection(button.dataset.openSection); });
     document.querySelectorAll('[data-open-module]').forEach(button => { button.onclick = () => open(button.dataset.openModule); });
     document.querySelectorAll('[data-core]').forEach(button => { button.onclick = () => A.goCore(button.dataset.core); });
+    document.querySelectorAll('[data-kitchen-action]').forEach(button => {
+      button.onclick = () => {
+        const action = button.dataset.kitchenAction;
+        const handler = window.ProductionNeeds?.[action];
+        if (typeof handler === 'function') return handler();
+        A.error(new Error('El mòdul de Cuina no ha carregat correctament.'));
+      };
+    });
     document.querySelectorAll('[data-export]').forEach(button => { button.onclick = () => exportData(button.dataset.export); });
     document.querySelectorAll('[data-work-centre]').forEach(button => {
       button.onclick = () => A.setContext(A.context.companyId, button.dataset.workCentre);
