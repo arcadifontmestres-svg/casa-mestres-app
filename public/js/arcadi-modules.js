@@ -267,7 +267,7 @@
     const employees = A.state.employees || [];
     const punches = A.state.punches || [];
     const schedules = A.state.schedules || [];
-    return `<div class="arcadiStats">${stat(employees.filter(item => item.active !== false).length, 'Empleats actius')}${stat(schedules.length, 'Torns')}${stat(scheduledHours().toFixed(1), 'Hores programades')}${stat(punches.length, 'Fitxatges')}</div><div class="panel actions"><button class="btn" data-core="employees">Empleats</button><button class="btn secondary" data-core="schedules">Horaris</button><button class="btn secondary" data-core="punches">Fitxatges</button></div>`;
+    return `<div class="arcadiStats">${stat(employees.filter(item => item.active !== false).length, 'Empleats actius')}${stat(schedules.length, 'Torns')}${stat(scheduledHours().toFixed(1), 'Hores programades')}${stat(punches.length, 'Fitxatges')}</div><div class="panel actions"><button class="btn" data-hr-action="renderEmployees">Empleats</button><button class="btn secondary" data-hr-action="openShiftCriteria">Criteris de torns</button><button class="btn secondary" data-hr-action="renderSchedules">Horari setmanal</button><button class="btn secondary" data-hr-action="renderPunches">Fitxatges</button></div>`;
   });
 
   custom('appccAdvanced', 59, 'operations', 'Seguretat i normativa', 'Visió conjunta d’APPCC, incidències, traçabilitat i manteniment preventiu.', () => {
@@ -404,6 +404,14 @@
         const handler = window.ProductionNeeds?.[action];
         if (typeof handler === 'function') return handler();
         A.error(new Error('El mòdul de Cuina no ha carregat correctament.'));
+      };
+    });
+    document.querySelectorAll('[data-hr-action]').forEach(button => {
+      button.onclick = () => {
+        const action = button.dataset.hrAction;
+        const handler = window.HR?.[action];
+        if (typeof handler === 'function') return handler();
+        A.error(new Error('El mòdul de RRHH no ha carregat correctament.'));
       };
     });
     document.querySelectorAll('[data-export]').forEach(button => { button.onclick = () => exportData(button.dataset.export); });
