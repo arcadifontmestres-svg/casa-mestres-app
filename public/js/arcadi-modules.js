@@ -107,34 +107,13 @@
   const sections = {
     purchases: { label: 'Compres i logística', description: 'Proveïdors, GS-COMP, GS-REC i traçabilitat.', modules: ['supplierAdvanced', 'purchaseAssistant', 'purchases', 'receipts', 'traceability'] },
     customers: { label: 'Clients i comercial', description: 'CRM, reserves, carta, grups, experiències i fidelització.', modules: ['crm', 'reservationsAdvanced', 'digitalMenu', 'publicationStudio', 'communications', 'marketing', 'groups', 'experiences', 'loyalty'] },
-    operations: { label: 'Operacions', description: 'Cuina, APPCC, manteniment, inventari, sala i RRHH.', modules: ['kitchen', 'criteriaStandards', 'appcc', 'maintenance', 'inventoryAdvanced', 'floorAdvanced', 'hrAdvanced', 'appccAdvanced'] },
+    operations: { label: 'Operacions', description: 'APPCC, manteniment, inventari, producció, sala i RRHH.', modules: ['criteriaStandards', 'appcc', 'maintenance', 'inventoryAdvanced', 'productionRecords', 'floorAdvanced', 'hrAdvanced', 'appccAdvanced'] },
     analysis: { label: 'Anàlisi i economia', description: 'Indicadors reals, costos i resultats.', modules: ['analytics', 'costs', 'economyAdvanced'] },
     ecosystem: { label: 'Ecosistema', description: 'Empreses, centres, plataformes, mini apps i exportacions.', modules: ['commandCenter', 'organizations', 'restaurants', 'platforms', 'miniapps', 'exports'] },
     system: { label: 'Sistema', description: 'Backoffice, configuració, control final i assistència IA.', modules: ['backoffice', 'system', 'finalization', 'assistant'] }
   };
 
   const custom = (key, phase, section, label, description, renderer) => register({ key, phase, section, label, description, renderer });
-
-  custom('kitchen', 55, 'operations', 'Cuina', 'Plats, bases, escandalls, produccions, mise en place i previsió de productes.', () => {
-    const dishes = A.scopedCollection ? A.scopedCollection('dishes') : (A.state.dishes || []);
-    const bases = A.scopedCollection ? A.scopedCollection('bases') : (A.state.bases || []);
-    const productions = A.scopedCollection ? A.scopedCollection('productionRecords') : (A.state.productionRecords || []);
-    const forecasts = A.scopedCollection ? A.scopedCollection('productForecasts') : (A.state.productForecasts || []);
-    const planned = productions.filter(item => ['Programada', 'Prevista', 'En producció'].includes(item.status)).length;
-    const pending = forecasts.filter(item => item.status === 'PREVISIO').length;
-    return `<div class="notice"><b>Cuina:</b> una sola entrada per crear receptes, calcular escandalls, programar elaboracions i generar les necessitats vinculades.</div>
-      <div class="arcadiStats">
-        ${stat(dishes.length, 'Plats')}${stat(bases.length, 'Bases de cuina')}${stat(planned, 'Produccions previstes')}${stat(pending, 'Necessitats pendents')}
-      </div>
-      <div class="panel"><h3>Circuit de treball de Cuina</h3><div class="cards">
-        <button class="card" data-core="dishes"><strong>${dishes.length}</strong><b>Plats</b><span>Recepta, elaboració i escandall automàtic</span></button>
-        <button class="card" data-core="bases"><strong>${bases.length}</strong><b>Bases de cuina</b><span>Recepta, rendiment i cost valorat</span></button>
-        <button class="card" data-kitchen-action="renderCostSheets"><strong>${dishes.length + bases.length}</strong><b>Escandalls</b><span>Consultar plats, bases o tots els escandalls</span></button>
-        <button class="card" data-kitchen-action="renderProductions"><strong>${planned}</strong><b>Produccions i mise en place</b><span>Programar quantitats i generar la fitxa de producció</span></button>
-        <button class="card" data-kitchen-action="renderForecast"><strong>${pending}</strong><b>Previsió de productes</b><span>Necessitats acumulades abans de l'autorització de compra</span></button>
-      </div><div class="actions"><button class="btn" data-kitchen-action="renderKitchen">Obrir Cuina completa</button></div></div>
-      <div class="notice"><b>Dependències automàtiques:</b> producció programada → ingredients escalats → previsió de productes → registre APPCC, lot, etiqueta i traçabilitat. La compra queda pendent de revisió i autorització de Direcció.</div>`;
-  });
 
   custom('commandCenter', 62, 'ecosystem', 'Centre de comandament', 'Visió corporativa i seguiment de cada centre de treball.', () => {
     const companyId = A.context?.companyId || '';
@@ -267,7 +246,7 @@
     const employees = A.state.employees || [];
     const punches = A.state.punches || [];
     const schedules = A.state.schedules || [];
-    return `<div class="arcadiStats">${stat(employees.filter(item => item.active !== false).length, 'Empleats actius')}${stat(schedules.length, 'Torns')}${stat(scheduledHours().toFixed(1), 'Hores programades')}${stat(punches.length, 'Fitxatges')}</div><div class="panel actions"><button class="btn" data-hr-action="renderEmployees">Empleats</button><button class="btn secondary" data-hr-action="openShiftCriteria">Criteris de torns</button><button class="btn secondary" data-hr-action="renderSchedules">Horari setmanal</button><button class="btn secondary" data-hr-action="renderPunches">Fitxatges</button></div>`;
+    return `<div class="arcadiStats">${stat(employees.filter(item => item.active !== false).length, 'Empleats actius')}${stat(schedules.length, 'Torns')}${stat(scheduledHours().toFixed(1), 'Hores programades')}${stat(punches.length, 'Fitxatges')}</div><div class="panel actions"><button class="btn" data-core="employees">Empleats</button><button class="btn secondary" data-core="schedules">Horaris</button><button class="btn secondary" data-core="punches">Fitxatges</button></div>`;
   });
 
   custom('appccAdvanced', 59, 'operations', 'Seguretat i normativa', 'Visió conjunta d’APPCC, incidències, traçabilitat i manteniment preventiu.', () => {
@@ -398,22 +377,6 @@
     document.querySelectorAll('[data-open-section]').forEach(button => { button.onclick = () => openSection(button.dataset.openSection); });
     document.querySelectorAll('[data-open-module]').forEach(button => { button.onclick = () => open(button.dataset.openModule); });
     document.querySelectorAll('[data-core]').forEach(button => { button.onclick = () => A.goCore(button.dataset.core); });
-    document.querySelectorAll('[data-kitchen-action]').forEach(button => {
-      button.onclick = () => {
-        const action = button.dataset.kitchenAction;
-        const handler = window.ProductionNeeds?.[action];
-        if (typeof handler === 'function') return handler();
-        A.error(new Error('El mòdul de Cuina no ha carregat correctament.'));
-      };
-    });
-    document.querySelectorAll('[data-hr-action]').forEach(button => {
-      button.onclick = () => {
-        const action = button.dataset.hrAction;
-        const handler = window.HR?.[action];
-        if (typeof handler === 'function') return handler();
-        A.error(new Error('El mòdul de RRHH no ha carregat correctament.'));
-      };
-    });
     document.querySelectorAll('[data-export]').forEach(button => { button.onclick = () => exportData(button.dataset.export); });
     document.querySelectorAll('[data-work-centre]').forEach(button => {
       button.onclick = () => A.setContext(A.context.companyId, button.dataset.workCentre);
