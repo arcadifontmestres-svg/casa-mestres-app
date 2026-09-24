@@ -2,7 +2,7 @@
 const $=id=>document.getElementById(id);let data=null,fullData=null,active='home',editing=null,reservationMonth=new Date().toISOString().slice(0,7),temp={ingredients:[],baseUses:[]},tpvZone='sala',tpvCategory='',tpvOrderId=null,tpvProductPage=0,tpvFamilyPage=0;
 const menu=[
  ['FRONT OFFICE','tpv','▣ Sala / TPV'],['','saleItems','Begudes / articles de venda'],
- ['','home','⌂ Inici'],['CONFIGURACIÓ','company','Empresa, logotip i GPS'],['','documents','Cartes, menús i pressupostos'],['','backup','Còpies de seguretat'],
+ ['BACK OFFICE','home','⌂ Inici'],['CONFIGURACIÓ','company','Empresa, logotip i GPS'],['','documents','Cartes, menús i pressupostos'],['','backup','Còpies de seguretat'],
  ['MAGATZEM','suppliers','Proveïdors'],['','products','Productes / Magatzem'],['','ocr','OCR · Crear productes'],
  ['CUINA','bases','Bases de cuina'],['','dishes','Fitxes de plats'],
  ['CONTROL DE QUALITAT','control','Control Normatiu'],
