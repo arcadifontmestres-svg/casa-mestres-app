@@ -107,13 +107,34 @@
   const sections = {
     purchases: { label: 'Compres i logística', description: 'Proveïdors, GS-COMP, GS-REC i traçabilitat.', modules: ['supplierAdvanced', 'purchaseAssistant', 'purchases', 'receipts', 'traceability'] },
     customers: { label: 'Clients i comercial', description: 'CRM, reserves, carta, grups, experiències i fidelització.', modules: ['crm', 'reservationsAdvanced', 'digitalMenu', 'publicationStudio', 'communications', 'marketing', 'groups', 'experiences', 'loyalty'] },
-    operations: { label: 'Operacions', description: 'APPCC, manteniment, inventari, producció, sala i RRHH.', modules: ['criteriaStandards', 'appcc', 'maintenance', 'inventoryAdvanced', 'productionRecords', 'floorAdvanced', 'hrAdvanced', 'appccAdvanced'] },
+    operations: { label: 'Operacions', description: 'Cuina, APPCC, manteniment, inventari, sala i RRHH.', modules: ['kitchen', 'criteriaStandards', 'appcc', 'maintenance', 'inventoryAdvanced', 'floorAdvanced', 'hrAdvanced', 'appccAdvanced'] },
     analysis: { label: 'Anàlisi i economia', description: 'Indicadors reals, costos i resultats.', modules: ['analytics', 'costs', 'economyAdvanced'] },
     ecosystem: { label: 'Ecosistema', description: 'Empreses, centres, plataformes, mini apps i exportacions.', modules: ['commandCenter', 'organizations', 'restaurants', 'platforms', 'miniapps', 'exports'] },
     system: { label: 'Sistema', description: 'Backoffice, configuració, control final i assistència IA.', modules: ['backoffice', 'system', 'finalization', 'assistant'] }
   };
 
   const custom = (key, phase, section, label, description, renderer) => register({ key, phase, section, label, description, renderer });
+
+  custom('kitchen', 55, 'operations', 'Cuina', 'Plats, bases, escandalls, produccions, mise en place i previsió de productes.', () => {
+    const dishes = A.scopedCollection ? A.scopedCollection('dishes') : (A.state.dishes || []);
+    const bases = A.scopedCollection ? A.scopedCollection('bases') : (A.state.bases || []);
+    const productions = A.scopedCollection ? A.scopedCollection('productionRecords') : (A.state.productionRecords || []);
+    const forecasts = A.scopedCollection ? A.scopedCollection('productForecasts') : (A.state.productForecasts || []);
+    const planned = productions.filter(item => ['Programada', 'Prevista', 'En producció'].includes(item.status)).length;
+    const pending = forecasts.filter(item => item.status === 'PREVISIO').length;
+    return `<div class="notice"><b>Cuina:</b> una sola entrada per crear receptes, calcular escandalls, programar elaboracions i generar les necessitats vinculades.</div>
+      <div class="arcadiStats">
+        ${stat(dishes.length, 'Plats')}${stat(bases.length, 'Bases de cuina')}${stat(planned, 'Produccions previstes')}${stat(pending, 'Necessitats pendents')}
+      </div>
+      <div class="panel"><h3>Circuit de treball de Cuina</h3><div class="cards">
+        <button class="card" data-core="dishes"><strong>${dishes.length}</strong><b>Plats</b><span>Recepta, elaboració i escandall automàtic</span></button>
+        <button class="card" data-core="bases"><strong>${bases.length}</strong><b>Bases de cuina</b><span>Recepta, rendiment i cost valorat</span></button>
+        <button class="card" data-core="cuina"><strong>${dishes.length + bases.length}</strong><b>Escandalls</b><span>Consultar plats, bases o tots els escandalls</span></button>
+        <button class="card" data-core="cuina"><strong>${planned}</strong><b>Produccions i mise en place</b><span>Programar quantitats i generar la fitxa de producció</span></button>
+        <button class="card" data-core="cuina"><strong>${pending}</strong><b>Previsió de productes</b><span>Necessitats acumulades abans de l'autorització de compra</span></button>
+      </div><div class="actions"><button class="btn" data-core="cuina">Obrir Cuina completa</button></div></div>
+      <div class="notice"><b>Dependències automàtiques:</b> producció programada → ingredients escalats → previsió de productes → registre APPCC, lot, etiqueta i traçabilitat. La compra queda pendent de revisió i autorització de Direcció.</div>`;
+  });
 
   custom('commandCenter', 62, 'ecosystem', 'Centre de comandament', 'Visió corporativa i seguiment de cada centre de treball.', () => {
     const companyId = A.context?.companyId || '';
