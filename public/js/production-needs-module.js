@@ -1,88 +1,27 @@
 (()=>{
 'use strict';
-const core=()=>window.ArcadiCore;
-const data=()=>core().getData();
-const e=value=>core().esc(value);
-const num=value=>core().n(value);
-const id=prefix=>core().uid(prefix);
-const ctx=()=>core().contextValues();
-
-function productLines(dish,portions){
-  const state=data();
-  const factor=Math.max(1,num(portions))/(num(dish.servings)||1);
-  const lines=[];
-  for(const item of dish.ingredients||[]){
-    const product=(state.products||[]).find(row=>row.id===item.productId);
-    lines.push({productId:item.productId||'',productName:product?.name||item.name||'Producte pendent',qty:num(item.qty)*factor,unit:item.unit||product?.unit||'unitat',source:'PLAT'});
-  }
-  for(const item of dish.baseUses||[]){
-    const base=(state.bases||[]).find(row=>row.id===item.baseId);
-    lines.push({productId:item.baseId||'',productName:'Base: '+(item.name||base?.name||'Base pendent'),qty:num(item.qty)*factor,unit:item.unit||'unitat',source:'BASE'});
-  }
-  return lines;
-}
-
-function renderProductions(){
-  const state=data();
-  state.productionPlans=state.productionPlans||[];
-  const rows=state.productionPlans.slice().reverse().map(item=>'<tr><td>'+e(item.date||'')+'</td><td><b>'+e(item.itemName)+'</b><br><span class="muted">'+e(item.notes||'')+'</span></td><td>'+e(item.qty)+' racions</td><td>'+e(item.requestedBy||'Cuina')+'</td><td><span class="badge warn">'+e(item.status||'PROPOSTA')+'</span></td><td>'+((item.needLines||[]).map(line=>e(line.productName)+': '+e(Number(line.qty||0).toFixed(2))+' '+e(line.unit)).join('<br>'))+'</td></tr>').join('');
-  document.getElementById('view').innerHTML='<div class="notice"><b>Criteri operatiu:</b> cuina proposa què necessita produir. La proposta genera necessitats de producte, però no modifica estoc ni crea cap compra. Direcció revisa i autoritza.</div><div class="panel"><div class="toolbar"><button class="btn" onclick="ProductionNeeds.openProduction()">Nova proposta de producció</button></div><div class="tableWrap"><table><thead><tr><th>Data</th><th>Producció</th><th>Quantitat</th><th>Proposa</th><th>Estat</th><th>Necessitats calculades</th></tr></thead><tbody>'+(rows||'<tr><td colspan="6">Encara no hi ha propostes de producció.</td></tr>')+'</tbody></table></div></div>';
-}
-
-function openProduction(){
-  const state=data();
-  const dishes=state.dishes||[];
-  core().openModal('Nova proposta de producció','<form id="productionForm"><div class="grid"><div><label>Plat o elaboració</label><select id="prod_dish">'+dishes.map(row=>'<option value="'+e(row.id)+'">'+e(row.name)+'</option>').join('')+'</select></div><div><label>Racions previstes</label><input id="prod_qty" type="number" min="1" step="1" value="1"></div><div><label>Data de producció</label><input id="prod_date" type="date" value="'+new Date().toISOString().slice(0,10)+'"></div><div><label>Responsable / partida</label><input id="prod_by"></div></div><div><label>Motiu o servei previst</label><textarea id="prod_notes"></textarea></div><div class="actions"><button class="btn" type="submit">Crear fitxa i necessitats</button><button class="btn secondary" type="button" onclick="closeModal()">Cancel·lar</button></div></form>');
-  document.getElementById('productionForm').onsubmit=async event=>{
-    event.preventDefault();
-    const dish=dishes.find(row=>row.id===document.getElementById('prod_dish').value);
-    if(!dish)return;
-    const quantity=Math.max(1,num(document.getElementById('prod_qty').value));
-    const context=ctx();
-    const now=new Date().toISOString();
-    const lines=productLines(dish,quantity);
-    const productionId=id('production');
-    const production={id:productionId,companyId:context.companyId,centreId:context.centreId,scope:'CENTRE',date:document.getElementById('prod_date').value,itemId:dish.id,itemName:dish.name,qty:quantity,requestedBy:document.getElementById('prod_by').value.trim()||'Cuina',notes:document.getElementById('prod_notes').value.trim(),status:'PROPOSTA',needLines:lines,createdAt:now};
-    state.productionPlans=state.productionPlans||[];
-    state.productionPlans.push(production);
-    state.operationalNeeds=state.operationalNeeds||[];
-    for(const line of lines)state.operationalNeeds.push({id:id('need'),companyId:context.companyId,centreId:context.centreId,scope:'CENTRE',date:production.date,area:'CUINA',productionId,productId:line.productId,productName:line.productName,qty:line.qty,unit:line.unit,requestedBy:production.requestedBy,reason:'Producció: '+dish.name,status:'PENDENT_DIRECCIO',createdAt:now});
-    await core().save();
-    core().closeModal();
-    renderProductions();
-  };
-}
-
-function summary(){
-  const grouped={};
-  for(const item of data().operationalNeeds||[]){
-    const key=[item.centreId||'sense-centre',item.date||'',item.productId||item.productName,item.unit,item.status].join('|');
-    if(!grouped[key])grouped[key]={...item,ids:[],qty:0,count:0};
-    grouped[key].ids.push(item.id);
-    grouped[key].qty+=num(item.qty);
-    grouped[key].count+=1;
-  }
-  return Object.values(grouped);
-}
-
-function renderNeeds(){
-  const state=data();
-  state.operationalNeeds=state.operationalNeeds||[];
-  const rows=summary().sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(item=>{
-    const statusClass=item.status==='PENDENT_DIRECCIO'?'warn':item.status==='AUTORITZADA'?'ok':'bad';
-    const buttons=item.status==='PENDENT_DIRECCIO'?'<button class="btn small" onclick=\'ProductionNeeds.decide('+JSON.stringify(item.ids)+',"AUTORITZADA")\'>Autoritzar</button> <button class="btn small bad" onclick=\'ProductionNeeds.decide('+JSON.stringify(item.ids)+',"REBUTJADA")\'>Rebutjar</button>':'—';
-    return '<tr><td>'+e(item.date||'')+'</td><td>'+e(item.centreId||'Centre actual')+'</td><td>'+e(item.area||'')+'</td><td><b>'+e(item.productName)+'</b><br><span class="muted">'+item.count+' registre(s)</span></td><td>'+e(item.qty.toFixed(2))+' '+e(item.unit)+'</td><td>'+e(item.reason||'')+'</td><td><span class="badge '+statusClass+'">'+e(item.status)+'</span></td><td>'+buttons+'</td></tr>';
-  }).join('');
-  document.getElementById('view').innerHTML='<div class="notice"><b>Direcció controla estoc i compra:</b> aquest resum consolida les necessitats creades per cuina, sala o manteniment. Autoritzar valida la necessitat; no descompta estoc ni confirma cap compra.</div><div class="panel"><div class="toolbar"><button class="btn secondary" onclick="show(\'needs\')">Actualitzar resum</button></div><div class="tableWrap"><table><thead><tr><th>Data</th><th>Centre</th><th>Àrea</th><th>Producte / necessitat</th><th>Quantitat</th><th>Origen</th><th>Estat</th><th>Decisió</th></tr></thead><tbody>'+(rows||'<tr><td colspan="8">No hi ha necessitats registrades.</td></tr>')+'</tbody></table></div></div>';
-}
-
-async function decide(ids,status){
-  const state=data();
-  const now=new Date().toISOString();
-  for(const item of state.operationalNeeds||[])if(ids.includes(item.id)){item.status=status;item.decidedAt=now;item.decidedBy='Direcció';}
-  await core().save();
-  renderNeeds();
-}
-
-window.ProductionNeeds={renderProductions,openProduction,renderNeeds,decide};
+const C=()=>window.ArcadiCore,S=()=>C().getData(),e=v=>C().esc(v),n=v=>C().n(v),id=p=>C().uid(p),ctx=()=>C().contextValues(),day=()=>new Date().toISOString().slice(0,10);
+const U={g:['m',.001],kg:['m',1],ml:['v',.001],L:['v',1],u:['u',1],unitat:['u',1]};
+const cv=(q,a,b)=>U[a]&&U[b]&&U[a][0]===U[b][0]?n(q)*U[a][1]/U[b][1]:n(q);
+const product=x=>(S().products||[]).find(p=>p.id===x),base=x=>(S().bases||[]).find(b=>b.id===x);
+const money=x=>n(x).toFixed(2).replace('.',',')+' €';
+function ingCost(x){const p=product(x.productId);return p?cv(x.qty,x.unit||p.unit,p.unit)*n(p.price):0}
+function baseCost(b,seen=new Set()){if(!b||seen.has(b.id))return 0;const next=new Set(seen);next.add(b.id);return(b.ingredients||[]).reduce((s,x)=>s+ingCost(x),0)+(b.baseUses||[]).reduce((s,x)=>{const c=base(x.baseId),y=n(c?.yield);return c&&y?s+baseCost(c,next)*cv(x.qty,x.unit,c.yieldUnit)/y:s},0)}
+function cost(r){return(r.ingredients||[]).reduce((s,x)=>s+ingCost(x),0)+(r.baseUses||[]).reduce((s,x)=>{const b=base(x.baseId),y=n(b?.yield);return b&&y?s+baseCost(b)*cv(x.qty,x.unit,b.yieldUnit)/y:s},0)}
+const yieldOf=(r,t)=>t==='dish'?(n(r.servings)||1):(n(r.yield)||1),unitOf=(r,t)=>t==='dish'?'racions':(r.yieldUnit||'unitat');
+function add(map,x,f,origin){if(x.asNeeded)return;const p=product(x.productId),u=p?.unit||x.unit||'unitat',k=(x.productId||x.name)+'|'+u;if(!map[k])map[k]={productId:x.productId||'',productName:p?.name||x.name||'Producte pendent',qty:0,unit:u,origins:[]};map[k].qty+=cv(n(x.qty)*f,x.unit||u,u);map[k].origins.push(origin)}
+function expand(map,b,f,origin,seen=new Set()){if(!b||seen.has(b.id))return;const next=new Set(seen);next.add(b.id);(b.ingredients||[]).forEach(x=>add(map,x,f,origin));(b.baseUses||[]).forEach(x=>{const c=base(x.baseId),y=n(c?.yield);if(c&&y)expand(map,c,f*cv(x.qty,x.unit,c.yieldUnit)/y,origin+' · '+c.name,next)})}
+function needs(r,t,q){const map={},f=n(q)/yieldOf(r,t);(r.ingredients||[]).forEach(x=>add(map,x,f,r.name));(r.baseUses||[]).forEach(x=>{const b=base(x.baseId),y=n(b?.yield);if(b&&y)expand(map,b,f*cv(x.qty,x.unit,b.yieldUnit)/y,r.name+' · '+b.name)});return Object.values(map).filter(x=>x.qty>0)}
+function renderKitchen(){const s=S(),planned=(s.productionRecords||[]).filter(x=>x.status==='Programada').length,pending=(s.productForecasts||[]).filter(x=>x.status==='PREVISIO').length;document.getElementById('view').innerHTML=`<div class="notice"><b>Cuina:</b> receptes, elaboració, escandalls, produccions i previsió de productes en un únic circuit.</div><div class="cards"><div class="card" onclick="show('dishes')"><strong>${(s.dishes||[]).length}</strong><b>Plats</b><span>Crear, consultar, editar i valorar</span></div><div class="card" onclick="show('bases')"><strong>${(s.bases||[]).length}</strong><b>Bases de cuina</b><span>Recepta, procés i escandall</span></div><div class="card" onclick="ProductionNeeds.renderCostSheets()"><strong>${(s.dishes||[]).length+(s.bases||[]).length}</strong><b>Escandalls</b><span>Plats, bases o tots</span></div><div class="card" onclick="ProductionNeeds.renderProductions()"><strong>${planned}</strong><b>Produccions i mise en place</b><span>Programació i registres vinculats</span></div><div class="card" onclick="ProductionNeeds.renderForecast()"><strong>${pending}</strong><b>Previsió de productes</b><span>Necessitats acumulades abans de comprar</span></div></div>`}
+function renderCostSheets(filter='all'){const a=[];if(filter!=='bases')(S().dishes||[]).forEach(r=>a.push(['dish',r,'Plat',yieldOf(r,'dish')+' racions']));if(filter!=='dishes')(S().bases||[]).forEach(r=>a.push(['base',r,'Base',(r.yield||'—')+' '+(r.yieldUnit||'')]));const rows=a.map(([t,r,k,y])=>`<tr><td><b>${e(r.name)}</b></td><td>${k}</td><td>${e(y)}</td><td>${money(cost(r))}</td><td>${money(cost(r)/yieldOf(r,t))}</td><td><button class="btn small secondary" onclick="openForm('${t==='dish'?'dishes':'bases'}','${e(r.id)}')">Editar</button> <button class="btn small gold" onclick="printSingle('${t==='dish'?'dishes':'bases'}','${e(r.id)}')">Fitxa</button> <button class="btn small" onclick="ProductionNeeds.openProduction('${t}','${e(r.id)}')">Programar</button></td></tr>`).join('');document.getElementById('view').innerHTML=`<div class="panel"><div class="toolbar"><button class="btn secondary" onclick="ProductionNeeds.renderKitchen()">← Cuina</button><label>Consultar <select onchange="ProductionNeeds.renderCostSheets(this.value)"><option value="all">Tots els escandalls</option><option value="dishes" ${filter==='dishes'?'selected':''}>Plats</option><option value="bases" ${filter==='bases'?'selected':''}>Bases</option></select></label></div></div><div class="panel"><div class="tableWrap"><table><thead><tr><th>Elaboració</th><th>Tipus</th><th>Rendiment</th><th>Cost recepta</th><th>Cost unitari</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan="6">No hi ha receptes.</td></tr>'}</tbody></table></div></div>`}
+function renderProductions(){const rows=(S().productionRecords||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).map(r=>`<tr><td>${e(r.date||'')}</td><td><b>${e(r.item||r.itemName||'')}</b></td><td>${e(r.quantity)} ${e(r.unit||'')}</td><td>${e(r.station||'')}</td><td><span class="badge ${r.status==='Finalitzada'?'ok':'warn'}">${e(r.status||'Programada')}</span></td><td>${e(r.lot||'—')}</td><td><button class="btn small secondary" onclick="ProductionNeeds.printProduction('${e(r.id)}')">Fitxa</button> <button class="btn small gold" onclick="ProductionNeeds.printLabel('${e(r.id)}')">Etiqueta</button></td></tr>`).join('');document.getElementById('view').innerHTML=`<div class="panel"><div class="toolbar"><button class="btn secondary" onclick="ProductionNeeds.renderKitchen()">← Cuina</button><button class="btn" onclick="ProductionNeeds.openProduction()">Programar producció</button><button class="btn secondary" onclick="ProductionNeeds.renderForecast()">Previsió de productes</button></div></div><div class="notice"><b>Una sola entrada:</b> genera fitxa escalada, previsió de productes, registre APPCC, lot, etiqueta i traçabilitat.</div><div class="panel"><div class="tableWrap"><table><thead><tr><th>Data</th><th>Producció</th><th>Quantitat</th><th>Partida</th><th>Estat</th><th>Lot</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan="7">Encara no hi ha produccions programades.</td></tr>'}</tbody></table></div></div>`}
+function openProduction(type='',rid=''){const s=S(),opts=[...(s.dishes||[]).map(r=>['dish',r]),...(s.bases||[]).map(r=>['base',r])],selected=type&&rid?type+':'+rid:'';C().openModal('Programar producció',`<form id="productionForm"><div class="grid"><div><label>Plat o base</label><select id="prod_recipe" required><option value="">Selecciona...</option>${opts.map(([t,r])=>`<option value="${t}:${e(r.id)}" ${selected===t+':'+r.id?'selected':''}>${t==='dish'?'Plat':'Base'} · ${e(r.name)}</option>`).join('')}</select></div><div><label>Quantitat a produir</label><input id="prod_qty" type="number" min="0.001" step="0.001" required></div><div><label>Data</label><input id="prod_date" type="date" value="${day()}" required></div><div><label>Responsable</label><input id="prod_by"></div></div><div id="prod_info" class="okBox">Selecciona una recepta.</div><div><label>Servei, grup o motiu</label><textarea id="prod_notes"></textarea></div><div class="actions"><button class="btn" type="submit">Programar i generar dependències</button><button class="btn secondary" type="button" onclick="closeModal()">Cancel·lar</button></div></form>`);const info=()=>{const[t,x]=document.getElementById('prod_recipe').value.split(':'),r=t==='dish'?(s.dishes||[]).find(y=>y.id===x):(s.bases||[]).find(y=>y.id===x);document.getElementById('prod_info').innerHTML=r?`Recepta: <b>${e(r.name)}</b> · ${yieldOf(r,t)} ${e(unitOf(r,t))} · ${money(cost(r))}`:'Selecciona una recepta.'};document.getElementById('prod_recipe').onchange=info;info();document.getElementById('productionForm').onsubmit=async ev=>{ev.preventDefault();const[t,x]=document.getElementById('prod_recipe').value.split(':'),r=t==='dish'?(s.dishes||[]).find(y=>y.id===x):(s.bases||[]).find(y=>y.id===x);if(!r)return;await createProduction(r,t,n(document.getElementById('prod_qty').value),document.getElementById('prod_date').value,document.getElementById('prod_by').value.trim(),document.getElementById('prod_notes').value.trim());C().closeModal();renderProductions()}}
+async function createProduction(r,t,q,date,who,notes){const s=S(),c=ctx(),now=new Date().toISOString(),pid=id('production'),lot='PROD-'+date.replaceAll('-','')+'-'+pid.slice(-5).toUpperCase(),lines=needs(r,t,q).map(x=>({...x,qty:Number(x.qty.toFixed(4))})),rec={id:pid,companyId:c.companyId,centreId:c.centreId,scope:'CENTRE',date,item:r.name,itemId:r.id,recipeType:t,quantity:q,unit:unitOf(r,t),station:r.station||'',status:'Programada',responsible:who||'Cuina',notes,lot,labelStatus:'Pendent d’imprimir',ingredients:lines,createdAt:now,updatedAt:now};(s.productionRecords??=[]).push(rec);lines.forEach(x=>(s.productForecasts??=[]).push({id:id('forecast'),companyId:c.companyId,centreId:c.centreId,scope:'CENTRE',date,productId:x.productId,productName:x.productName,qty:x.qty,unit:x.unit,originType:'PRODUCCIO',originId:pid,origin:'Producció: '+r.name,status:'PREVISIO',createdAt:now}));s.controlNormatiu=s.controlNormatiu||{empresa:{},records:{}};s.controlNormatiu.records=s.controlNormatiu.records||{};(s.controlNormatiu.records.produccio??=[]).push({id:id('appcc_prod'),companyId:c.companyId,centreId:c.centreId,data:date,produccio:r.name,quantitat:q+' '+unitOf(r,t),responsable:rec.responsible,lot,estat:'Programada',productionId:pid,observacions:notes,createdAt:now});(s.traceabilityRecords??=[]).push({id:id('trace'),companyId:c.companyId,centreId:c.centreId,scope:'CENTRE',code:'GS-TRAC-'+lot,product:r.name,lot,receivedAt:date,status:'Producció programada',usedIn:notes||'Pendent',productionId:pid,notes:'Generat automàticament des de producció.',createdAt:now});await C().save()}
+function groups(){const g={};(S().productForecasts||[]).filter(x=>x.status==='PREVISIO').forEach(x=>{const k=(x.productId||x.productName)+'|'+x.unit;if(!g[k])g[k]={...x,ids:[],qty:0,origins:[]};g[k].ids.push(x.id);g[k].qty+=n(x.qty);g[k].origins.push(x.origin||x.originType)});return Object.values(g)}
+function ordered(pid,u){return(S().purchaseOrders||[]).filter(o=>!['Cancel·lada','Rebutjada','Tancada'].includes(o.status)).reduce((sum,o)=>sum+(o.lines||[]).filter(x=>x.productId===pid).reduce((a,x)=>a+cv(x.qty,x.unit||u,u),0),0)}
+function renderForecast(){const rows=groups().map(x=>{const p=product(x.productId),stock=cv(n(p?.stock),p?.unit||x.unit,x.unit),ord=ordered(x.productId,x.unit),net=Math.max(0,x.qty-stock-ord);return`<tr><td><b>${e(x.productName)}</b></td><td>${x.qty.toFixed(3)} ${e(x.unit)}</td><td>${stock.toFixed(3)}</td><td>${ord.toFixed(3)}</td><td><b>${net.toFixed(3)} ${e(x.unit)}</b></td><td>${e([...new Set(x.origins)].join(' · '))}</td></tr>`}).join('');document.getElementById('view').innerHTML=`<div class="panel"><div class="toolbar"><button class="btn secondary" onclick="ProductionNeeds.renderKitchen()">← Cuina</button><button class="btn secondary" onclick="ProductionNeeds.renderProductions()">Produccions</button><button class="btn" onclick="ProductionNeeds.closeForecast()">Tancar previsió / Generar proposta de compra</button></div></div><div class="notice"><b>Previsió, no compra:</b> acumula necessitats i, en tancar-la, resta estoc i quantitats ja demanades. La proposta queda pendent de Direcció.</div><div class="panel"><div class="tableWrap"><table><thead><tr><th>Producte</th><th>Previst</th><th>Estoc</th><th>Ja demanat</th><th>Necessitat neta</th><th>Origen</th></tr></thead><tbody>${rows||'<tr><td colspan="6">No hi ha necessitats pendents.</td></tr>'}</tbody></table></div></div>`}
+async function closeForecast(){const gs=groups();if(!gs.length)return alert('No hi ha cap previsió pendent.');if(!confirm('Consolidar la previsió i generar una proposta pendent de Direcció?'))return;const s=S(),c=ctx(),now=new Date().toISOString(),lines=[];gs.forEach(x=>{const p=product(x.productId),st=cv(n(p?.stock),p?.unit||x.unit,x.unit),ord=ordered(x.productId,x.unit),net=Math.max(0,x.qty-st-ord);if(net>0)lines.push({productId:x.productId,productName:x.productName,qty:Number(net.toFixed(4)),unit:x.unit,forecastQty:Number(x.qty.toFixed(4)),stockQty:Number(st.toFixed(4)),alreadyOrderedQty:Number(ord.toFixed(4)),resolution:'PENDENT_DIRECCIO'})});const code='GS-COMP-PROP-'+Date.now().toString(36).toUpperCase();(s.purchaseOrders??=[]).push({id:id('purchase'),companyId:c.companyId,centreId:c.centreId,scope:'CENTRE',code,date:day(),status:'Pendent autorització Direcció',source:'PREVISIO_PRODUCTES',lines,notes:'Direcció ha de decidir compra a proveïdor o traspàs entre centres.',createdAt:now,updatedAt:now});const ids=new Set(gs.flatMap(x=>x.ids));(s.productForecasts||[]).forEach(x=>{if(ids.has(x.id)){x.status='CONSOLIDADA';x.purchaseCode=code;x.consolidatedAt=now}});await C().save();renderForecast();alert('Proposta '+code+' creada. No s’ha confirmat cap compra ni modificat l’estoc.')}
+function printDoc(r,label=false){const w=window.open('','_blank'),rows=(r.ingredients||[]).map(x=>`<tr><td>${e(x.productName)}</td><td>${e(x.qty)} ${e(x.unit)}</td></tr>`).join('');w.document.write(`<html><head><style>body{font-family:Arial;margin:28px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #bbb;padding:8px}.label{border:2px solid;padding:16px;width:360px}</style></head><body>${label?`<div class="label"><h2>${e(r.item)}</h2><b>Producció:</b> ${e(r.date)}<br><b>Lot:</b> ${e(r.lot)}<br><b>Quantitat:</b> ${e(r.quantity)} ${e(r.unit)}<br><b>Conservació:</b> segons fitxa tècnica</div>`:`<h1>Fitxa de producció</h1><h2>${e(r.item)}</h2><p><b>Data:</b> ${e(r.date)} · <b>Lot:</b> ${e(r.lot)} · <b>Responsable:</b> ${e(r.responsible)}</p><table><tr><th>Ingredient</th><th>Quantitat</th></tr>${rows}</table><p>${e(r.notes||'')}</p>`}<script>window.print()<\/script></body></html>`);w.document.close()}
+const find=x=>(S().productionRecords||[]).find(r=>r.id===x);
+window.ProductionNeeds={renderKitchen,renderCostSheets,renderProductions,openProduction,renderForecast,closeForecast,printProduction:x=>{const r=find(x);if(r)printDoc(r)},printLabel:x=>{const r=find(x);if(r)printDoc(r,true)}};
 })();

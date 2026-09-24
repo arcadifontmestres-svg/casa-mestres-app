@@ -170,10 +170,36 @@ function normalizeArcadiData(data) {
   const collections = [
     'maintenanceRecords', 'communications', 'crmContacts', 'marketingCampaigns', 'financialEntries',
     'groupEvents', 'experiences', 'loyaltyAccounts', 'organizations', 'governanceCriteria', 'corporateStandards', 'governanceTasks', 'criterionDeployments', 'communicationReads', 'appccTemplates', 'operatingProtocols', 'productStandards', 'supplierStandards', 'purchaseOrders',
-    'goodsReceipts', 'traceabilityRecords', 'productionRecords', 'productionPlans', 'operationalNeeds', 'restaurants', 'permissions', 'permissionAudit',
+    'goodsReceipts', 'traceabilityRecords', 'productionRecords', 'productForecasts', 'productionPlans', 'operationalNeeds', 'restaurants', 'permissions', 'permissionAudit',
     'platformProfiles', 'miniApps', 'dailyOperations', 'appliedMigrations'
   ];
   for (const key of collections) if (!Array.isArray(data[key])) data[key] = [];
+  if (!data.appliedMigrations.some(item => item.id === 'replace_simplified_production_flow_v1')) {
+    for (const old of data.productionPlans) {
+      if (data.productionRecords.some(item => item.legacyProductionPlanId === old.id)) continue;
+      data.productionRecords.push({
+        ...old,
+        id: old.id || `production_${Date.now().toString(36)}`,
+        legacyProductionPlanId: old.id || '',
+        item: old.itemName || old.item || '',
+        quantity: old.qty || old.quantity || 0,
+        unit: old.unit || 'racions',
+        status: old.status === 'PROPOSTA' ? 'Programada' : (old.status || 'Programada')
+      });
+    }
+    for (const old of data.operationalNeeds) {
+      if (data.productForecasts.some(item => item.legacyOperationalNeedId === old.id)) continue;
+      data.productForecasts.push({
+        ...old,
+        id: old.id || `forecast_${Date.now().toString(36)}`,
+        legacyOperationalNeedId: old.id || '',
+        origin: old.reason || old.origin || 'Necessitat operativa',
+        originType: old.area || 'OPERACIO',
+        status: old.status === 'PENDENT_DIRECCIO' ? 'PREVISIO' : (old.status || 'PREVISIO')
+      });
+    }
+    data.appliedMigrations.push({ id: 'replace_simplified_production_flow_v1', appliedAt: new Date().toISOString() });
+  }
   data.controlNormatiu = data.controlNormatiu && typeof data.controlNormatiu === 'object'
     ? data.controlNormatiu : { empresa: {}, records: {} };
   data.controlNormatiu.records = data.controlNormatiu.records && typeof data.controlNormatiu.records === 'object'
@@ -343,7 +369,7 @@ const BACKUP_SCOPED_COLLECTIONS = [
   'shiftTemplates', 'schedules', 'punches', 'reservations', 'maintenanceRecords',
   'communications', 'crmContacts', 'marketingCampaigns', 'groupEvents', 'experiences',
   'loyaltyAccounts', 'purchaseOrders', 'goodsReceipts', 'traceabilityRecords',
-  'productionRecords', 'financialEntries', 'permissions', 'permissionAudit',
+  'productionRecords', 'productForecasts', 'financialEntries', 'permissions', 'permissionAudit',
   'governanceCriteria', 'governanceTasks', 'criterionDeployments', 'corporateStandards'
 ];
 
