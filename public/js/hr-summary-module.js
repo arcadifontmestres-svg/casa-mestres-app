@@ -7,6 +7,21 @@
       root.show('employees');
       return true;
     };
+    api.renderSchedules = function () {
+      if (typeof root.show !== 'function') return false;
+      root.show('schedules');
+      return true;
+    };
+    api.renderPunches = function () {
+      if (typeof root.show !== 'function') return false;
+      root.show('punches');
+      return true;
+    };
+    api.openShiftCriteria = function () {
+      if (!api.renderSchedules()) return false;
+      if (typeof root.openShiftCriteria === 'function') root.openShiftCriteria();
+      return true;
+    };
     root.ArcadiHR = api;
     root.HR = api;
     const boot = () => api.install();
