@@ -34,6 +34,7 @@ loadEnv();
 const configuredDataDir = String(process.env.DATA_DIR || '').trim();
 const DATA_DIR = configuredDataDir ? path.resolve(configuredDataDir) : ROOT;
 const DATA = path.join(DATA_DIR, 'data.json');
+const CENTRES_DIR = path.join(DATA_DIR, 'centres');
 const BACKUPS = path.join(DATA_DIR, 'backups');
 const PORT = Number(process.env.PORT || 3210);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -44,6 +45,7 @@ const DIRECTION_SESSION_MS = 30 * 60 * 1000;
 
 function ensureStorage() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.mkdirSync(CENTRES_DIR, { recursive: true });
   fs.mkdirSync(BACKUPS, { recursive: true });
   if (!fs.existsSync(DATA)) {
     if (!fs.existsSync(SEED_DATA)) throw new Error('Falta el fitxer inicial data.json');
@@ -76,6 +78,10 @@ function safeEqual(left, right) {
   const a = Buffer.from(String(left));
   const b = Buffer.from(String(right));
   return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+function sameJson(left, right) {
+  return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
 }
 
 function hashSecret(value) {
@@ -296,6 +302,95 @@ function readData() {
   }
 }
 
+const CENTRE_DATA_COLLECTIONS = [
+  'suppliers', 'products', 'bases', 'dishes', 'saleItems', 'documents', 'employees',
+  'shiftTemplates', 'schedules', 'punches', 'reservations', 'maintenanceRecords',
+  'communications', 'crmContacts', 'marketingCampaigns', 'groupEvents', 'experiences',
+  'loyaltyAccounts', 'purchaseOrders', 'goodsReceipts', 'traceabilityRecords',
+  'productionRecords', 'productForecasts', 'financialEntries', 'permissions', 'permissionAudit'
+];
+
+function centreFile(centreId) {
+  const safeId = String(centreId || '').trim();
+  if (!safeId || !/^[a-zA-Z0-9_-]+$/.test(safeId)) throw new Error('Centre de treball no vàlid');
+  return path.join(CENTRES_DIR, `${safeId}.json`);
+}
+
+function requestContext(req) {
+  return {
+    companyId: String(req.headers['x-arcadi-company-id'] || '').trim(),
+    centreId: String(req.headers['x-arcadi-centre-id'] || '').trim()
+  };
+}
+
+function recordCompanyId(item) {
+  return item?.companyId || 'company_casa_mestres';
+}
+
+function readCentreFile(companyId, centreId, source) {
+  const file = centreFile(centreId);
+  if (!fs.existsSync(file)) {
+    const local = { arcadiCentreDataVersion: 1, companyId, centreId, collections: {} };
+    for (const key of CENTRE_DATA_COLLECTIONS) {
+      local.collections[key] = (source[key] || []).filter(item => recordMatchesScope(item, companyId, centreId));
+    }
+    local.controlNormatiu = { records: scopedControlRecords(source.controlNormatiu, companyId, centreId) };
+    fs.writeFileSync(file, JSON.stringify(local, null, 2), 'utf8');
+  }
+  try {
+    const local = JSON.parse(fs.readFileSync(file, 'utf8'));
+    return local.companyId === companyId && local.centreId === centreId ? local : { collections: {} };
+  } catch (error) {
+    throw new Error(`No es pot llegir ${path.basename(file)}: ${error.message}`);
+  }
+}
+
+function readContextData(source, context) {
+  if (!context?.companyId || !context.centreId) return source;
+  const local = readCentreFile(context.companyId, context.centreId, source);
+  const result = { ...source };
+  for (const key of CENTRE_DATA_COLLECTIONS) {
+    const companyRecords = (source[key] || []).filter(item =>
+      recordCompanyId(item) === context.companyId && (item.scope === 'COMPANY' || item.scope === 'CORPORATE')
+    );
+    result[key] = [...companyRecords, ...(local.collections?.[key] || [])];
+  }
+  result.controlNormatiu = {
+    ...(source.controlNormatiu || {}),
+    records: local.controlNormatiu?.records || {}
+  };
+  return result;
+}
+
+function writeContextData(incoming, context) {
+  if (!context?.companyId || !context.centreId) return writeData(incoming);
+  const current = readData();
+  const local = { arcadiCentreDataVersion: 1, companyId: context.companyId, centreId: context.centreId, collections: {} };
+  for (const key of CENTRE_DATA_COLLECTIONS) {
+    const records = incoming[key] || [];
+    const companyRecords = records.filter(item =>
+      recordCompanyId(item) === context.companyId && (item.scope === 'COMPANY' || item.scope === 'CORPORATE')
+    );
+    local.collections[key] = records.filter(item => recordMatchesScope(item, context.companyId, context.centreId)
+      && item.scope !== 'COMPANY' && item.scope !== 'CORPORATE');
+    current[key] = (current[key] || []).filter(item => {
+      if (recordCompanyId(item) !== context.companyId) return true;
+      if (item.scope === 'COMPANY' || item.scope === 'CORPORATE') return false;
+      return !recordMatchesScope(item, context.companyId, context.centreId);
+    });
+    current[key].push(...companyRecords);
+  }
+  const incomingControl = incoming.controlNormatiu?.records || {};
+  local.controlNormatiu = { records: scopedControlRecords({ records: incomingControl }, context.companyId, context.centreId) };
+  for (const [key, value] of Object.entries(incoming)) {
+    if (!CENTRE_DATA_COLLECTIONS.includes(key) && key !== 'controlNormatiu') current[key] = value;
+  }
+  const file = centreFile(context.centreId);
+  fs.writeFileSync(file, JSON.stringify(local, null, 2), 'utf8');
+  writeData(current);
+  return readContextData(current, context);
+}
+
 function backupCurrent() {
   if (!fs.existsSync(DATA)) return;
   fs.mkdirSync(BACKUPS, { recursive: true });
@@ -315,11 +410,14 @@ function writeData(data) {
 }
 
 let mutationQueue = Promise.resolve();
-function mutateData(change) {
+function mutateData(change, context = null) {
   const job = mutationQueue.then(async () => {
-    const data = readData();
+    const data = context?.companyId && context?.centreId
+      ? readContextData(readData(), context)
+      : readData();
     const result = await change(data);
-    writeData(data);
+    if (context?.companyId && context?.centreId) writeContextData(data, context);
+    else writeData(data);
     return result;
   });
   mutationQueue = job.catch(() => {});
@@ -958,13 +1056,22 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname === '/api/state' && req.method === 'GET') {
       if (!requireAdmin(req, res)) return;
-      return send(res, 200, readData());
+      return send(res, 200, readContextData(readData(), requestContext(req)));
     }
 
     if (pathname === '/api/state' && ['POST', 'PUT'].includes(req.method)) {
       if (!requireAdmin(req, res)) return;
       const incoming = await bodyJson(req);
       if (!incoming || typeof incoming !== 'object') return send(res, 400, { error: 'Dades no vàlides' });
+      const context = requestContext(req);
+      const currentState = context.companyId && context.centreId
+        ? readContextData(readData(), context)
+        : readData();
+      const changesPermissions = !sameJson(currentState.permissions, incoming.permissions)
+        || !sameJson(currentState.permissionAudit, incoming.permissionAudit);
+      if (changesPermissions && !directionUnlocked(req)) {
+        return send(res, 403, { error: 'Cal desbloquejar Direcció per modificar autoritzacions.' });
+      }
       const state = await mutateData(current => {
         const reservations = current.reservations || [];
         const commercialSendHistory = current.commercialSendHistory || [];
@@ -1002,7 +1109,7 @@ const server = http.createServer(async (req, res) => {
           supplierStandards
         });
         return current;
-      });
+      }, context);
       return send(res, 200, { ok: true, state });
     }
 

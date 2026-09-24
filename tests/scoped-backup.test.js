@@ -8,6 +8,11 @@ const app = fs.readFileSync(path.resolve(__dirname, '..', 'public', 'app.js'), '
 assert.match(server, /kind: 'ARCADI_SCOPED_BACKUP'/);
 assert.match(server, /function buildScopedBackup\(data, scope, companyId, centreId = ''\)/);
 assert.match(server, /function restoreScopedBackup\(data, backup\)/);
+assert.match(server, /const CENTRES_DIR = path\.join\(DATA_DIR, 'centres'\)/);
+assert.match(server, /function readContextData\(source, context\)/);
+assert.match(server, /function writeContextData\(incoming, context\)/);
+assert.match(server, /arcadiCentreDataVersion: 1/);
+assert.match(server, /'x-arcadi-centre-id'/);
 assert.match(server, /current\.filter\(item => !recordMatchesScope\(item, companyId, centreId\)\)/);
 assert.match(server, /scope === 'centre' \? centreId : ''/);
 assert.match(app, /ARCADI_CATALOG_TRANSFER/);

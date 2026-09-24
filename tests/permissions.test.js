@@ -12,6 +12,16 @@ assert.match(app, /const PERMISSION_ACTIONS=\['Consultar','Crear','Editar','Elim
   'Falten accions de la matriu');
 assert.match(app, /permissionAudit\.push\(/,
   'Falta historial de canvis de permisos');
+assert.match(app, /function featureAllowed\(|function canViewFeature\(/,
+  'Falta la visibilitat de funcions basada en la matriu de permisos');
+assert.match(app, /featureAllowed\(key\)|featureAllowed\(active\)|menu\.filter\(/,
+  'La navegació no filtra funcions segons els permisos de Direcció');
+assert.match(app, /if \(!records\.length\) return false;/,
+  'Una funció sense autorització explícita no pot quedar visible');
+assert.match(app, /function permissionDefaults\(\)\{return Object\.fromEntries\(/,
+  'Els permisos nous no poden crear autoritzacions automàtiques');
+assert.match(app, /return featureAllowed\(featureKey, 'Consultar'\);/,
+  'La visibilitat només depèn de la casella explícita Consultar');
 assert.match(app, /Object\.assign\(window,\{openPermission\}\)/,
   'El botó del formulari no pot accedir a openPermission');
 assert.match(server, /'permissions', 'permissionAudit'/,
@@ -22,5 +32,9 @@ assert.match(server, /if \(pathname === '\/api\/state' && \['POST', 'PUT'\]\.inc
   'L\'escriptura del Back Office no està protegida');
 assert.match(server, /const ADMIN_STATIC = new Set\(\['\/', '\/index\.html', '\/app\.js'/,
   'La pantalla principal no està reservada al Back Office');
+assert.match(server, /changesPermissions = !sameJson\(currentState\.permissions, incoming\.permissions\)/,
+  'Les autoritzacions no es poden modificar sense detectar el canvi');
+assert.match(server, /changesPermissions && !directionUnlocked\(req\)/,
+  'Les autoritzacions només es poden modificar amb Direcció desbloquejada');
 
 console.log('Matriu de permisos: estructura, historial i protecció de Direcció verificats');

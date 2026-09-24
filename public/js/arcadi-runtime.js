@@ -11,8 +11,15 @@
   const uid = prefix => `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 
   async function api(path, options = {}) {
+    let context = {};
+    try { context = JSON.parse(localStorage.getItem('arcadi_work_context_v1') || '{}'); } catch {}
     const response = await fetch(path, {
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Arcadi-Company-Id': context.companyId || '',
+        'X-Arcadi-Centre-Id': context.centreId || '',
+        ...(options.headers || {})
+      },
       ...options
     });
     const text = await response.text();

@@ -29,6 +29,10 @@ Cada centre disposa d'un espai de dades operatives independent. No es barregen:
 - reserves, clients operatius i configuració del local;
 - quadrants, fitxatges i geolocalització.
 
+En desplegament, les col·leccions locals es desen a `DATA_DIR/centres/<centreId>.json`.
+`data.json` conserva l'índex corporatiu i les dades compartides; el codi de servidor i
+els mòduls JavaScript són únics i reutilitzats per tots els centres.
+
 El codi JavaScript és compartit i únic. No es creen còpies de l'aplicació per centre.
 
 ## Biblioteca corporativa i operativa local
