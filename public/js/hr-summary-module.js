@@ -2,7 +2,13 @@
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   if (root) {
+    api.renderEmployees = function () {
+      if (typeof root.show !== 'function') return false;
+      root.show('employees');
+      return true;
+    };
     root.ArcadiHR = api;
+    root.HR = api;
     const boot = () => api.install();
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
     else boot();
