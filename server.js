@@ -39,6 +39,8 @@ const PORT = Number(process.env.PORT || 3210);
 const HOST = process.env.HOST || '0.0.0.0';
 const stripeTestSessions = new Map();
 const deviceActivationAttempts = new Map();
+const directionSessions = new Map();
+const DIRECTION_SESSION_MS = 30 * 60 * 1000;
 
 function ensureStorage() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -124,6 +126,36 @@ function sendEmployeeCookie(res, token, body) {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
     'Set-Cookie': `arcadi_employee_device=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=31536000${secure}`
+  });
+  res.end(JSON.stringify(body));
+}
+
+function directionPasswordRecord(data) {
+  return data.systemSecurity?.directionPassword || null;
+}
+
+function directionPasswordHash(password, salt) {
+  return crypto.scryptSync(String(password), String(salt), 64).toString('hex');
+}
+
+function directionUnlocked(req) {
+  const token = cookieValue(req, 'arcadi_direction_session');
+  const expiresAt = directionSessions.get(token);
+  if (!token || !expiresAt) return false;
+  if (expiresAt <= Date.now()) {
+    directionSessions.delete(token);
+    return false;
+  }
+  return true;
+}
+
+function sendDirectionCookie(res, token, body) {
+  securityHeaders(res);
+  const secure = process.env.ARCADI_DESKTOP === '1' ? '' : '; Secure';
+  res.writeHead(200, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+    'Set-Cookie': `arcadi_direction_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${Math.floor(DIRECTION_SESSION_MS / 1000)}${secure}`
   });
   res.end(JSON.stringify(body));
 }
@@ -855,6 +887,60 @@ const server = http.createServer(async (req, res) => {
         adminConfigured: adminConfigured(),
         persistence: configuredDataDir ? 'directori extern configurat' : 'fitxer local'
       });
+    }
+
+    if (pathname === '/api/direction/status' && req.method === 'GET') {
+      if (!requireAdmin(req, res)) return;
+      return send(res, 200, {
+        configured: Boolean(directionPasswordRecord(readData())),
+        unlocked: directionUnlocked(req)
+      });
+    }
+
+    if (pathname === '/api/direction/setup' && req.method === 'POST') {
+      if (!requireAdmin(req, res)) return;
+      const input = await bodyJson(req);
+      const password = String(input.password || '');
+      if (password.length < 8) return send(res, 400, { error: 'La contrasenya ha de tenir almenys 8 caràcters.' });
+      const current = readData();
+      if (directionPasswordRecord(current)) return send(res, 409, { error: 'La contrasenya de Direcció ja està creada.' });
+      const salt = crypto.randomBytes(16).toString('hex');
+      await mutateData(data => {
+        data.systemSecurity = data.systemSecurity || {};
+        data.systemSecurity.directionPassword = {
+          salt,
+          hash: directionPasswordHash(password, salt),
+          createdAt: new Date().toISOString()
+        };
+      });
+      const token = crypto.randomBytes(32).toString('base64url');
+      directionSessions.set(token, Date.now() + DIRECTION_SESSION_MS);
+      return sendDirectionCookie(res, token, { ok: true, unlocked: true });
+    }
+
+    if (pathname === '/api/direction/unlock' && req.method === 'POST') {
+      if (!requireAdmin(req, res)) return;
+      const input = await bodyJson(req);
+      const record = directionPasswordRecord(readData());
+      if (!record) return send(res, 409, { error: 'Primer cal crear la contrasenya de Direcció.' });
+      const supplied = directionPasswordHash(String(input.password || ''), record.salt);
+      if (!safeEqual(supplied, record.hash)) return send(res, 401, { error: 'Contrasenya incorrecta.' });
+      const token = crypto.randomBytes(32).toString('base64url');
+      directionSessions.set(token, Date.now() + DIRECTION_SESSION_MS);
+      return sendDirectionCookie(res, token, { ok: true, unlocked: true });
+    }
+
+    if (pathname === '/api/direction/lock' && req.method === 'POST') {
+      if (!requireAdmin(req, res)) return;
+      const token = cookieValue(req, 'arcadi_direction_session');
+      if (token) directionSessions.delete(token);
+      securityHeaders(res);
+      res.writeHead(200, {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'no-store',
+        'Set-Cookie': 'arcadi_direction_session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0'
+      });
+      return res.end(JSON.stringify({ ok: true, unlocked: false }));
     }
 
     if (pathname === '/api/stripe/webhook' && req.method === 'POST') {
