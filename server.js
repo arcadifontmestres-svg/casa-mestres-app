@@ -69,6 +69,7 @@ function securityHeaders(res) {
 }
 
 function send(res, status, body, type = 'application/json; charset=utf-8') {
+  if (res.headersSent || res.writableEnded) return;
   securityHeaders(res);
   res.writeHead(status, { 'Content-Type': type, 'Cache-Control': 'no-store' });
   res.end(typeof body === 'string' ? body : JSON.stringify(body));
@@ -1713,6 +1714,8 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': mime(file), 'Cache-Control': 'no-cache' });
     return fs.createReadStream(file).pipe(res);
   } catch (error) {
+    console.error('Error servidor:', error);
+    if (res.headersSent || res.writableEnded) return;
     return send(res, error.statusCode || 500, { error: error.message });
   }
 });
