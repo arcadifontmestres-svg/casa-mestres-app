@@ -8,8 +8,8 @@
     "start": "node startup-copy.js",
     "desktop": "electron .",
     "build:windows": "electron-builder --win portable",
-    "check": "node --check server.js && node --check commercial-server.js && node --check commercial-email.js && node --check commercial-brand.js && node --check gmail-oauth.js && node --check criteria.js && node --check mcp.js && node --check oauth.js && node --check company-copy.js && node --check startup-copy.js && node --check public/app.js && node --check public/js/production-needs-module.js && node --check public/js/arcadi-runtime.js && node --check public/js/context-module.js && node --check public/js/arcadi-modules.js && node --check public/js/criteria-module.js && node --check public/js/hr-summary-module.js && node --check public/js/commercial-proposals-module.js && node --check public/js/sarriera-brand-default.js && node --check public/js/commercial-corporate-presentation.js && node --check public/js/commercial-email-settings.js && node --check desktop/main.cjs",
-    "test": "node tests/structure.test.js && node tests/production-needs.test.js && node tests/integration.test.js && node tests/desktop-mode.test.js && node tests/mcp.test.js && node tests/criteria.test.js && node tests/criteria-integration.test.js && node tests/multicentre-command.test.js && node tests/permissions.test.js && node tests/employee-activation.test.js && node tests/scoped-backup.test.js && node tests/hr-summary.test.js && node tests/company-copy.test.js && node tests/commercial-proposals.test.js && node tests/commercial-server.test.js && node --test tests/gmail-oauth.test.js"
+    "check": "node --check server.js && node --check commercial-server.js && node --check commercial-email.js && node --check commercial-brand.js && node --check instagram-graph.js && node --check instagram-server.js && node --check gmail-oauth.js && node --check criteria.js && node --check mcp.js && node --check oauth.js && node --check company-copy.js && node --check startup-copy.js && node --check public/app.js && node --check public/js/production-needs-module.js && node --check public/js/arcadi-runtime.js && node --check public/js/context-module.js && node --check public/js/arcadi-modules.js && node --check public/js/criteria-module.js && node --check public/js/hr-summary-module.js && node --check public/js/commercial-proposals-module.js && node --check public/js/sarriera-brand-default.js && node --check public/js/commercial-corporate-presentation.js && node --check public/js/commercial-email-settings.js && node --check desktop/main.cjs",
+    "test": "node tests/structure.test.js && node tests/production-needs.test.js && node tests/integration.test.js && node tests/desktop-mode.test.js && node tests/mcp.test.js && node tests/criteria.test.js && node tests/criteria-integration.test.js && node tests/multicentre-command.test.js && node tests/permissions.test.js && node tests/employee-activation.test.js && node tests/scoped-backup.test.js && node tests/hr-summary.test.js && node tests/company-copy.test.js && node tests/commercial-proposals.test.js && node tests/commercial-server.test.js && node tests/instagram-graph.test.js && node --test tests/gmail-oauth.test.js"
   },
   "engines": {
     "node": ">=22.12"
@@ -33,6 +33,8 @@
       "commercial-server.js",
       "commercial-email.js",
       "commercial-brand.js",
+      "instagram-graph.js",
+      "instagram-server.js",
       "gmail-oauth.js",
       "company-copy.js",
       "startup-copy.js",
