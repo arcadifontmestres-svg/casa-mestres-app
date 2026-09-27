@@ -1,203 +1,134 @@
 'use strict';
-/**
- * criteria.js — Gestió de criteris de governança per a ARCADI Gestió
- * Implementa la creació, actualització i transició d'estat dels criteris.
- */
 
 const crypto = require('crypto');
 
-/**
- * Genera un ID únic per a un criteri.
- * @returns {string}
- */
-function generateId() {
-  return `crit_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
-}
-
-/**
- * Retorna la data i hora actual en format ISO 8601.
- * @returns {string}
- */
-function now() {
-  return new Date().toISOString();
-}
-
-/**
- * Estats vàlids d'un criteri.
- */
-const VALID_STATES = [
-  'Esborrany',
-  'En revisió',
-  'Aprovat',
-  'Actiu',
-  'Suspès',
-  'Arxivat'
+const CRITERION_STATES = [
+  'DETECTADA',
+  'EN_ESTUDI',
+  'EN_PROVA',
+  'PENDENT_APROVACIO',
+  'APROVADA',
+  'PUBLICADA',
+  'EN_IMPLANTACIO',
+  'IMPLANTADA',
+  'REBUTJADA',
+  'SUBSTITUIDA'
 ];
 
-/**
- * Transicions d'estat permeses.
- * Clau: estat actual → Valors: estats als quals es pot transitar.
- */
-const ALLOWED_TRANSITIONS = {
-  'Esborrany':   ['En revisió', 'Arxivat'],
-  'En revisió':  ['Aprovat', 'Esborrany', 'Arxivat'],
-  'Aprovat':     ['Actiu', 'En revisió', 'Arxivat'],
-  'Actiu':       ['Suspès', 'Arxivat'],
-  'Suspès':      ['Actiu', 'Arxivat'],
-  'Arxivat':     []
+const TRANSITIONS = {
+  DETECTADA: ['EN_ESTUDI', 'REBUTJADA'],
+  EN_ESTUDI: ['EN_PROVA', 'PENDENT_APROVACIO', 'REBUTJADA'],
+  EN_PROVA: ['EN_ESTUDI', 'PENDENT_APROVACIO', 'REBUTJADA'],
+  PENDENT_APROVACIO: ['EN_ESTUDI', 'APROVADA', 'REBUTJADA'],
+  APROVADA: ['PUBLICADA', 'SUBSTITUIDA'],
+  PUBLICADA: ['EN_IMPLANTACIO', 'SUBSTITUIDA'],
+  EN_IMPLANTACIO: ['IMPLANTADA', 'PUBLICADA', 'SUBSTITUIDA'],
+  IMPLANTADA: ['SUBSTITUIDA'],
+  REBUTJADA: ['EN_ESTUDI'],
+  SUBSTITUIDA: []
 };
 
-/**
- * Crea un nou criteri de governança.
- * @param {object} data - Dades globals de l'aplicació
- * @param {object} body - Cos de la petició amb els camps del criteri
- * @returns {{ ok: boolean, criterion?: object, error?: string }}
- */
-function createCriterion(data, body) {
-  if (!body || typeof body !== 'object') {
-    return { ok: false, error: 'El cos de la petició és invàlid' };
-  }
+function cleanList(value) {
+  return Array.isArray(value) ? [...new Set(value.map(item => String(item || '').trim()).filter(Boolean))] : [];
+}
 
-  const title = String(body.title || '').trim();
-  if (!title) {
-    return { ok: false, error: 'El camp "title" és obligatori' };
-  }
+function snapshot(criterion) {
+  const { history, ...current } = criterion;
+  return JSON.parse(JSON.stringify(current));
+}
 
-  const criterion = {
-    id:           generateId(),
-    title,
-    description:  String(body.description  || '').trim(),
-    category:     String(body.category     || 'General').trim(),
-    restaurantId: String(body.restaurantId || '').trim(),
-    organizationId: String(body.organizationId || '').trim(),
-    status:       'Esborrany',
-    priority:     String(body.priority     || 'Normal').trim(),
-    assignedTo:   String(body.assignedTo   || '').trim(),
-    dueDate:      body.dueDate ? String(body.dueDate) : null,
-    tags:         Array.isArray(body.tags) ? body.tags.map(String) : [],
-    notes:        String(body.notes        || '').trim(),
-    createdAt:    now(),
-    updatedAt:    now(),
-    history: [
-      {
-        action:    'Creat',
-        status:    'Esborrany',
-        timestamp: now(),
-        notes:     'Criteri creat inicialment'
-      }
-    ]
+function historyEntry(action, actor, details = {}) {
+  return {
+    id: 'criterion_event_' + crypto.randomUUID(),
+    action,
+    actor: String(actor || 'direccio'),
+    at: new Date().toISOString(),
+    details: JSON.parse(JSON.stringify(details || {}))
   };
-
-  if (!Array.isArray(data.governanceCriteria)) data.governanceCriteria = [];
-  data.governanceCriteria.push(criterion);
-
-  return { ok: true, criterion };
 }
 
-/**
- * Actualitza un criteri existent.
- * @param {object} data - Dades globals de l'aplicació
- * @param {string} id - ID del criteri a actualitzar
- * @param {object} body - Camps a actualitzar
- * @returns {{ ok: boolean, criterion?: object, error?: string }}
- */
-function updateCriterion(data, id, body) {
-  if (!id) return { ok: false, error: 'Cal especificar l\'ID del criteri' };
-  if (!body || typeof body !== 'object') return { ok: false, error: 'El cos de la petició és invàlid' };
+function createCriterion(input, actor = 'direccio') {
+  const title = String(input.title || '').trim();
+  const problem = String(input.problem || '').trim();
+  if (!title) throw Object.assign(new Error('El criteri necessita un títol'), { statusCode: 400 });
+  if (!problem) throw Object.assign(new Error('El criteri necessita descriure el problema'), { statusCode: 400 });
 
-  if (!Array.isArray(data.governanceCriteria)) data.governanceCriteria = [];
-
-  const index = data.governanceCriteria.findIndex(c => c.id === id);
-  if (index < 0) return { ok: false, error: `Criteri no trobat: "${id}"` };
-
-  const criterion = data.governanceCriteria[index];
-
-  // Camps actualitzables (no es pot canviar l'estat aquí — usar transitionCriterion)
-  const updatable = ['title', 'description', 'category', 'restaurantId', 'organizationId',
-                     'priority', 'assignedTo', 'dueDate', 'notes'];
-
-  for (const field of updatable) {
-    if (body[field] !== undefined) {
-      criterion[field] = field === 'tags'
-        ? (Array.isArray(body[field]) ? body[field].map(String) : criterion.tags)
-        : (body[field] === null ? null : String(body[field]).trim());
-    }
-  }
-
-  if (body.tags !== undefined && Array.isArray(body.tags)) {
-    criterion.tags = body.tags.map(String);
-  }
-
-  criterion.updatedAt = now();
-
-  if (!Array.isArray(criterion.history)) criterion.history = [];
-  criterion.history.push({
-    action:    'Actualitzat',
-    status:    criterion.status,
-    timestamp: now(),
-    notes:     String(body.notes || 'Actualització de camps')
-  });
-
-  data.governanceCriteria[index] = criterion;
-  return { ok: true, criterion };
+  const now = new Date().toISOString();
+  const criterion = {
+    id: 'criterion_' + crypto.randomUUID(),
+    companyId: String(input.companyId || '').trim(),
+    area: String(input.area || 'Operacions').trim(),
+    title,
+    problem,
+    proposal: String(input.proposal || '').trim(),
+    priority: String(input.priority || 'MITJANA').toUpperCase(),
+    state: 'DETECTADA',
+    version: 1,
+    ownerId: String(input.ownerId || '').trim(),
+    reviewerIds: cleanList(input.reviewerIds),
+    centreIds: cleanList(input.centreIds),
+    optionalCentreIds: cleanList(input.optionalCentreIds),
+    exceptions: Array.isArray(input.exceptions) ? input.exceptions : [],
+    evidence: Array.isArray(input.evidence) ? input.evidence : [],
+    dueDate: String(input.dueDate || '').trim(),
+    nextStep: String(input.nextStep || '').trim(),
+    targetType: String(input.targetType || '').trim(),
+    targetId: String(input.targetId || '').trim(),
+    effectiveAt: '',
+    publishedAt: '',
+    createdAt: now,
+    updatedAt: now,
+    history: []
+  };
+  criterion.history.push(historyEntry('CREADA', actor, { snapshot: snapshot(criterion) }));
+  return criterion;
 }
 
-/**
- * Transiciona un criteri a un nou estat.
- * @param {object} data - Dades globals de l'aplicació
- * @param {string} id - ID del criteri
- * @param {object} body - { newStatus: string, notes?: string }
- * @returns {{ ok: boolean, criterion?: object, error?: string }}
- */
-function transitionCriterion(data, id, body) {
-  if (!id) return { ok: false, error: 'Cal especificar l\'ID del criteri' };
-  if (!body || typeof body !== 'object') return { ok: false, error: 'El cos de la petició és invàlid' };
-
-  const newStatus = String(body.newStatus || '').trim();
-  if (!newStatus) return { ok: false, error: 'Cal especificar "newStatus"' };
-  if (!VALID_STATES.includes(newStatus)) {
-    return { ok: false, error: `Estat invàlid: "${newStatus}". Estats vàlids: ${VALID_STATES.join(', ')}` };
+function updateCriterion(criterion, input, actor = 'direccio') {
+  const protectedFields = new Set(['id', 'state', 'version', 'history', 'createdAt', 'publishedAt']);
+  const allowedFields = [
+    'companyId', 'area', 'title', 'problem', 'proposal', 'priority', 'ownerId',
+    'reviewerIds', 'centreIds', 'optionalCentreIds', 'exceptions', 'evidence',
+    'dueDate', 'nextStep', 'targetType', 'targetId', 'effectiveAt'
+  ];
+  const before = snapshot(criterion);
+  for (const field of allowedFields) {
+    if (!(field in input) || protectedFields.has(field)) continue;
+    if (['reviewerIds', 'centreIds', 'optionalCentreIds'].includes(field)) criterion[field] = cleanList(input[field]);
+    else if (['exceptions', 'evidence'].includes(field)) criterion[field] = Array.isArray(input[field]) ? input[field] : criterion[field];
+    else criterion[field] = String(input[field] ?? '').trim();
   }
+  if (!criterion.title || !criterion.problem) throw Object.assign(new Error('Títol i problema són obligatoris'), { statusCode: 400 });
+  criterion.version = Number(criterion.version || 1) + 1;
+  criterion.updatedAt = new Date().toISOString();
+  criterion.history.push(historyEntry('ACTUALITZADA', actor, { before, after: snapshot(criterion) }));
+  return criterion;
+}
 
-  if (!Array.isArray(data.governanceCriteria)) data.governanceCriteria = [];
-
-  const index = data.governanceCriteria.findIndex(c => c.id === id);
-  if (index < 0) return { ok: false, error: `Criteri no trobat: "${id}"` };
-
-  const criterion = data.governanceCriteria[index];
-  const currentStatus = criterion.status || 'Esborrany';
-
-  // Verificar que la transició és permesa
-  const allowed = ALLOWED_TRANSITIONS[currentStatus] || [];
-  if (!allowed.includes(newStatus)) {
-    return {
-      ok: false,
-      error: `Transició no permesa: "${currentStatus}" → "${newStatus}". ` +
-             `Transicions permeses des de "${currentStatus}": ${allowed.join(', ') || 'cap'}`
-    };
+function transitionCriterion(criterion, nextState, actor = 'direccio', note = '') {
+  const current = String(criterion.state || 'DETECTADA').toUpperCase();
+  const wanted = String(nextState || '').toUpperCase();
+  if (!CRITERION_STATES.includes(wanted)) throw Object.assign(new Error('Estat de criteri no vàlid'), { statusCode: 400 });
+  if (!(TRANSITIONS[current] || []).includes(wanted)) {
+    throw Object.assign(new Error(`No es pot passar de ${current} a ${wanted}`), { statusCode: 409 });
   }
-
-  const previousStatus = criterion.status;
-  criterion.status    = newStatus;
-  criterion.updatedAt = now();
-
-  if (!Array.isArray(criterion.history)) criterion.history = [];
-  criterion.history.push({
-    action:         'Transició d\'estat',
-    previousStatus,
-    status:         newStatus,
-    timestamp:      now(),
-    notes:          String(body.notes || `Transició de "${previousStatus}" a "${newStatus}"`)
-  });
-
-  data.governanceCriteria[index] = criterion;
-  return { ok: true, criterion };
+  if (wanted === 'APROVADA' && !String(criterion.proposal || '').trim()) {
+    throw Object.assign(new Error('No es pot aprovar un criteri sense proposta tècnica'), { statusCode: 400 });
+  }
+  const previous = current;
+  criterion.state = wanted;
+  criterion.version = Number(criterion.version || 1) + 1;
+  criterion.updatedAt = new Date().toISOString();
+  if (wanted === 'APROVADA' && !criterion.effectiveAt) criterion.effectiveAt = criterion.updatedAt;
+  if (wanted === 'PUBLICADA') criterion.publishedAt = criterion.updatedAt;
+  criterion.history.push(historyEntry('CANVI_ESTAT', actor, { from: previous, to: wanted, note: String(note || '').trim() }));
+  return criterion;
 }
 
 module.exports = {
+  CRITERION_STATES,
+  TRANSITIONS,
   createCriterion,
   updateCriterion,
-  transitionCriterion,
-  VALID_STATES,
-  ALLOWED_TRANSITIONS
+  transitionCriterion
 };
