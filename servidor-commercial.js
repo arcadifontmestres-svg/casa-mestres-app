@@ -5,6 +5,7 @@
 const { applyStartupCopy } = require('./startup-copy.js');
 const { applySarrieraKitchenIntegration } = require('./sarriera-integration-migration.js');
 const { scheduleFirstStory } = require('./first-instagram-story.js');
+const { scheduleRadioVilafrancaInstagram } = require('./radio-instagram-publish.js');
 
 applyStartupCopy();
 applySarrieraKitchenIntegration();
@@ -12,3 +13,4 @@ require('./commercial-brand.js');
 require('./instagram-server.js');
 applyStartupCopy();
 scheduleFirstStory();
+scheduleRadioVilafrancaInstagram();
