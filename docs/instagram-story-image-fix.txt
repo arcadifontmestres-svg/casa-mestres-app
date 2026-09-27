@@ -1,0 +1,1 @@
+Fix: la Story es reconstrueix a l'arrencada com a JPEG 320x569 des d'un fitxer base64, per evitar que Meta rebutgi l'asset anterior per format/mida. El publicador d'una sola vegada es manté sense canvis.

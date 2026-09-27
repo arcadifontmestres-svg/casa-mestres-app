@@ -1,0 +1,1 @@
+No cal cap acció manual de l'usuari; el deploy provarà de publicar la Story automàticament.
