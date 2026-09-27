@@ -8,5 +8,5 @@ const { applySarrieraKitchenIntegration } = require('./sarriera-integration-migr
 applyStartupCopy();
 applySarrieraKitchenIntegration();
 require('./commercial-brand.js');
-require('./commercial-server.js');
+require('./instagram-server.js');
 applyStartupCopy();
