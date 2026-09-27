@@ -82,6 +82,10 @@ async function publishImage({ imageUrl, caption = '', mediaType = 'FEED' }) {
   const container = await graphPost(`/${encodeURIComponent(current.igUserId)}/media`, containerInput, 'media_create');
   if (!container.id) throw Object.assign(new Error('Meta no ha retornat cap creation_id.'), { statusCode: 502, metaStage: 'media_create' });
 
+  if (normalizedType === 'STORY') {
+    await new Promise(resolve => setTimeout(resolve, 12000));
+  }
+
   const published = await graphPost(`/${encodeURIComponent(current.igUserId)}/media_publish`, {
     creation_id: container.id,
     access_token: current.systemUserToken
