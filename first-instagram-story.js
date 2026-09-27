@@ -5,7 +5,8 @@ const path = require('path');
 const instagram = require('./instagram-graph.js');
 
 const APP_URL = String(process.env.APP_BASE_URL || 'https://casa-mestres-restaurant-app.onrender.com').replace(/\/$/, '');
-const IMAGE_URL = `${APP_URL}/social/sarriera-ja-hi-som.jpg`;
+const SOURCE_IMAGE_URL = `${APP_URL}/social/sarriera-ja-hi-som.jpg`;
+const IMAGE_URL = `https://images.weserv.nl/?url=${encodeURIComponent(SOURCE_IMAGE_URL)}&w=1080&h=1920&fit=cover&output=jpg`;
 const DATA_DIR = String(process.env.DATA_DIR || '/var/data');
 const MARKER = path.join(DATA_DIR, 'instagram-first-story-sarriera-20260927.json');
 const IMAGE_B64 = path.join(__dirname, 'public', 'social', 'sarriera-ja-hi-som-360x640.b64');
@@ -16,7 +17,7 @@ function ensureMetaCompatibleImage() {
   const encoded = fs.readFileSync(IMAGE_B64, 'utf8').trim();
   if (!encoded) return;
   fs.writeFileSync(IMAGE_FILE, Buffer.from(encoded, 'base64'));
-  console.log('[Instagram] Story preparada en JPEG 360x640 compatible amb Meta.');
+  console.log('[Instagram] Origen Story preparat; Meta rebrà JPEG 1080x1920 via URL pública.');
 }
 
 function scheduleFirstStory() {
