@@ -36,6 +36,14 @@ function scheduleFirstStory() {
     attempts += 1;
     try {
       const probe = await fetch(IMAGE_URL, { method: 'GET' });
+      const probeInfo = {
+        status: probe.status,
+        ok: probe.ok,
+        contentType: probe.headers.get('content-type'),
+        contentLength: probe.headers.get('content-length'),
+        imageUrl: IMAGE_URL
+      };
+      console.log(`[Instagram] IMAGE_PROBE ${JSON.stringify(probeInfo)}`);
       if (!probe.ok) throw new Error(`imatge pública no disponible (HTTP ${probe.status})`);
 
       const result = await instagram.publishImage({ imageUrl: IMAGE_URL, mediaType: 'STORY' });
@@ -43,7 +51,18 @@ function scheduleFirstStory() {
       fs.writeFileSync(MARKER, JSON.stringify({ publishedAt: new Date().toISOString(), imageUrl: IMAGE_URL, ...result }, null, 2));
       console.log(`[Instagram] FIRST_STORY_PUBLISHED mediaId=${result.mediaId}`);
     } catch (error) {
-      console.error(`[Instagram] FIRST_STORY_FAILED intent=${attempts}: ${error.message}`);
+      const diagnostic = {
+        event: 'FIRST_STORY_FAILED',
+        intent: attempts,
+        message: error.message,
+        stage: error.metaStage || null,
+        httpStatus: error.metaHttpStatus || error.statusCode || null,
+        type: error.metaType || null,
+        code: error.metaCode ?? null,
+        errorSubcode: error.metaSubcode ?? null,
+        fbtraceId: error.metaFbtraceId || null
+      };
+      console.error(`[Instagram] META_ERROR ${JSON.stringify(diagnostic)}`);
       if (attempts < 3) setTimeout(run, 30000);
     }
   };
