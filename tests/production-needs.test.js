@@ -13,7 +13,7 @@ assert.match(kitchenEntry[2],/^Cuina\b/,'L’etiqueta visible de CUINA ha de con
 assert.match(app,/kitchen:\(\)=>window\.ProductionNeeds\?\.renderKitchen\?\.\(\)/,'La vista kitchen ha de delegar al mòdul ProductionNeeds');
 assert.match(moduleCode,/function renderKitchen\(\)/,'ProductionNeeds ha d’exposar la pantalla integrada de Cuina');
 
-assert.match(app,/productForecasts/);
+assert.match(moduleCode,/productForecasts/,'La previsió de productes ha de viure al mòdul ProductionNeeds');
 assert.doesNotMatch(app,/\['','productions','Produccions'\]/);
 assert.doesNotMatch(app,/\['','needs','Necessitats i autorització'\]/);
 assert.match(moduleCode,/Plats, bases o tots/);
