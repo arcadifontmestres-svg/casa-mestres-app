@@ -33,6 +33,25 @@ function validateHttpsUrl(value) {
   return parsed.toString();
 }
 
+async function graphGet(pathname, params) {
+  const url = new URL(`${GRAPH_ROOT}${pathname}`);
+  for (const [key, value] of Object.entries(params || {})) {
+    if (value !== undefined && value !== null && value !== '') url.searchParams.set(key, String(value));
+  }
+
+  const response = await fetch(url, { method: 'GET' });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || payload.error) {
+    const message = payload?.error?.message || `Meta Graph API ha retornat HTTP ${response.status}.`;
+    const error = new Error(message);
+    error.statusCode = response.status >= 400 && response.status < 600 ? response.status : 502;
+    error.metaCode = payload?.error?.code;
+    error.metaSubcode = payload?.error?.error_subcode;
+    throw error;
+  }
+  return payload;
+}
+
 async function graphPost(pathname, params) {
   const body = new URLSearchParams();
   for (const [key, value] of Object.entries(params || {})) {
@@ -54,6 +73,36 @@ async function graphPost(pathname, params) {
     throw error;
   }
   return payload;
+}
+
+async function discoverInstagramAccounts() {
+  const current = config();
+  if (!current.systemUserToken) {
+    throw Object.assign(new Error('Falta META_SYSTEM_USER_TOKEN al servidor.'), { statusCode: 503 });
+  }
+
+  const payload = await graphGet('/me/accounts', {
+    fields: 'name,instagram_business_account{id,username}',
+    access_token: current.systemUserToken
+  });
+
+  const accounts = (payload.data || [])
+    .filter(item => item?.instagram_business_account?.id)
+    .map(item => ({
+      pageName: String(item.name || ''),
+      id: String(item.instagram_business_account.id),
+      username: String(item.instagram_business_account.username || '')
+    }));
+
+  const sarriera = accounts.find(item => item.username.toLowerCase() === 'sarriera1930') || null;
+
+  return {
+    ok: true,
+    graphVersion: current.graphVersion,
+    configuredIgUserId: current.igUserId || null,
+    matched: sarriera,
+    accounts
+  };
 }
 
 async function publishImage({ imageUrl, caption = '', mediaType = 'FEED' }) {
@@ -94,4 +143,4 @@ async function publishImage({ imageUrl, caption = '', mediaType = 'FEED' }) {
   };
 }
 
-module.exports = { GRAPH_VERSION, status, publishImage };
+module.exports = { GRAPH_VERSION, status, discoverInstagramAccounts, publishImage };
