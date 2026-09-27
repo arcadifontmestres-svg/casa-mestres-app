@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <rect width="1080" height="1920" fill="#efe3cf"/>
+  <rect x="0" y="0" width="1080" height="210" fill="#111111"/>
+  <text x="540" y="92" text-anchor="middle" font-family="Georgia,serif" font-size="44" fill="#d9b56d" letter-spacing="5">SARRIERA 1930</text>
+  <text x="540" y="155" text-anchor="middle" font-family="Arial,sans-serif" font-size="26" fill="#ffffff" letter-spacing="3">ACTIVITATS GRUP TRÀFEC</text>
+  <text x="540" y="430" text-anchor="middle" font-family="Georgia,serif" font-size="58" fill="#35412b" letter-spacing="10">L’ARBOÇ</text>
+  <line x1="410" y1="470" x2="670" y2="470" stroke="#8b5a2b" stroke-width="3"/>
+  <text x="540" y="690" text-anchor="middle" font-family="Georgia,serif" font-size="112" fill="#7b2116">LA COCA</text>
+  <text x="540" y="815" text-anchor="middle" font-family="Georgia,serif" font-size="112" fill="#7b2116">ENRAMADA</text>
+  <text x="540" y="900" text-anchor="middle" font-family="Georgia,serif" font-size="38" font-style="italic" fill="#4f583c">Tradició · Tècnica · Creativitat</text>
+  <rect x="120" y="1040" width="840" height="360" rx="28" fill="#fffaf2" stroke="#c7aa7c" stroke-width="3"/>
+  <text x="540" y="1145" text-anchor="middle" font-family="Georgia,serif" font-size="48" fill="#7b2116">Presentació gastronòmica</text>
+  <text x="540" y="1240" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" fill="#2d2d2d">22 i 23 d’octubre de 2026</text>
+  <text x="540" y="1310" text-anchor="middle" font-family="Arial,sans-serif" font-size="34" fill="#2d2d2d">Fira de la Coca Enramada · L’Arboç</text>
+  <text x="540" y="1515" text-anchor="middle" font-family="Georgia,serif" font-size="46" fill="#35412b">Una col·laboració que posa en valor</text>
+  <text x="540" y="1575" text-anchor="middle" font-family="Georgia,serif" font-size="46" fill="#35412b">la tradició mirant cap al futur.</text>
+  <line x1="300" y1="1705" x2="780" y2="1705" stroke="#8b5a2b" stroke-width="2"/>
+  <text x="540" y="1790" text-anchor="middle" font-family="Georgia,serif" font-size="46" fill="#111111" letter-spacing="7">SARRIERA 1930</text>
+</svg>
