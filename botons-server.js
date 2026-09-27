@@ -9,7 +9,9 @@ const ROOT = __dirname;
 const originalCreateServer = http.createServer;
 const DATA_DIR = path.resolve(String(process.env.DATA_DIR || ROOT));
 const BOTONS_FILE = path.join(DATA_DIR, 'botons.json');
+const STORIES_DIR = path.join(DATA_DIR, 'stories');
 const SEED_FILE = path.join(ROOT, 'public', 'botons.json');
+const MAX_STORY_BYTES = 8 * 1024 * 1024;
 
 function securityHeaders(res) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -59,15 +61,16 @@ function loadSeed() {
   }
 }
 
-function ensureFile() {
+function ensureData() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.mkdirSync(STORIES_DIR, { recursive: true });
   if (!fs.existsSync(BOTONS_FILE)) {
     fs.writeFileSync(BOTONS_FILE, JSON.stringify(loadSeed(), null, 2));
   }
 }
 
 function readButtons() {
-  ensureFile();
+  ensureData();
   try {
     const data = JSON.parse(fs.readFileSync(BOTONS_FILE, 'utf8'));
     return Array.isArray(data) ? data : [];
@@ -77,7 +80,7 @@ function readButtons() {
 }
 
 function writeButtons(buttons) {
-  ensureFile();
+  ensureData();
   const tmp = `${BOTONS_FILE}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(buttons, null, 2));
   fs.renameSync(tmp, BOTONS_FILE);
@@ -91,6 +94,14 @@ function safeEqual(a, b) {
 
 function pepAuthorized(req) {
   return safeEqual(req.headers['x-pep-secret'], process.env.PEP_SECRET);
+}
+
+function requirePep(req, res) {
+  if (!process.env.PEP_SECRET || !pepAuthorized(req)) {
+    send(res, 401, { error: 'No autoritzat' });
+    return false;
+  }
+  return true;
 }
 
 function validButton(input) {
@@ -110,21 +121,86 @@ function validButton(input) {
   return { id, label, imatge: parsed.toString(), espai };
 }
 
+function storyFilename(value) {
+  const name = String(value || '').trim().toLowerCase();
+  if (!/^[a-z0-9][a-z0-9_-]{0,80}\.jpg$/.test(name)) {
+    throw Object.assign(new Error('filename ha de ser un nom segur acabat en .jpg.'), { statusCode: 400 });
+  }
+  return name;
+}
+
+function publicStoryUrl(req, filename) {
+  const configured = String(process.env.APP_BASE_URL || '').replace(/\/$/, '');
+  const base = configured || `https://${String(req.headers.host || 'casa-mestres-restaurant-app.onrender.com')}`;
+  return `${base}/public/stories/${encodeURIComponent(filename)}`;
+}
+
+function saveStory(input, req) {
+  ensureData();
+  const filename = storyFilename(input?.filename);
+  const raw = String(input?.dataBase64 || '').replace(/^data:image\/jpeg;base64,/i, '').trim();
+  if (!raw) throw Object.assign(new Error('Falta dataBase64.'), { statusCode: 400 });
+  let bytes;
+  try { bytes = Buffer.from(raw, 'base64'); }
+  catch { throw Object.assign(new Error('dataBase64 no és vàlid.'), { statusCode: 400 }); }
+  if (!bytes.length || bytes.length > MAX_STORY_BYTES) {
+    throw Object.assign(new Error('El JPEG ha de pesar menys de 8 MB.'), { statusCode: 413 });
+  }
+  if (bytes[0] !== 0xff || bytes[1] !== 0xd8 || bytes[bytes.length - 2] !== 0xff || bytes[bytes.length - 1] !== 0xd9) {
+    throw Object.assign(new Error('El fitxer ha de ser JPEG.'), { statusCode: 415 });
+  }
+  const target = path.join(STORIES_DIR, filename);
+  fs.writeFileSync(target, bytes);
+  return { filename, bytes: bytes.length, url: publicStoryUrl(req, filename) };
+}
+
+function serveStory(req, res, pathname) {
+  const match = pathname.match(/^\/public\/stories\/([a-z0-9][a-z0-9_-]{0,80}\.jpg)$/i);
+  if (!match || req.method !== 'GET') return false;
+  ensureData();
+  const filename = storyFilename(match[1]);
+  const target = path.join(STORIES_DIR, filename);
+  if (!fs.existsSync(target)) {
+    send(res, 404, { error: 'Story no trobada.' });
+    return true;
+  }
+  securityHeaders(res);
+  const stat = fs.statSync(target);
+  res.writeHead(200, {
+    'Content-Type': 'image/jpeg',
+    'Content-Length': stat.size,
+    'Cache-Control': 'public, max-age=3600'
+  });
+  fs.createReadStream(target).pipe(res);
+  return true;
+}
+
 async function handleBotonsRequest(req, res) {
   const url = new URL(req.url, 'http://localhost');
-  if (url.pathname !== '/api/botons') return false;
+
+  if (serveStory(req, res, url.pathname)) return true;
 
   try {
+    if (url.pathname === '/api/stories' && req.method === 'POST') {
+      if (!requirePep(req, res)) return true;
+      if (!String(req.headers['content-type'] || '').startsWith('application/json')) {
+        send(res, 415, { error: 'Content-Type ha de ser application/json.' });
+        return true;
+      }
+      const input = await readJsonBody(req, 12 * 1024 * 1024);
+      send(res, 200, { ok: true, story: saveStory(input, req) });
+      return true;
+    }
+
+    if (url.pathname !== '/api/botons') return false;
+
     if (req.method === 'GET') {
       send(res, 200, readButtons());
       return true;
     }
 
     if (req.method === 'POST') {
-      if (!process.env.PEP_SECRET || !pepAuthorized(req)) {
-        send(res, 401, { error: 'No autoritzat' });
-        return true;
-      }
+      if (!requirePep(req, res)) return true;
       if (!String(req.headers['content-type'] || '').startsWith('application/json')) {
         send(res, 415, { error: 'Content-Type ha de ser application/json.' });
         return true;
