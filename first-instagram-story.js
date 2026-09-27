@@ -6,9 +6,9 @@ const instagram = require('./instagram-graph.js');
 
 const APP_URL = String(process.env.APP_BASE_URL || 'https://casa-mestres-restaurant-app.onrender.com').replace(/\/$/, '');
 const SOURCE_IMAGE_URL = `${APP_URL}/social/sarriera-ja-hi-som.jpg`;
-const IMAGE_URL = `https://images.weserv.nl/?url=${encodeURIComponent(SOURCE_IMAGE_URL)}&w=1080&h=1920&fit=cover&output=jpg`;
+const IMAGE_URL = `https://images.weserv.nl/?url=${encodeURIComponent(SOURCE_IMAGE_URL)}&w=1080&h=1920&fit=cover&output=jpg&q=90&cb=20260927b`;
 const DATA_DIR = String(process.env.DATA_DIR || '/var/data');
-const MARKER = path.join(DATA_DIR, 'instagram-first-story-sarriera-20260927.json');
+const MARKER = path.join(DATA_DIR, 'instagram-first-story-sarriera-20260927-v2.json');
 const IMAGE_B64 = path.join(__dirname, 'public', 'social', 'sarriera-ja-hi-som-360x640.b64');
 const IMAGE_FILE = path.join(__dirname, 'public', 'social', 'sarriera-ja-hi-som.jpg');
 
@@ -17,7 +17,7 @@ function ensureMetaCompatibleImage() {
   const encoded = fs.readFileSync(IMAGE_B64, 'utf8').trim();
   if (!encoded) return;
   fs.writeFileSync(IMAGE_FILE, Buffer.from(encoded, 'base64'));
-  console.log('[Instagram] Origen Story preparat; Meta rebrà JPEG 1080x1920 via URL pública.');
+  console.log('[Instagram] Origen Story v2 preparat; Meta rebrà JPEG 1080x1920 q90 amb URL nova.');
 }
 
 function scheduleFirstStory() {
@@ -28,7 +28,7 @@ function scheduleFirstStory() {
     return;
   }
   if (fs.existsSync(MARKER)) {
-    console.log('[Instagram] Primera story ja publicada; no es repeteix.');
+    console.log('[Instagram] Story v2 ja publicada; no es repeteix.');
     return;
   }
 
@@ -50,10 +50,10 @@ function scheduleFirstStory() {
       const result = await instagram.publishImage({ imageUrl: IMAGE_URL, mediaType: 'STORY' });
       fs.mkdirSync(DATA_DIR, { recursive: true });
       fs.writeFileSync(MARKER, JSON.stringify({ publishedAt: new Date().toISOString(), imageUrl: IMAGE_URL, ...result }, null, 2));
-      console.log(`[Instagram] FIRST_STORY_PUBLISHED mediaId=${result.mediaId}`);
+      console.log(`[Instagram] FIRST_STORY_V2_PUBLISHED mediaId=${result.mediaId}`);
     } catch (error) {
       const diagnostic = {
-        event: 'FIRST_STORY_FAILED',
+        event: 'FIRST_STORY_V2_FAILED',
         intent: attempts,
         message: error.message,
         stage: error.metaStage || null,
