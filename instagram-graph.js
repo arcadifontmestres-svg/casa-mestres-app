@@ -33,7 +33,7 @@ function validateHttpsUrl(value) {
   return parsed.toString();
 }
 
-async function graphPost(pathname, params) {
+async function graphPost(pathname, params, stage = 'graph_post') {
   const body = new URLSearchParams();
   for (const [key, value] of Object.entries(params || {})) {
     if (value !== undefined && value !== null && value !== '') body.set(key, String(value));
@@ -46,11 +46,16 @@ async function graphPost(pathname, params) {
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || payload.error) {
-    const message = payload?.error?.message || `Meta Graph API ha retornat HTTP ${response.status}.`;
+    const meta = payload?.error || {};
+    const message = meta.message || `Meta Graph API ha retornat HTTP ${response.status}.`;
     const error = new Error(message);
     error.statusCode = response.status >= 400 && response.status < 600 ? response.status : 502;
-    error.metaCode = payload?.error?.code;
-    error.metaSubcode = payload?.error?.error_subcode;
+    error.metaStage = stage;
+    error.metaType = meta.type || null;
+    error.metaCode = meta.code ?? null;
+    error.metaSubcode = meta.error_subcode ?? null;
+    error.metaFbtraceId = meta.fbtrace_id || null;
+    error.metaHttpStatus = response.status;
     throw error;
   }
   return payload;
@@ -74,14 +79,14 @@ async function publishImage({ imageUrl, caption = '', mediaType = 'FEED' }) {
   if (normalizedType === 'STORY') containerInput.media_type = 'STORIES';
   else if (caption) containerInput.caption = String(caption).slice(0, 2200);
 
-  const container = await graphPost(`/${encodeURIComponent(current.igUserId)}/media`, containerInput);
-  if (!container.id) throw Object.assign(new Error('Meta no ha retornat cap creation_id.'), { statusCode: 502 });
+  const container = await graphPost(`/${encodeURIComponent(current.igUserId)}/media`, containerInput, 'media_create');
+  if (!container.id) throw Object.assign(new Error('Meta no ha retornat cap creation_id.'), { statusCode: 502, metaStage: 'media_create' });
 
   const published = await graphPost(`/${encodeURIComponent(current.igUserId)}/media_publish`, {
     creation_id: container.id,
     access_token: current.systemUserToken
-  });
-  if (!published.id) throw Object.assign(new Error('Meta no ha retornat l’identificador de publicació.'), { statusCode: 502 });
+  }, 'media_publish');
+  if (!published.id) throw Object.assign(new Error('Meta no ha retornat l’identificador de publicació.'), { statusCode: 502, metaStage: 'media_publish' });
 
   return {
     ok: true,
