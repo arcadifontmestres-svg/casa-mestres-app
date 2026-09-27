@@ -10,7 +10,7 @@ const { scheduleRadioVilafrancaInstagram } = require('./radio-instagram-publish.
 applyStartupCopy();
 applySarrieraKitchenIntegration();
 require('./commercial-brand.js');
-require('./instagram-server.js');
+require('./botons-server.js');
 applyStartupCopy();
 scheduleFirstStory();
 scheduleRadioVilafrancaInstagram();
