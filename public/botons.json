@@ -1,0 +1,38 @@
+[
+  {
+    "id": "activitats",
+    "label": "ACTIVITATS",
+    "imatge": "https://casa-mestres-restaurant-app.onrender.com/public/stories/activitats.jpg",
+    "espai": "ACTIVITATS"
+  },
+  {
+    "id": "carta",
+    "label": "CARTA",
+    "imatge": "https://casa-mestres-restaurant-app.onrender.com/public/stories/carta.jpg",
+    "espai": "CARTA"
+  },
+  {
+    "id": "novetats",
+    "label": "NOVETATS",
+    "imatge": "https://casa-mestres-restaurant-app.onrender.com/public/stories/novetats.jpg",
+    "espai": "NOVETATS"
+  },
+  {
+    "id": "espai",
+    "label": "L’ESPAI",
+    "imatge": "https://casa-mestres-restaurant-app.onrender.com/public/stories/espai.jpg",
+    "espai": "L’ESPAI"
+  },
+  {
+    "id": "grups",
+    "label": "GRUPS",
+    "imatge": "https://casa-mestres-restaurant-app.onrender.com/public/stories/grups.jpg",
+    "espai": "GRUPS"
+  },
+  {
+    "id": "premsa",
+    "label": "PREMSA",
+    "imatge": "https://casa-mestres-restaurant-app.onrender.com/public/stories/premsa.jpg",
+    "espai": "PREMSA"
+  }
+]
