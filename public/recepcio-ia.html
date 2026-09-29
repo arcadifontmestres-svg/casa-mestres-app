@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TRÀFEC · Recepció IA</title>
+  <link rel="stylesheet" href="/recepcio-ia.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="kicker">GRUP TRÀFEC · PROTOTIP</div>
+      <h1>Central de Recepció IA</h1>
+      <p>Una única recepció per reserves, grups, centres i Direcció.</p>
+    </div>
+    <div class="demoBadge">DEMO · NO CREA RESERVES REALS</div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <h2>“Bon dia, Grup Tràfec. Sóc l’assistent virtual de recepció. En què et puc ajudar?”</h2>
+        <p>El prototip mostra com una mateixa recepció pot entendre la petició, consultar el circuit correcte i derivar-la a ARCADI Reserves, Grups/Comercial, Direcció o al centre.</p>
+      </div>
+      <button id="speakIntro" class="voiceBtn">🔊 Escoltar salutació</button>
+    </section>
+
+    <section class="layout">
+      <div class="panel chatPanel">
+        <div class="panelHead">
+          <div>
+            <div class="eyebrow">TRUCADA / XAT</div>
+            <h3>Recepcionista virtual</h3>
+          </div>
+          <button id="resetBtn" class="secondary">Reiniciar</button>
+        </div>
+
+        <div id="chat" class="chat"></div>
+
+        <div class="quickTitle">Proves ràpides per demà</div>
+        <div class="quickGrid">
+          <button data-demo="Vull reservar a Sarriera dissabte a les 21:00 per 4 persones">Reserva normal</button>
+          <button data-demo="Som un grup de 35 persones per dimecres a la nit a Sarriera">Grup de 35</button>
+          <button data-demo="Vull parlar amb Direcció">Derivar a Direcció</button>
+          <button data-demo="Vull parlar amb La Granada">Derivar a un centre</button>
+        </div>
+
+        <div class="composer">
+          <input id="message" autocomplete="off" placeholder="Escriu què diria el client...">
+          <button id="micBtn" class="mic" title="Parlar">🎙️</button>
+          <button id="sendBtn" class="primary">Enviar</button>
+        </div>
+        <div id="speechNote" class="speechNote"></div>
+      </div>
+
+      <aside class="panel actionPanel">
+        <div class="eyebrow">QUÈ FARIA ARCADI</div>
+        <h3>Ruta operativa</h3>
+        <div id="route" class="route empty">Encara no hi ha cap petició.</div>
+
+        <div class="rules">
+          <h4>Criteris del prototip</h4>
+          <div><b>≤10 pax</b><span>Reserva → ARCADI Reserves</span></div>
+          <div><b>&gt;10 pax</b><span>Grup → Comercial / alerta Agenda Centre</span></div>
+          <div><b>Direcció</b><span>Derivació de trucada</span></div>
+          <div><b>Centre</b><span>Derivació al centre corresponent</span></div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="/js/recepcio-ia.js"></script>
+</body>
+</html>
