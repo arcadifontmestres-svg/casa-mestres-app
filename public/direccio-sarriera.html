@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sarriera 1930 · Direcció</title>
+  <style>
+    :root{--bg:#f4f6f5;--paper:#fff;--ink:#181c1d;--muted:#6c7476;--line:#dfe4e2;--dark:#111819;--ok:#1f6d50;--warn:#8a6114;--soft:#eef3f1;--shadow:0 10px 28px rgba(18,28,26,.07)}
+    *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Segoe UI,Arial,sans-serif}button,input,select,textarea{font:inherit}
+    .top{background:var(--dark);color:#fff;padding:22px clamp(18px,4vw,48px);display:flex;justify-content:space-between;gap:20px;align-items:center}.kicker{font-size:10px;font-weight:900;letter-spacing:1.2px;opacity:.68}.top h1{margin:5px 0 3px;font-size:29px}.top p{margin:0;color:#c9d1cf}.badge{border:1px solid #45504e;border-radius:999px;padding:8px 12px;font-size:11px;font-weight:900;white-space:nowrap}
+    .wrap{max-width:1320px;margin:auto;padding:24px clamp(14px,3vw,34px) 50px}.hero{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:16px}.hero h2{margin:0 0 5px;font-size:24px}.hero p{margin:0;color:var(--muted)}.date{font-weight:800;color:#485251}
+    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 15px;box-shadow:var(--shadow)}.stat small{display:block;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.7px}.stat b{display:block;font-size:25px;margin:5px 0 1px}.stat span{font-size:11px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:var(--shadow)}.panel h3{margin:0 0 4px;font-size:18px}.sub{font-size:12px;color:var(--muted);margin-bottom:12px}.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.action{display:block;text-decoration:none;border:1px solid var(--line);background:#fafcfb;color:var(--ink);border-radius:12px;padding:13px;font-weight:850}.action small{display:block;color:var(--muted);font-weight:500;margin-top:4px;line-height:1.35}.action:hover{border-color:#9ab5ad;background:#f6faf8}
+    .list{display:flex;flex-direction:column;gap:8px}.item{border:1px solid var(--line);border-radius:11px;padding:10px 11px;background:#fbfcfc}.item b{font-size:12px}.item span{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.35}.item.warn{border-color:#e5c887;background:#fffaf0}.item.ok{border-color:#b7d5c8;background:#f5fbf8}.empty{color:var(--muted);font-size:12px;padding:8px 0}
+    .form{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.form .wide{grid-column:1/-1}.form label{display:block;font-size:10px;font-weight:800;color:#596260;margin-bottom:4px}.form input,.form select,.form textarea{width:100%;border:1px solid #cfd6d3;border-radius:9px;padding:9px;background:#fff}.btn{border:0;border-radius:10px;padding:10px 13px;background:var(--dark);color:#fff;font-weight:850;cursor:pointer}.btn.secondary{background:#e9efed;color:#26302e}.mini{border:0;border-radius:8px;padding:6px 9px;background:#e8efec;color:#26302e;font-weight:800;font-size:10px;cursor:pointer;float:right}
+    .team{margin-top:14px}.teamRow{display:grid;grid-template-columns:1.2fr .7fr .9fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:11px}.teamRow.head{color:var(--muted);font-weight:800;font-size:9px;text-transform:uppercase}.statusline{margin-top:14px;padding:10px 12px;border-radius:10px;background:var(--soft);font-size:11px;color:#485251}
+    @media(max-width:980px){.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}@media(max-width:620px){.top,.hero{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:1fr 1fr}.actions,.form{grid-template-columns:1fr}.form .wide{grid-column:auto}.teamRow{grid-template-columns:1fr}.teamRow.head{display:none}}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div><div class="kicker">ARCADI GESTIÓ · DIRECCIÓ · POSADA EN MARXA</div><h1>Sarriera 1930</h1><p>Visió mínima per decidir, assignar i executar.</p></div>
+    <div class="badge">DEMO OPERATIVA · DADES REALS</div>
+  </header>
+  <main class="wrap">
+    <div class="hero"><div><h2>Tauler de Direcció</h2><p>Només el necessari per la reunió de posada en marxa.</p></div><div id="today" class="date"></div></div>
+    <section id="stats" class="stats"><div class="stat"><small>CARREGANT</small><b>…</b><span>dades del centre</span></div></section>
+    <div class="grid">
+      <div>
+        <section class="panel">
+          <h3>Accessos de treball</h3><div class="sub">El mateix circuit que utilitzarà el centre.</div>
+          <div class="actions">
+            <a class="action" href="/sarriera.html?screen=agenda">AGENDA CENTRE<small>Setmana, ocupació, grups, torns, tasques i avisos.</small></a>
+            <a class="action" href="/#arcadi-reservationsAdvanced">RESERVES<small>Consulta i gestió de reserves de Sarriera.</small></a>
+            <a class="action" href="/#kitchen">CUINA<small>Receptari, producció i necessitats.</small></a>
+            <a class="action" href="/control_normatiu.html">APPCC / CONTROL NORMATIU<small>Registres operatius i de seguretat alimentària.</small></a>
+          </div>
+        </section>
+
+        <section class="panel" style="margin-top:14px">
+          <h3>Equip vinculat al centre</h3><div class="sub">Lectura directa de les persones registrades a Sarriera.</div>
+          <div id="team" class="team"><div class="empty">Carregant equip…</div></div>
+        </section>
+      </div>
+
+      <div>
+        <section class="panel">
+          <h3>Punts que requereixen atenció</h3><div class="sub">Grups pendents, tasques i avisos oberts.</div>
+          <div id="attention" class="list"><div class="empty">Carregant…</div></div>
+        </section>
+
+        <section class="panel" style="margin-top:14px">
+          <h3>Acció de Direcció</h3><div class="sub">Crear una tasca o avís real per al centre durant la reunió.</div>
+          <form id="actionForm" class="form">
+            <div><label>TIPUS</label><select id="kind"><option>TASCA</option><option>AVIS</option></select></div>
+            <div><label>DATA</label><input id="date" type="date"></div>
+            <div class="wide"><label>RESPONSABLE / DESTINATARI</label><input id="recipient" placeholder="S1, S2, C1, Cuina, Sala…"></div>
+            <div class="wide"><label>ACCIÓ / ASSUMPTE</label><input id="subject" required placeholder="Ex. Tancar quadrant de dijous"></div>
+            <div class="wide"><label>DETALL</label><textarea id="message" rows="3"></textarea></div>
+            <div class="wide"><button class="btn" type="submit">Guardar a Agenda Centre</button></div>
+          </form>
+          <div id="formStatus" class="statusline">Preparat per registrar decisions de la reunió.</div>
+        </section>
+      </div>
+    </div>
+  </main>
+<script>
+(()=>{
+'use strict';
+const COMPANY='company_grup_trafec', CENTRE='restaurant_sarriera';
+localStorage.setItem('arcadi_work_context_v1',JSON.stringify({companyId:COMPANY,centreId:CENTRE}));
+const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])), num=v=>Number.isFinite(Number(v))?Number(v):0;
+const localISO=()=>{const d=new Date(),o=d.getTimezoneOffset();return new Date(d.getTime()-o*60000).toISOString().slice(0,10)};
+const plus=(iso,days)=>{const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+days);return d.toISOString().slice(0,10)};
+const inCentre=x=>(!x.companyId||x.companyId===COMPANY)&&(!x.centreId||x.centreId===CENTRE||(Array.isArray(x.centreIds)&&x.centreIds.includes(CENTRE)));
+let state=null;
+async function load(){const r=await fetch('/api/state',{headers:{'X-Arcadi-Company-Id':COMPANY,'X-Arcadi-Centre-Id':CENTRE}});if(!r.ok)throw Error('No s’han pogut carregar les dades');state=await r.json();render()}
+async function save(){const r=await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json','X-Arcadi-Company-Id':COMPANY,'X-Arcadi-Centre-Id':CENTRE},body:JSON.stringify(state)});if(!r.ok)throw Error('No s’ha pogut guardar');const out=await r.json();state=out.state||state;render()}
+function employeeName(x){return x.name||x.fullName||[x.firstName,x.lastName].filter(Boolean).join(' ')||x.code||'Persona'}
+function employeeRole(x){return x.position||x.role||x.jobTitle||x.category||'—'}
+function render(){
+  const today=localISO(),end=plus(today,7);
+  const reservations=(state.reservations||[]).filter(inCentre).filter(x=>x.date>=today&&x.date<=end&&String(x.status||'').toLowerCase()!=='cancel·lada');
+  const groups=(state.groupEvents||[]).filter(inCentre).filter(x=>x.date>=today&&x.date<=end&&!/cancel/i.test(String(x.status||'')));
+  const confirmedGroups=groups.filter(x=>/confirm/i.test(String(x.status||'')));
+  const pendingGroups=groups.filter(x=>!/confirm|realitzat/i.test(String(x.status||'')));
+  const tasks=(state.communications||[]).filter(inCentre).filter(x=>['TASCA','AVIS'].includes(x.agendaKind)&&x.status!=='Arxivat');
+  const pax=reservations.reduce((s,x)=>s+num(x.pax),0)+confirmedGroups.reduce((s,x)=>s+num(x.pax),0);
+  const employees=(state.employees||[]).filter(inCentre).filter(x=>!['Inactiu','Baixa'].includes(String(x.status||'')));
+  $('stats').innerHTML=[['OCUPACIÓ 7 DIES',pax,'pax confirmats'],['RESERVES',reservations.length,'properes 7 dies'],['GRUPS CONFIRMATS',confirmedGroups.length,'properes 7 dies'],['GRUPS PENDENTS',pendingGroups.length,'requereixen seguiment'],['TASQUES / AVISOS',tasks.length,'oberts al centre']].map(x=>`<div class="stat"><small>${x[0]}</small><b>${x[1]}</b><span>${x[2]}</span></div>`).join('');
+  const att=[];
+  pendingGroups.slice(0,5).forEach(g=>att.push(`<div class="item warn"><b>GRUP PENDENT · ${esc(g.date||'')}</b><span>${esc(g.name||g.client||'Grup')} · ${num(g.pax)||'?'} pax · ${esc(g.status||'Pendent')}</span></div>`));
+  tasks.slice().sort((a,b)=>String(a.agendaDate||'').localeCompare(String(b.agendaDate||''))).slice(0,8).forEach(t=>att.push(`<div class="item"><button class="mini" data-close="${esc(t.id)}">Tancar</button><b>${esc(t.agendaKind)} · ${esc(t.agendaDate||'')}</b><span>${esc(t.subject||'')} · ${esc(t.recipient||'Centre')}</span></div>`));
+  $('attention').innerHTML=att.join('')||'<div class="empty">Cap alerta o tasca oberta en aquest moment.</div>';
+  document.querySelectorAll('[data-close]').forEach(b=>b.onclick=async()=>{const x=(state.communications||[]).find(v=>v.id===b.dataset.close);if(x){x.status='Arxivat';x.updatedAt=new Date().toISOString();await save()}});
+  $('team').innerHTML=employees.length?`<div class="teamRow head"><div>Persona</div><div>Posició</div><div>Estat</div></div>`+employees.slice(0,20).map(x=>`<div class="teamRow"><div><b>${esc(employeeName(x))}</b></div><div>${esc(employeeRole(x))}</div><div>${esc(x.status||'Actiu')}</div></div>`).join(''):'<div class="empty">No hi ha persones vinculades al centre en les dades actuals.</div>';
+}
+$('today').textContent=new Date().toLocaleDateString('ca-ES',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+$('date').value=localISO();
+$('actionForm').onsubmit=async e=>{e.preventDefault();const subject=$('subject').value.trim();if(!subject)return;state.communications=state.communications||[];state.communications.push({id:'comm_dir_'+Date.now().toString(36),companyId:COMPANY,centreId:CENTRE,scope:'CENTRE',agendaKind:$('kind').value,agendaDate:$('date').value,agendaTime:'',subject,recipient:$('recipient').value.trim(),message:$('message').value.trim(),channel:'Intern',status:'Pendent',source:'DIRECCIO',createdAt:new Date().toISOString()});$('formStatus').textContent='Guardant…';try{await save();$('subject').value='';$('message').value='';$('formStatus').textContent='Guardat. Ja és visible a Agenda Centre.'}catch(err){$('formStatus').textContent=err.message}};
+load().catch(err=>{ $('stats').innerHTML=`<div class="stat"><small>ERROR</small><b>!</b><span>${esc(err.message)}</span></div>`; $('attention').innerHTML='<div class="empty">No s’han pogut carregar les dades.</div>'});
+})();
+</script>
+</body>
+</html>
