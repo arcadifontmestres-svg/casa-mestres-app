@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Sarriera 1930 · ARCADI Centre</title>
   <link rel="stylesheet" href="/centre.css">
+  <style>.centreActions{display:flex;gap:8px;align-items:center}.directionLink{padding:9px 13px;border-radius:999px;background:#111819;color:#fff;text-decoration:none;font-size:11px;font-weight:900}@media(max-width:850px){.centreActions{width:100%;justify-content:space-between}}</style>
 </head>
 <body>
   <header class="centreTop">
@@ -13,7 +14,7 @@
       <h1 id="centreName">Sarriera 1930</h1>
       <p id="centreContext">Grup Tràfec</p>
     </div>
-    <span class="status">● ACTIU</span>
+    <div class="centreActions"><a class="directionLink" href="/direccio-sarriera.html">DIRECCIÓ</a><span class="status">● ACTIU</span></div>
   </header>
 
   <main class="centreShell">
@@ -50,5 +51,12 @@
     }));
   </script>
   <script src="/js/centre.js"></script>
+  <script>
+    window.addEventListener('load',()=>{
+      const screen=new URLSearchParams(location.search).get('screen');
+      if(screen==='agenda'&&window.CentreApp) window.CentreApp.agenda();
+      if(screen==='operativa'&&window.CentreApp) window.CentreApp.operativa();
+    });
+  </script>
 </body>
 </html>
