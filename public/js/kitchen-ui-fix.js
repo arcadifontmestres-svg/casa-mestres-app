@@ -60,7 +60,8 @@ function decorateRecipeRows(){
     if(!select||!host)return;
     let box=host.querySelector('.kfSelectedItem');
     if(!box){box=document.createElement('div');box.className='kfSelectedItem';host.appendChild(box)}
-    box.textContent=selectedText(select,products);
+    const text=selectedText(select,products);
+    if(box.textContent!==text)box.textContent=text;
   });
   document.querySelectorAll('#baseRows .lineRow').forEach(row=>{
     const select=row.querySelector('select[data-base="baseId"]');
@@ -68,7 +69,8 @@ function decorateRecipeRows(){
     if(!select||!host)return;
     let box=host.querySelector('.kfSelectedItem');
     if(!box){box=document.createElement('div');box.className='kfSelectedItem';host.appendChild(box)}
-    box.textContent=selectedText(select,bases);
+    const text=selectedText(select,bases);
+    if(box.textContent!==text)box.textContent=text;
   });
 }
 function watchRecipeRows(){
@@ -76,7 +78,7 @@ function watchRecipeRows(){
     const el=document.getElementById(id);
     if(!el||el.dataset.kfObserved==='1')return;
     el.dataset.kfObserved='1';
-    new MutationObserver(()=>decorateRecipeRows()).observe(el,{childList:true,subtree:true});
+    new MutationObserver(()=>decorateRecipeRows()).observe(el,{childList:true});
   });
   decorateRecipeRows();
 }
