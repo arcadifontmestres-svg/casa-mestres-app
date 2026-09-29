@@ -11,6 +11,7 @@ const { scheduleHighlightBootstrapStory } = require('./highlight-bootstrap-story
 applyStartupCopy();
 applySarrieraKitchenIntegration();
 require('./commercial-brand.js');
+require('./twilio-demo-server.js');
 require('./botons-server.js');
 applyStartupCopy();
 scheduleFirstStory();
