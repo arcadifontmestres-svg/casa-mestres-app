@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SarRiera 1930 · ARCADI Centre</title>
+  <link rel="stylesheet" href="/centre.css">
+</head>
+<body>
+  <header class="centreTop">
+    <div>
+      <div class="kicker">ARCADI GESTIÓ · CENTRE VINCULAT</div>
+      <h1 id="centreName">Sarriera 1930</h1>
+      <p id="centreContext">Grup Tràfec</p>
+    </div>
+    <span class="status">● ACTIU</span>
+  </header>
+
+  <main class="centreShell">
+    <section id="centreHome">
+      <div class="intro">
+        <h2>Inici</h2>
+        <p>Operativa de Sarriera 1930. Tres accessos principals.</p>
+      </div>
+      <div class="mainGrid">
+        <button class="mainCard" data-screen="agenda">
+          <span>01</span><b>AGENDA CENTRE</b>
+          <small>Horaris, torns, ocupació, grups, tasques i avisos.</small>
+        </button>
+
+        <a class="mainCard linkCard" href="/#arcadi-reservationsAdvanced">
+          <span>02</span><b>RESERVES</b>
+          <small>Gestió de reserves en el context de Sarriera 1930.</small>
+        </a>
+
+        <button class="mainCard" data-screen="operativa">
+          <span>03</span><b>OPERATIVA</b>
+          <small>Cuina i APPCC / Control Normatiu.</small>
+        </button>
+      </div>
+    </section>
+
+    <section id="screen" class="screen hidden"></section>
+  </main>
+
+  <script>
+    localStorage.setItem('arcadi_work_context_v1', JSON.stringify({
+      companyId: 'company_grup_trafec',
+      centreId: 'restaurant_sarriera'
+    }));
+  </script>
+  <script src="/js/centre.js"></script>
+</body>
+</html>
