@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ARCADI · Centre</title>
+  <link rel="stylesheet" href="/centre.css">
+</head>
+<body>
+  <header class="centreTop">
+    <div>
+      <div class="kicker">ARCADI GESTIÓ · CENTRE VINCULAT</div>
+      <h1 id="centreName">Centre de treball</h1>
+      <p id="centreContext">Grup Tràfec</p>
+    </div>
+    <span class="status">● ACTIU</span>
+  </header>
+
+  <main class="centreShell">
+    <section id="centreHome">
+      <div class="intro">
+        <h2>Inici</h2>
+        <p>Tres accessos principals. Les funcions d’Operativa les defineix Direcció per a cada centre.</p>
+      </div>
+      <div class="mainGrid">
+        <button class="mainCard" data-screen="agenda"><span>01</span><b>AGENDA CENTRE</b><small>Horaris, torns, ocupació, grups, tasques i avisos.</small></button>
+        <button class="mainCard" data-screen="reserves"><span>02</span><b>RESERVES</b><small>Llibre de reserves i modificacions operatives del centre.</small></button>
+        <button class="mainCard" data-screen="operativa"><span>03</span><b>OPERATIVA</b><small>Funcions autoritzades del centre.</small></button>
+      </div>
+    </section>
+
+    <section id="screen" class="screen hidden"></section>
+  </main>
+
+  <script src="/js/centre.js"></script>
+</body>
+</html>
