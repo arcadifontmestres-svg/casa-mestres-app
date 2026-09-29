@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071924">
+<title>ARCADI · Centre</title>
+<link rel="stylesheet" href="/centre.css">
+</head>
+<body>
+<section id="activation" class="activation" hidden>
+  <div class="activationCard">
+    <div class="activationBrand"><div class="logo">AG</div><div><div class="brand-title">ARCADI GESTIÓ</div><div class="brand-sub">APP DE CENTRE</div></div></div>
+    <h1>Activar aquest centre</h1><p>Aquesta pantalla encara no està vinculada. Introdueix les dades facilitades per Direcció.</p>
+    <label>Codi del centre</label><input id="centreCode" value="SARRIERA1930" autocomplete="off">
+    <label>Codi d’activació</label><input id="activationCode" placeholder="000000" inputmode="numeric" maxlength="8">
+    <button id="activateBtn" class="btn primary" style="width:100%;margin-top:16px">Activar centre</button>
+    <button id="previewBtn" class="btn secondary" style="width:100%;margin-top:10px">Veure disseny sense connexió</button>
+    <div id="activationMsg" class="feedback" hidden></div>
+  </div>
+</section>
+
+<div id="app" class="app" hidden>
+<aside class="side">
+  <div class="brand"><div class="logo">AG</div><div><div class="brand-title">ARCADI GESTIÓ</div><div class="brand-sub">GESTIÓ RESTAURANT</div></div></div>
+  <div class="centre"><span>CENTRE</span><strong id="centreName">—</strong><small id="companyName">—</small></div>
+  <nav class="nav" id="nav">
+    <button class="active" data-screen="home">Inici</button><button data-screen="reservations">Reserves / Sala</button><button data-screen="kitchen">Cuina</button><button data-screen="production">Producció</button><button data-screen="appcc">APPCC</button><button data-screen="maintenance">Manteniment</button><button data-screen="tasks">Tasques</button>
+  </nav>
+  <div id="extraWrap" class="extraWrap" hidden><div class="nav-label">DIRECCIÓ HA ACTIVAT</div><div id="extraNav" class="extraNav"></div></div>
+  <div class="sideFoot"><span id="dot" class="dot"></span><span id="conn">Connectant...</span></div>
+</aside>
+<main class="main">
+<header class="top"><div><span class="eyebrow">OPERATIVA DEL CENTRE</span><h1 id="title">Avui</h1><p id="subtitle">Reserves, servei, tasques i avisos del centre.</p></div><div class="actions"><button id="refresh" class="btn secondary">Actualitzar</button><button id="manualRes" class="btn primary">+ Reserva manual</button></div></header>
+
+<section id="home" class="screen active">
+  <div class="stats"><article class="stat dark"><span>RESERVES AVUI</span><strong id="sRes">—</strong><small id="sPax">— pax confirmats</small></article><article class="stat"><span>PROPERA RESERVA</span><strong id="sNext">—</strong><small id="sNextMeta">Sense dades</small></article><article class="stat"><span>TASQUES PENDENTS</span><strong id="sTasks">—</strong><small>Pendents del centre</small></article><article class="stat"><span>AVISOS</span><strong id="sAlerts">—</strong><small id="sAlertsMeta">Sense dades</small></article></div>
+  <div class="module-title"><span class="eyebrow">ACCESSOS RÀPIDS</span><h2>Operativa</h2></div>
+  <div class="cards">
+    <button class="card" data-screen="reservations"><span class="icon">R</span><div><b>Reserves / Sala</b><small>Reserves d’avui, calendari i alta manual.</small></div></button>
+    <button class="card" data-screen="kitchen"><span class="icon">C</span><div><b>Cuina</b><small>Plats, bases, produccions, necessitats i ordres de servei.</small></div></button>
+    <button class="card" data-screen="production"><span class="icon">P</span><div><b>Producció</b><small>Proposar produccions i consultar les autoritzades.</small></div></button>
+    <button class="card" data-screen="appcc"><span class="icon">A</span><div><b>APPCC / Control normatiu</b><small>Registres, lots, etiquetes, traçabilitat i seguiment setmanal.</small></div></button>
+    <button class="card" data-screen="maintenance"><span class="icon">M</span><div><b>Manteniment</b><small>Comunicar incidències i consultar-ne l’estat.</small></div></button>
+    <button class="card" data-screen="tasks"><span class="icon">T</span><div><b>Tasques</b><small>Ordres de Direcció, Comercial i servei.</small></div></button>
+  </div>
+  <div id="extraSection" hidden><div class="module-title"><span class="eyebrow">ACTIVATS PER DIRECCIÓ</span><h2>Accessos addicionals</h2></div><div id="extraCards" class="cards"></div></div>
+</section>
+
+<section id="reservations" class="screen"><div class="toolbar"><button class="btn primary" id="manualRes2">+ Reserva manual</button><button class="btn secondary" data-load="reservations">Actualitzar</button></div><div class="panel"><div class="panelHead"><h2>Reserves d’avui</h2><span id="resSum" class="pill">—</span></div><div id="resList" class="list empty">Sense dades carregades.</div></div><div class="panel"><h2>Calendari</h2><div class="empty" style="margin-top:15px">El calendari es carregarà des de l’app mare.</div></div></section>
+<section id="kitchen" class="screen">
+  <div class="toolbar"><button class="btn secondary" data-load="kitchen">Actualitzar Cuina</button></div>
+  <div class="cards">
+    <button class="card" data-open="dishDlg"><span class="icon">P</span><div><b>Crear plat</b><small>Fitxa de plat amb ingredients del magatzem del centre.</small></div></button>
+    <button class="card" data-open="baseDlg"><span class="icon">B</span><div><b>Crear base de cuina</b><small>Fitxa de base amb ingredients i altres bases del centre.</small></div></button>
+    <button class="card" data-kitchen-view="dishes"><span class="icon">F</span><div><b>Consultar plats</b><small>Fitxes i escandalls disponibles al centre.</small></div></button>
+    <button class="card" data-kitchen-view="bases"><span class="icon">F</span><div><b>Consultar bases</b><small>Bases de cuina i fitxes de producció.</small></div></button>
+    <button class="card" data-open="prodDlg"><span class="icon">PR</span><div><b>Proposar producció</b><small>Genera la proposta i les necessitats associades.</small></div></button>
+    <button class="card" data-open="needDlg"><span class="icon">N</span><div><b>Crear necessitat</b><small>Producte o material que el centre necessita.</small></div></button>
+  </div>
+  <div id="kitchenCatalog" class="panel" hidden><div class="panelHead"><h2 id="kitchenCatalogTitle">Fitxes</h2><span class="pill">Centre actiu</span></div><div id="kitchenCatalogList" class="list empty">Sense dades carregades.</div></div>
+  <div class="split"><div class="panel"><h2>Ordres de servei</h2><div id="ordersList" class="list empty" style="margin-top:15px">Sense dades carregades.</div></div><div class="panel"><h2>Necessitats enviades</h2><div id="needsList" class="list empty" style="margin-top:15px">Sense dades carregades.</div></div></div>
+</section>
+<section id="production" class="screen"><div class="toolbar"><button class="btn primary" data-open="prodDlg">+ Proposar producció</button><button class="btn secondary" data-load="production">Actualitzar</button></div><div class="panel"><div class="panelHead"><h2>Produccions del centre</h2><span class="pill">Centre → app mare → personal</span></div><p style="color:var(--muted);margin-top:0">Una producció autoritzada per l’app mare pot generar automàticament la tasca corresponent a la mini-app personal.</p><div id="prodList" class="list empty" style="margin-top:15px">Sense dades carregades.</div></div></section>
+<section id="appcc" class="screen">
+  <div class="toolbar"><button class="btn primary" data-open="appccDlg">+ Entrar registre</button><button class="btn secondary" data-load="appcc">Actualitzar</button></div>
+  <div class="cards">
+    <button class="card" data-appcc-view="records"><span class="icon">R</span><div><b>Registres APPCC</b><small>Temperatures, neteges i registres definits per Direcció.</small></div></button>
+    <button class="card" data-appcc-view="lots"><span class="icon">L</span><div><b>Produccions i lots</b><small>Lots vinculats als fulls de producció del centre.</small></div></button>
+    <button class="card" data-appcc-view="labels"><span class="icon">E</span><div><b>Etiquetes</b><small>Etiquetes generades o pendents d’impressió.</small></div></button>
+    <button class="card" data-appcc-view="traceability"><span class="icon">T</span><div><b>Traçabilitat</b><small>Seguiment de lots, productes i elaboracions.</small></div></button>
+  </div>
+  <div class="panel"><div class="panelHead"><h2 id="appccPanelTitle">Setmana actual</h2><span id="appccWeek" class="pill">—</span></div><div id="appccList" class="list empty">Els formularis disponibles els defineix Direcció.</div></div>
+</section>
+<section id="maintenance" class="screen"><div class="toolbar"><button class="btn primary" data-open="maintDlg">+ Nova incidència</button><button class="btn secondary" data-load="maintenance">Actualitzar</button></div><div class="panel"><h2>Incidències</h2><div id="maintList" class="list empty" style="margin-top:15px">Sense dades carregades.</div></div></section>
+<section id="tasks" class="screen"><div class="panel"><h2>Tasques i ordres</h2><div id="tasksList" class="list empty" style="margin-top:15px">Sense dades carregades.</div></div></section>
+<section id="dynamic" class="screen"><div id="dynamicBox" class="panel"></div></section>
+</main></div>
+
+<dialog id="resDlg"><form class="modal" id="resForm"><div class="modalHead"><div><span class="eyebrow">SALA</span><h2>Nova reserva manual</h2></div><button type="button" class="close" data-close>×</button></div><div class="grid"><label>Nom<input name="name" required></label><label>Telèfon<input name="phone" required></label><label>Persones<input name="pax" type="number" min="1" required></label><label>Data<input name="date" type="date" required></label><label>Hora<input name="time" type="time" required></label><label class="wide">Observacions<textarea name="notes"></textarea></label></div><div id="resValid" class="feedback" hidden></div><div class="modalActions"><button type="button" id="checkRes" class="btn secondary">Validar disponibilitat</button><button id="saveRes" class="btn primary" disabled>Confirmar reserva</button></div></form></dialog>
+<dialog id="dishDlg"><form class="modal" data-submit="dish"><div class="modalHead"><div><span class="eyebrow">CUINA</span><h2>Crear plat</h2></div><button type="button" class="close" data-close>×</button></div><div class="grid"><label>Nom del plat<input name="name" required></label><label>Partida<input name="station" placeholder="Freds, Calents..."></label><label>Racions<input name="servings" type="number" min="1" value="1"></label><label>Categoria<input name="category"></label><label class="wide">Ingredients del magatzem del centre<select name="ingredients" class="centreProducts" multiple size="6"><option value="">Pendents de connexió al magatzem del centre</option></select></label><label class="wide">Elaboració<textarea name="process" required></textarea></label><label class="wide">Emplatat / observacions<textarea name="plating"></textarea></label></div><div class="modalActions"><button class="btn primary">Enviar fitxa a l’app mare</button></div></form></dialog>
+<dialog id="baseDlg"><form class="modal" data-submit="base"><div class="modalHead"><div><span class="eyebrow">CUINA</span><h2>Crear base de cuina</h2></div><button type="button" class="close" data-close>×</button></div><div class="grid"><label>Nom de la base<input name="name" required></label><label>Rendiment<input name="yield" type="number" min="0" step="0.01"></label><label>Unitat rendiment<input name="yieldUnit" placeholder="kg, L, racions..."></label><label>Vida útil<input name="life" placeholder="48 h"></label><label class="wide">Ingredients del magatzem del centre<select name="ingredients" class="centreProducts" multiple size="6"><option value="">Pendents de connexió al magatzem del centre</option></select></label><label class="wide">Elaboració<textarea name="process" required></textarea></label></div><div class="modalActions"><button class="btn primary">Enviar base a l’app mare</button></div></form></dialog>
+<dialog id="needDlg"><form class="modal simple" data-submit="need"><div class="modalHead"><div><span class="eyebrow">OPERATIVA</span><h2>Crear necessitat</h2></div><button type="button" class="close" data-close>×</button></div><label>Àrea<select name="area"><option>Cuina</option><option>Sala</option><option>Manteniment</option></select></label><label>Necessitat<input name="item" required placeholder="Ex. 8 kg de patates"></label><label>Quan es necessita<input name="neededAt" type="datetime-local"></label><label>Observacions<textarea name="notes"></textarea></label><div class="modalActions"><button class="btn primary">Enviar a l’app mare</button></div></form></dialog>
+<dialog id="prodDlg"><form class="modal simple" data-submit="production"><div class="modalHead"><div><span class="eyebrow">PRODUCCIÓ</span><h2>Proposar producció</h2></div><button type="button" class="close" data-close>×</button></div><label>Plat o base<input name="item" required></label><label>Quantitat<input name="quantity" type="number" min="0" step="0.01" required></label><label>Unitat<input name="unit"></label><label>Data prevista<input name="date" type="date"></label><label>Observacions<textarea name="notes"></textarea></label><div class="modalActions"><button class="btn primary">Enviar proposta</button></div></form></dialog>
+<dialog id="appccDlg"><form class="modal simple" data-submit="appcc"><div class="modalHead"><div><span class="eyebrow">APPCC</span><h2>Entrar registre</h2></div><button type="button" class="close" data-close>×</button></div><label>Registre<select name="template" id="appccTemplate"><option value="">Pendents de connexió</option></select></label><label>Data<input name="date" type="date" required></label><label>Valor / resultat<input name="value" required></label><label>Observacions<textarea name="notes"></textarea></label><div class="modalActions"><button class="btn primary">Guardar registre</button></div></form></dialog>
+<dialog id="maintDlg"><form class="modal simple" data-submit="maintenance"><div class="modalHead"><div><span class="eyebrow">MANTENIMENT</span><h2>Nova incidència</h2></div><button type="button" class="close" data-close>×</button></div><label>Zona / equip<input name="asset" required></label><label>Incidència<input name="title" required></label><label>Prioritat<select name="priority"><option>Normal</option><option>Alta</option><option>Urgent</option></select></label><label>Observacions<textarea name="notes"></textarea></label><div class="modalActions"><button class="btn primary">Enviar incidència</button></div></form></dialog>
+<div id="toast" class="toast" hidden></div>
+<script src="/centre.js"></script>
+</body></html>
