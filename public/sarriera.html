@@ -3,60 +3,47 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Sarriera 1930 · ARCADI Centre</title>
+  <title>Sarriera 1930 · Centre</title>
   <link rel="stylesheet" href="/centre.css">
-  <style>.centreActions{display:flex;gap:8px;align-items:center}.directionLink{padding:9px 13px;border-radius:999px;background:#111819;color:#fff;text-decoration:none;font-size:11px;font-weight:900}@media(max-width:850px){.centreActions{width:100%;justify-content:space-between}}</style>
 </head>
 <body>
   <header class="centreTop">
     <div>
-      <div class="kicker">ARCADI GESTIÓ · CENTRE VINCULAT</div>
-      <h1 id="centreName">Sarriera 1930</h1>
-      <p id="centreContext">Grup Tràfec</p>
+      <div class="kicker">SARRIERA 1930 · MINIAPP CENTRE</div>
+      <h1>Sarriera 1930</h1>
+      <p>Operativa autònoma del centre</p>
     </div>
-    <div class="centreActions"><a class="directionLink" href="/direccio-sarriera.html">DIRECCIÓ</a><span class="status">● ACTIU</span></div>
+    <span id="localStatus" class="status">● CENTRE VALIDAT</span>
   </header>
 
   <main class="centreShell">
     <section id="centreHome">
       <div class="intro">
         <h2>Inici</h2>
-        <p>Operativa de Sarriera 1930. Tres accessos principals.</p>
+        <p>Aquesta miniapp és un satèl·lit independent. No dona accés a ARCADI Gestió Central.</p>
       </div>
       <div class="mainGrid">
         <button class="mainCard" data-screen="agenda">
           <span>01</span><b>AGENDA CENTRE</b>
-          <small>Horaris, torns, ocupació, grups, tasques i avisos.</small>
+          <small>Operativa, reserves, tasques i avisos locals.</small>
         </button>
 
-        <a class="mainCard linkCard" href="/#arcadi-reservationsAdvanced">
+        <button class="mainCard" data-screen="reserves">
           <span>02</span><b>RESERVES</b>
-          <small>Gestió de reserves en el context de Sarriera 1930.</small>
-        </a>
+          <small>Llibre local de reserves de Sarriera.</small>
+        </button>
 
         <button class="mainCard" data-screen="operativa">
           <span>03</span><b>OPERATIVA</b>
-          <small>Cuina i APPCC / Control Normatiu.</small>
+          <small>Només les funcions habilitades per al centre.</small>
         </button>
       </div>
+      <div class="notice"><b>Criteri fix:</b> Direcció governa. El satèl·lit executa. Aquesta pantalla no obre, ni enllaça, ni retorna a la matriu central.</div>
     </section>
 
     <section id="screen" class="screen hidden"></section>
   </main>
 
-  <script>
-    localStorage.setItem('arcadi_work_context_v1', JSON.stringify({
-      companyId: 'company_grup_trafec',
-      centreId: 'restaurant_sarriera'
-    }));
-  </script>
-  <script src="/js/centre.js"></script>
-  <script>
-    window.addEventListener('load',()=>{
-      const screen=new URLSearchParams(location.search).get('screen');
-      if(screen==='agenda'&&window.CentreApp) window.CentreApp.agenda();
-      if(screen==='operativa'&&window.CentreApp) window.CentreApp.operativa();
-    });
-  </script>
+  <script src="/js/sarriera-satellite.js"></script>
 </body>
 </html>
