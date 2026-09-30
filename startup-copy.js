@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { copyCasaMestresToGrupTrafec } = require('./company-copy.js');
+const { syncCasaMestresMasterCatalog } = require('./catalog-master-sync.js');
 
 const ROOT = __dirname;
 
@@ -26,15 +27,21 @@ function backupData(dataFile, backupsDir) {
 function applyStartupCopy() {
   const { dataFile, backupsDir } = dataPaths();
   if (!fs.existsSync(dataFile)) return { applied: false, reason: 'data_missing' };
+
   const data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
-  const result = copyCasaMestresToGrupTrafec(data);
-  if (!result.applied) return result;
+  const initial = copyCasaMestresToGrupTrafec(data);
+  const catalog = syncCasaMestresMasterCatalog(data);
+  const changed = Boolean(initial.applied || catalog.applied);
+
+  if (!changed) return { applied: false, reason: initial.reason || 'catalog_up_to_date', initial, catalog };
+
   backupData(dataFile, backupsDir);
   const temporary = `${dataFile}.copy.tmp`;
   fs.writeFileSync(temporary, JSON.stringify(data, null, 2), 'utf8');
   fs.renameSync(temporary, dataFile);
-  console.log(`Còpia Casa Mestres → Grup Tràfec completada: ${result.total} registres.`);
-  return result;
+
+  console.log(`Còpia/sincronització Casa Mestres → Grup Tràfec: inicial ${initial.total || 0}, catàleg ${catalog.total || 0}.`);
+  return { applied: true, initial, catalog, total: (initial.total || 0) + (catalog.total || 0) };
 }
 
 if (require.main === module) {
