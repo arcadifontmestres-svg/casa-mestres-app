@@ -33,6 +33,42 @@ function employeeSnapshot(item, centreId) {
   };
 }
 
+function employeesFromPunches(punches, centreId) {
+  const byEmployee = new Map();
+  for (const punch of punches) {
+    if (!punch) continue;
+    const id = String(punch.employeeId || '').trim();
+    const name = String(punch.employeeName || '').trim();
+    if (!id || !name || byEmployee.has(id)) continue;
+    byEmployee.set(id, {
+      id,
+      code: String(punch.employeeCode || punch.code || '').trim(),
+      name,
+      level: '',
+      role: '',
+      roleBase: '',
+      phone: '',
+      active: true,
+      tasks: '',
+      responsibilities: '',
+      notes: 'Recuperat automàticament dels registres de fitxatge conservats.',
+      companyId: TARGET_COMPANY_ID,
+      centreId,
+      scope: 'CENTRE',
+      recoveredAt: new Date().toISOString()
+    });
+  }
+
+  let sequence = 1;
+  for (const employee of byEmployee.values()) {
+    if (!employee.code) {
+      employee.code = String(sequence).padStart(3, '0');
+      sequence += 1;
+    }
+  }
+  return [...byEmployee.values()];
+}
+
 function recoverSarrieraHr({ dataDir, dataFile, backupsDir }) {
   const root = safeJson(dataFile);
   if (!root) return { applied: false, reason: 'data_unreadable' };
@@ -68,6 +104,7 @@ function recoverSarrieraHr({ dataDir, dataFile, backupsDir }) {
     : [];
 
   let sourceFile = '';
+  let recoverySource = 'backup';
   let recoveredEmployees = [];
   let recoveredSchedules = [];
 
@@ -93,9 +130,14 @@ function recoverSarrieraHr({ dataDir, dataFile, backupsDir }) {
   }
 
   if (!recoveredEmployees.length) {
+    recoveredEmployees = employeesFromPunches(centre.collections.punches, centreId);
+    recoverySource = 'punches';
+  }
+
+  if (!recoveredEmployees.length) {
     return {
       applied: false,
-      reason: 'no_matching_employee_in_backups',
+      reason: 'no_employee_source',
       centreId,
       backupFiles: files.length,
       punchEmployeeIds: punchIds.size,
@@ -125,6 +167,7 @@ function recoverSarrieraHr({ dataDir, dataFile, backupsDir }) {
   return {
     applied: true,
     centreId,
+    recoverySource,
     sourceFile,
     employeesRecovered: recoveredEmployees.length,
     schedulesRecovered: recoveredSchedules.length,
