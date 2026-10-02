@@ -5,6 +5,7 @@ const path = require('path');
 const { copyCasaMestresToGrupTrafec } = require('./company-copy.js');
 const { syncCasaMestresMasterCatalog } = require('./catalog-master-sync.js');
 const { repairTrafecOperationalData } = require('./trafec-repair.js');
+const { restoreTrafecHr } = require('./trafec-hr-restore.js');
 
 const ROOT = __dirname;
 
@@ -33,7 +34,15 @@ function applyStartupCopy() {
   const initial = copyCasaMestresToGrupTrafec(data);
   const catalog = syncCasaMestresMasterCatalog(data);
   const repair = repairTrafecOperationalData(data);
-  const changed = Boolean(initial.applied || catalog.applied || repair.applied);
+  const hr = restoreTrafecHr(data);
+  const changed = Boolean(initial.applied || catalog.applied || repair.applied || hr.applied);
+
+  console.log(
+    `RRHH Grup Tràfec: empleats ${hr.targetEmployees}, actius ${hr.activeTargetEmployees}, ` +
+    `copiats ${hr.copiedEmployees}, Sarriera ${hr.sarrieraCentreId || 'NO'}, ` +
+    `reactivats ${hr.reactivated}, assignats ${hr.assigned}, vinculacions ${hr.relinked}, ` +
+    `fitxatges ${hr.punches}, torns ${hr.schedules}.`
+  );
 
   if (!changed) {
     return {
@@ -41,7 +50,8 @@ function applyStartupCopy() {
       reason: initial.reason || 'catalog_up_to_date',
       initial,
       catalog,
-      repair
+      repair,
+      hr
     };
   }
 
@@ -61,9 +71,11 @@ function applyStartupCopy() {
     initial,
     catalog,
     repair,
+    hr,
     total: (initial.total || 0) + (catalog.total || 0) +
       (repair.movedToTrafec || 0) + (repair.reactivatedEmployees || 0) +
-      (repair.linkedOperationalRecords || 0)
+      (repair.linkedOperationalRecords || 0) +
+      (hr.reactivated || 0) + (hr.assigned || 0) + (hr.relinked || 0)
   };
 }
 
