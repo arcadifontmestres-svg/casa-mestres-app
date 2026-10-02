@@ -9,6 +9,13 @@ function injectDirection(state){
   permissions.push({id:'__arcadi_direction_runtime__',companyId:'',centreId:'',employeeId:'__direction__',employeeName:'Direcció',level:'Direcció',matrix:fullMatrix(),runtimeOnly:true});
   return {...state,permissions};
 }
+function forceBrand(){
+  const name=document.getElementById('brandName');
+  const logo=document.getElementById('brandLogo');
+  if(name&&name.textContent!=='GRUP TRÀFEC')name.textContent='GRUP TRÀFEC';
+  if(logo&&logo.textContent!=='GT')logo.textContent='GT';
+  if(document.title!=='GRUP TRÀFEC · GESTIÓ')document.title='GRUP TRÀFEC · GESTIÓ';
+}
 window.fetch=async function(input,init={}){
   const response=await previousFetch(input,init);
   const url=typeof input==='string'?input:String(input?.url||'');
@@ -21,4 +28,9 @@ window.fetch=async function(input,init={}){
   }
   return response;
 };
+window.addEventListener('DOMContentLoaded',()=>{
+  forceBrand();
+  const observer=new MutationObserver(forceBrand);
+  observer.observe(document.documentElement,{subtree:true,childList:true,characterData:true});
+});
 })();
