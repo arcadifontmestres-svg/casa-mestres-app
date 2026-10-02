@@ -6,6 +6,7 @@ const { copyCasaMestresToGrupTrafec } = require('./company-copy.js');
 const { syncCasaMestresMasterCatalog } = require('./catalog-master-sync.js');
 const { repairTrafecOperationalData } = require('./trafec-repair.js');
 const { restoreTrafecHr } = require('./trafec-hr-restore.js');
+const { recoverSarrieraHr } = require('./recover-sarriera-hr.js');
 
 const ROOT = __dirname;
 
@@ -27,7 +28,7 @@ function backupData(dataFile, backupsDir) {
 }
 
 function applyStartupCopy() {
-  const { dataFile, backupsDir } = dataPaths();
+  const { dataDir, dataFile, backupsDir } = dataPaths();
   if (!fs.existsSync(dataFile)) return { applied: false, reason: 'data_missing' };
 
   const data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
@@ -35,7 +36,8 @@ function applyStartupCopy() {
   const catalog = syncCasaMestresMasterCatalog(data);
   const repair = repairTrafecOperationalData(data);
   const hr = restoreTrafecHr(data);
-  const changed = Boolean(initial.applied || catalog.applied || repair.applied || hr.applied);
+  const recovery = recoverSarrieraHr({ dataDir, dataFile, backupsDir });
+  const changed = Boolean(initial.applied || catalog.applied || repair.applied || hr.applied || recovery.applied);
 
   console.log(
     `RRHH Grup Tràfec: empleats ${hr.targetEmployees}, actius ${hr.activeTargetEmployees}, ` +
@@ -43,6 +45,7 @@ function applyStartupCopy() {
     `reactivats ${hr.reactivated}, assignats ${hr.assigned}, vinculacions ${hr.relinked}, ` +
     `fitxatges ${hr.punches}, torns ${hr.schedules}.`
   );
+  console.log(`RRHH Sarriera recuperació: ${JSON.stringify(recovery)}.`);
 
   if (!changed) {
     return {
@@ -51,7 +54,8 @@ function applyStartupCopy() {
       initial,
       catalog,
       repair,
-      hr
+      hr,
+      recovery
     };
   }
 
@@ -72,10 +76,12 @@ function applyStartupCopy() {
     catalog,
     repair,
     hr,
+    recovery,
     total: (initial.total || 0) + (catalog.total || 0) +
       (repair.movedToTrafec || 0) + (repair.reactivatedEmployees || 0) +
       (repair.linkedOperationalRecords || 0) +
-      (hr.reactivated || 0) + (hr.assigned || 0) + (hr.relinked || 0)
+      (hr.reactivated || 0) + (hr.assigned || 0) + (hr.relinked || 0) +
+      (recovery.employeesRecovered || 0) + (recovery.schedulesRecovered || 0)
   };
 }
 
