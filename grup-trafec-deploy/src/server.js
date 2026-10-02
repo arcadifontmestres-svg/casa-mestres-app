@@ -24,11 +24,11 @@ const links = createCenterLinks(store);
 
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, '..', 'public')));
-app.get('/api/health', (_req, res) => res.json({ ok: true, app: 'GRUP TRÀFEC', version: '0.5.0' }));
+app.get('/api/health', (_req, res) => res.json({ ok: true, app: 'GRUP TRÀFEC', version: '0.6.0' }));
 app.use('/api/govern', createGovernRouter(govern));
-app.use('/api/crm', createCrmContextRouter(crm, links));
-app.use('/api/comercial', createCommercialContextRouter(commercial, links));
-app.use('/api/reserves', createReservationContextRouter(reservations, links));
+app.use('/api/crm', createCrmContextRouter(crm, links, govern));
+app.use('/api/comercial', createCommercialContextRouter(commercial, links, govern));
+app.use('/api/reserves', createReservationContextRouter(reservations, links, govern));
 app.use((error, _req, res, _next) => { console.error(error); res.status(error.status || 500).json({ error: error.message || 'Error intern.' }); });
 if (require.main === module) app.listen(PORT, () => console.log(`GRUP TRÀFEC actiu al port ${PORT}`));
 module.exports = { app, store, crm, reservations, commercial, govern, links };
