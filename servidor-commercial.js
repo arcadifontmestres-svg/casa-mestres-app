@@ -12,7 +12,7 @@ applyStartupCopy();
 applySarrieraKitchenIntegration();
 require('./commercial-brand.js');
 require('./twilio-demo-server.js');
-require('./sarriera-satellite-server.js');
+require('./centre-satellite-server.js');
 require('./botons-server.js');
 applyStartupCopy();
 scheduleFirstStory();
