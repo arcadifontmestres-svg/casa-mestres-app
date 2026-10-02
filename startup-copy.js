@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { copyCasaMestresToGrupTrafec } = require('./company-copy.js');
 const { syncCasaMestresMasterCatalog } = require('./catalog-master-sync.js');
+const { repairTrafecOperationalData } = require('./trafec-repair.js');
 
 const ROOT = __dirname;
 
@@ -31,17 +32,39 @@ function applyStartupCopy() {
   const data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
   const initial = copyCasaMestresToGrupTrafec(data);
   const catalog = syncCasaMestresMasterCatalog(data);
-  const changed = Boolean(initial.applied || catalog.applied);
+  const repair = repairTrafecOperationalData(data);
+  const changed = Boolean(initial.applied || catalog.applied || repair.applied);
 
-  if (!changed) return { applied: false, reason: initial.reason || 'catalog_up_to_date', initial, catalog };
+  if (!changed) {
+    return {
+      applied: false,
+      reason: initial.reason || 'catalog_up_to_date',
+      initial,
+      catalog,
+      repair
+    };
+  }
 
   backupData(dataFile, backupsDir);
   const temporary = `${dataFile}.copy.tmp`;
   fs.writeFileSync(temporary, JSON.stringify(data, null, 2), 'utf8');
   fs.renameSync(temporary, dataFile);
 
-  console.log(`Còpia/sincronització Casa Mestres → Grup Tràfec: inicial ${initial.total || 0}, catàleg ${catalog.total || 0}.`);
-  return { applied: true, initial, catalog, total: (initial.total || 0) + (catalog.total || 0) };
+  console.log(
+    `Còpia/sincronització Casa Mestres → Grup Tràfec: inicial ${initial.total || 0}, ` +
+    `catàleg ${catalog.total || 0}, reassignats ${repair.movedToTrafec || 0}, ` +
+    `empleats reactivats ${repair.reactivatedEmployees || 0}, registres RRHH vinculats ${repair.linkedOperationalRecords || 0}.`
+  );
+
+  return {
+    applied: true,
+    initial,
+    catalog,
+    repair,
+    total: (initial.total || 0) + (catalog.total || 0) +
+      (repair.movedToTrafec || 0) + (repair.reactivatedEmployees || 0) +
+      (repair.linkedOperationalRecords || 0)
+  };
 }
 
 if (require.main === module) {
