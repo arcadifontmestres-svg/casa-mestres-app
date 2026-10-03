@@ -1,6 +1,6 @@
 {
   "name": "grup-trafec",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "description": "Gestió central del Grup Tràfec",
   "main": "src/server.js",
