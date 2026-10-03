@@ -1,0 +1,1 @@
+Gestió Grup Tràfec: menú Front Office / Back Office / RRHH / Configuració. Configuració crea centres i empleats; no hi ha dades fictícies per defecte. Miniapps autònomes assignables per centre.
