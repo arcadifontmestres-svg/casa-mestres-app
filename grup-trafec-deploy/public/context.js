@@ -3,8 +3,14 @@
 (() => {
   const nativeFetch = window.fetch.bind(window);
   const STORAGE_KEY = 'grupTrafeCenterId';
+  const SATELLITES = Object.freeze({
+    '/sarriera': 'S1930',
+    '/sarriera/': 'S1930'
+  });
+  const satelliteCode = SATELLITES[window.location.pathname.toLowerCase()] || '';
+  const satelliteMode = Boolean(satelliteCode);
   let centers = [];
-  let currentCenterId = localStorage.getItem(STORAGE_KEY) || '';
+  let currentCenterId = satelliteMode ? '' : (localStorage.getItem(STORAGE_KEY) || '');
 
   function withCenter(url) {
     if (!currentCenterId || typeof url !== 'string' || !url.startsWith('/api/') || url.startsWith('/api/govern')) return url;
@@ -34,16 +40,32 @@
 
   function functionAllowed(key) {
     const center = selectedCenter();
-    if (!center) return true;
+    if (!center) return !satelliteMode;
     return !center.permissions || center.permissions[key] !== false;
   }
 
+  function applySatelliteIdentity() {
+    if (!satelliteMode) return;
+    const center = selectedCenter();
+    const brand = document.querySelector('.side .brand');
+    if (brand) brand.textContent = center?.name || 'SARRIERA 1930';
+    document.title = `${center?.name || 'SARRIERA 1930'} · GRUP TRÀFEC`;
+  }
+
   function applyMenuPermissions() {
-    const mapping = { crm: 'crm', commercial: 'commercial', reservations: 'reservations' };
+    const mapping = {
+      crm: 'crm',
+      commercial: 'commercial',
+      reservations: 'reservations'
+    };
     Object.entries(mapping).forEach(([viewName, permissionKey]) => {
       const button = document.querySelector(`[data-view="${viewName}"]`);
       if (button) button.style.display = functionAllowed(permissionKey) ? '' : 'none';
     });
+
+    const governButton = document.querySelector('[data-view="govern"]');
+    if (governButton && satelliteMode) governButton.remove();
+
     const active = document.querySelector('.side button.active');
     const activeName = active?.dataset.view || 'home';
     if (mapping[activeName] && !functionAllowed(mapping[activeName])) {
@@ -64,7 +86,7 @@
     }
     const center = selectedCenter();
     if (!center) {
-      badge.textContent = 'Context: GRUP TRÀFEC · visió global';
+      badge.textContent = satelliteMode ? 'Sarriera 1930 · connexió pendent' : 'Context: GRUP TRÀFEC · visió global';
       return;
     }
     const enabled = [
@@ -72,11 +94,17 @@
       functionAllowed('commercial') ? 'Comercial' : '',
       functionAllowed('reservations') ? 'Reserves' : ''
     ].filter(Boolean).join(' · ');
-    badge.textContent = `Centre actiu: ${center.name} · ${enabled || 'sense funcions operatives'}`;
+    badge.textContent = satelliteMode
+      ? `${center.name} · ${enabled || 'sense funcions operatives'}`
+      : `Centre actiu: ${center.name} · ${enabled || 'sense funcions operatives'}`;
   }
 
   function renderSelector() {
     let box = document.getElementById('centerContextBox');
+    if (satelliteMode) {
+      if (box) box.remove();
+      return;
+    }
     if (!box) {
       box = document.createElement('div');
       box.id = 'centerContextBox';
@@ -106,13 +134,13 @@
     if (name === 'crm' && functionAllowed('crm')) return loadCrm().catch(showError);
     if (name === 'commercial' && functionAllowed('commercial')) return loadCommercial().catch(showError);
     if (name === 'reservations' && functionAllowed('reservations')) return loadReservations().catch(showError);
-    if (name === 'govern') return loadGovern().catch(showError);
+    if (name === 'govern' && !satelliteMode) return loadGovern().catch(showError);
     setActive('home');
     renderHome();
   }
 
   function ensureGovernButton() {
-    if (document.querySelector('[data-view="govern"]')) return;
+    if (satelliteMode || document.querySelector('[data-view="govern"]')) return;
     const button = document.createElement('button');
     button.dataset.view = 'govern';
     button.textContent = 'Govern / Centres';
@@ -127,10 +155,16 @@
   async function refreshCenters() {
     const out = await govApi('/api/govern/centres?includeInactive=1');
     centers = out.items || [];
-    if (currentCenterId && !centers.some(item => item.id === currentCenterId && item.active !== false)) {
+
+    if (satelliteMode) {
+      const satellite = centers.find(item => item.active !== false && String(item.code || '').toUpperCase() === satelliteCode);
+      currentCenterId = satellite?.id || '';
+    } else if (currentCenterId && !centers.some(item => item.id === currentCenterId && item.active !== false)) {
       currentCenterId = '';
       localStorage.setItem(STORAGE_KEY, '');
     }
+
+    applySatelliteIdentity();
     renderSelector();
     applyMenuPermissions();
     renderBadge();
@@ -138,6 +172,7 @@
   }
 
   async function loadGovern() {
+    if (satelliteMode) return reloadCurrentView();
     setStatus('Carregant centres...');
     const out = await refreshCenters();
     const root = document.getElementById('view');
