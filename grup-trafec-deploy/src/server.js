@@ -15,6 +15,7 @@ const { createReservationContextRouter } = require('./api/reserves-context');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const publicDir = path.join(__dirname, '..', 'public');
 const store = createStore();
 const crm = createCrmService(store);
 const reservations = createReservationService(store);
@@ -23,8 +24,9 @@ const govern = createGovernService(store);
 const links = createCenterLinks(store);
 
 app.use(express.json({ limit: '2mb' }));
-app.use(express.static(path.join(__dirname, '..', 'public')));
-app.get('/api/health', (_req, res) => res.json({ ok: true, app: 'GRUP TRÀFEC', version: '0.6.0' }));
+app.use(express.static(publicDir));
+app.get(['/sarriera', '/sarriera/'], (_req, res) => res.sendFile(path.join(publicDir, 'index.html')));
+app.get('/api/health', (_req, res) => res.json({ ok: true, app: 'GRUP TRÀFEC', version: '0.7.0' }));
 app.use('/api/govern', createGovernRouter(govern));
 app.use('/api/crm', createCrmContextRouter(crm, links, govern));
 app.use('/api/comercial', createCommercialContextRouter(commercial, links, govern));
