@@ -1,22 +1,7 @@
 {
-  "centers": [
-    {"id":"centre_sarriera_1930","code":"S1930","name":"Sarriera 1930","type":"Restaurant","company":"Grup Tràfec","active":true},
-    {"id":"centre_la_granada","code":"GRANADA","name":"La Granada","type":"Restaurant","company":"Grup Tràfec","active":true},
-    {"id":"centre_l_arboc","code":"ARBOC","name":"L'Arboç","type":"Restaurant","company":"Grup Tràfec","active":true},
-    {"id":"centre_sitges","code":"SITGES","name":"Sitges","type":"Restaurant","company":"Grup Tràfec","active":true},
-    {"id":"centre_piscina_granada","code":"PISCINA-GRANADA","name":"Piscina La Granada","type":"Restaurant","company":"Grup Tràfec","active":true},
-    {"id":"centre_l_hospitalet","code":"HOSPITALET","name":"L'Hospitalet","type":"Restaurant","company":"Grup Tràfec","active":true},
-    {"id":"centre_can_cartro","code":"CAN-CARTRO","name":"Can Cartró","type":"Restaurant","company":"Grup Tràfec","active":true}
-  ],
-  "centerPermissions": [
-    {"centerId":"centre_sarriera_1930","functions":{"crm":true,"commercial":true,"reservations":true}},
-    {"centerId":"centre_la_granada","functions":{"crm":true,"commercial":true,"reservations":true}},
-    {"centerId":"centre_l_arboc","functions":{"crm":true,"commercial":true,"reservations":true}},
-    {"centerId":"centre_sitges","functions":{"crm":true,"commercial":true,"reservations":true}},
-    {"centerId":"centre_piscina_granada","functions":{"crm":true,"commercial":true,"reservations":true}},
-    {"centerId":"centre_l_hospitalet","functions":{"crm":true,"commercial":true,"reservations":true}},
-    {"centerId":"centre_can_cartro","functions":{"crm":true,"commercial":true,"reservations":true}}
-  ],
+  "centers": [],
+  "centerPermissions": [],
+  "employees": [],
   "recordAssignments": [],
   "crmContacts": [],
   "commercialProposals": [],
