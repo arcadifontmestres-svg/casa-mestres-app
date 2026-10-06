@@ -105,8 +105,8 @@ A.openRecordForm=function(definition,id=''){
     }
     await A.save('CENTRE GUARDAT');
     A.closeModal();
-    window.ArcadiContext?.render?.();
-    M.open('restaurants');
+    location.hash='arcadi-restaurants';
+    location.reload();
   };
 };
 
