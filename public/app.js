@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const $=id=>document.getElementById(id);let data=null,fullData=null,active='home',editing=null,reservationMonth=new Date().toISOString().slice(0,7),temp={ingredients:[],baseUses:[]},tpvZone='sala',tpvCategory='',tpvOrderId=null,tpvProductPage=0,tpvFamilyPage=0;
+const $=id=>document.getElementById(id);const URL_PARAMS=new URLSearchParams(location.search),MINIAPP_MODE=URL_PARAMS.get('miniapp')==='1';let data=null,fullData=null,active='home',editing=null,reservationMonth=new Date().toISOString().slice(0,7),temp={ingredients:[],baseUses:[]},tpvZone='sala',tpvCategory='',tpvOrderId=null,tpvProductPage=0,tpvFamilyPage=0;
 const menu=[
  ['FRONT OFFICE','tpv','▣ Sala / TPV'],['','saleItems','Begudes / articles de venda'],
  ['BACK OFFICE','home','⌂ Inici'],['CONFIGURACIÓ','company','Empresa, logotip i GPS'],['','documents','Cartes, menús i pressupostos'],['','backup','Còpies de seguretat'],
@@ -68,13 +68,18 @@ function render(){
   renderBrand();
   $('title').textContent=titles[active]?.[0]||active;
   $('subtitle').textContent=titles[active]?.[1]||'';
-  const visibleMenu = menu.filter(([group,key,label])=> key === '' || key === 'home' || key === 'company' || key === 'permissions' || canViewFeature(key));
+  const visibleMenu = MINIAPP_MODE ? [] : menu.filter(([group,key,label])=> key === '' || key === 'home' || key === 'company' || key === 'permissions' || canViewFeature(key));
   let html='';
   for(const [group,key,label] of visibleMenu){
     if(group)html+=`<div class="group">${esc(group)}</div>`;
     html+=`<button class="${active===key?'active':''}" onclick="show('${key}')">${esc(label)}</button>`
   }
   $('nav').innerHTML=html;
+  if (MINIAPP_MODE) {
+    document.body.classList.add('arcadiMiniappMode');
+    let st=document.getElementById('arcadiMiniappStyle');
+    if(!st){st=document.createElement('style');st.id='arcadiMiniappStyle';st.textContent='.arcadiMiniappMode aside{display:none!important}.arcadiMiniappMode .app{grid-template-columns:1fr!important}.arcadiMiniappMode main{margin-left:0!important;width:100%!important}.arcadiMiniappMode .brand,.arcadiMiniappMode .nav{display:none!important}';document.head.appendChild(st)}
+  }
   const f={kitchen:()=>window.ProductionNeeds?.renderKitchen?.(),tpv:renderTPV,saleItems:renderSaleItems,home:renderHome,company:renderCompany,documents:renderDocuments,backup:renderBackup,suppliers:renderSuppliers,products:renderProducts,ocr:renderOCR,bases:renderBases,dishes:renderDishes,control:renderControl,employees:renderEmployees,schedules:renderSchedules,punches:renderPunches,reservations:renderReservations,permissions:renderPermissions}[active]||renderHome;
   f();
 }
