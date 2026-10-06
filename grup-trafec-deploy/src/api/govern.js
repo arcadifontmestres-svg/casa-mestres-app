@@ -50,6 +50,18 @@ function createGovernRouter(govern) {
     catch (error) { next(error); }
   });
 
+  router.post('/activate-center', (req, res, next) => {
+    try { res.json(govern.activateCenterDevice(req.body || {})); }
+    catch (error) { next(error); }
+  });
+
+  router.get('/center-session', (req, res) => {
+    const token = String(req.headers['x-center-device-token'] || '');
+    const session = govern.centerByDeviceToken(token);
+    if (!session) return res.status(401).json({ error: 'Dispositiu no vinculat.' });
+    res.json(session);
+  });
+
   router.get('/employees', (req, res) => {
     res.json({ items: govern.listEmployees({ includeInactive: req.query.includeInactive === '1' }) });
   });
