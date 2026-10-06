@@ -36,11 +36,28 @@
     }
   }
 
+  function operationalContext() {
+    const select = document.getElementById('centerContextSelect');
+    const label = select?.selectedOptions?.[0]?.textContent || '';
+    const params = new URLSearchParams({ companyId: 'company_grup_trafec' });
+    if (/sarriera/i.test(label)) params.set('centreId', 'restaurant_sarriera');
+    return params.toString();
+  }
+
+  function openMiniapp(target) {
+    const base = 'https://grup-trafec-operatiu.onrender.com/';
+    window.location.href = base + '?' + operationalContext() + target;
+  }
+
   function openConnectedTool(key) {
-    forceGlobalContext();
     if (key === 'reservations' && typeof loadReservations === 'function') return loadReservations().catch(showError);
     if (key === 'crm' && typeof loadCrm === 'function') return loadCrm().catch(showError);
     if (key === 'commercial' && typeof loadCommercial === 'function') return loadCommercial().catch(showError);
+    if (key === 'gestio_cuina') return openMiniapp('#kitchen');
+    if (key === 'gestio_magatzem') return openMiniapp('#products');
+    if (key === 'control_normatiu') return openMiniapp('#control');
+    if (key === 'fitxatges') return window.location.href = 'https://grup-trafec-operatiu.onrender.com/fitxatges.html?' + operationalContext();
+    if (key === 'front_office_tpv') return openMiniapp('#tpv');
   }
 
   function bindBackOfficeCards(catalog) {
@@ -50,7 +67,6 @@
         const key = button.dataset.governTool;
         const item = catalog.find(x => x.key === key);
         if (!item) return;
-        if (key === 'front_office_tpv') return renderTpvGateway(item);
         return openConnectedTool(key);
       });
     });
@@ -105,7 +121,7 @@
         <div class="toolGrid">${card(tpv, 'Configurar punts de venda, productes, preus, local, zones, taules i ocupació.')}</div>`;
       setStatusLocal('');
       const button = document.querySelector('[data-govern-tool="front_office_tpv"]');
-      if (button) button.addEventListener('click', () => renderTpvGateway(tpv));
+      if (button) button.addEventListener('click', () => openConnectedTool('front_office_tpv'));
     } catch (error) {
       if (typeof showError === 'function') showError(error);
     }
