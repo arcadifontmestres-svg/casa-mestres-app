@@ -31,8 +31,18 @@ async function load(){fullData=await api('/api/state');data=scopeData(fullData);
 function ensureTPVData(){data.saleItems=data.saleItems||[];data.dishes=data.dishes||[];data.dishes.forEach(d=>{if(d.onMenu==null)d.onMenu=false;if(!Array.isArray(d.zones))d.zones=[]});data.tpvConfig=data.tpvConfig||{zones:[],orders:[]};data.tpvConfig.orders=data.tpvConfig.orders||[]}
 async function save(){const s=$('saveStatus');s.textContent='GUARDANT...';s.className='badge warn';try{const result=await api('/api/state',{method:'POST',body:JSON.stringify(mergeScopedData())});fullData=result.state||await api('/api/state');data=scopeData(fullData);s.textContent='GUARDAT A RENDER';s.className='badge ok';renderBrand();return data}catch(error){s.textContent='NO GUARDAT';s.className='badge bad';alert('No s’ha pogut guardar a Render: '+error.message);throw error}}
 function renderBrand(){$('brandName').textContent='ARCADI GESTIO';$('brandLogo').textContent='AG'}
+function centreAllowsFeature(featureKey){
+  const ctx=contextValues();
+  if(!ctx.centreId)return true;
+  const centre=(fullData?.restaurants||[]).find(item=>item.id===ctx.centreId);
+  if(!centre||!Array.isArray(centre.enabledModules))return true;
+  const moduleName=FEATURE_PERMISSION_MAP[featureKey];
+  if(moduleName==null)return true;
+  return centre.enabledModules.includes(moduleName);
+}
 function featureAllowed(featureKey, action='Consultar'){
   if (!featureKey || featureKey === 'home' || featureKey === 'company' || featureKey === 'permissions') return true;
+  if (!centreAllowsFeature(featureKey)) return false;
   const featureName=FEATURE_PERMISSION_MAP[featureKey];
   if (featureName == null) return true;
   const ctx=contextValues();
