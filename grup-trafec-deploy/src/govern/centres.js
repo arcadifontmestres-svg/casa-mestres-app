@@ -25,6 +25,14 @@ function activationCode() { return String(crypto.randomInt(0, 1000000)).padStart
 function createGovernService(store) {
   if (!store) throw new Error('Govern necessita un magatzem de dades.');
 
+  store.update(data => {
+    for (const center of data.centers || []) {
+      if (!center.activationCode) center.activationCode = activationCode();
+      if (!center.activationStatus) center.activationStatus = 'NO_VINCULAT';
+      if (!center.satellitePath) center.satellitePath = '/centre.html';
+    }
+  });
+
   function listCenters({ includeInactive = false } = {}) {
     return store.read().centers
       .filter(item => includeInactive || item.active !== false)
