@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const SOURCE_COMPANY_ID = 'company_casa_mestres';
 const SOURCE_CENTRE_ID = 'restaurant_casa_mestres';
 const TARGET_COMPANY_ID = 'company_grup_trafec';
-const COLLECTIONS = ['products', 'bases', 'dishes'];
+const COLLECTIONS = ['suppliers', 'products', 'bases', 'dishes'];
 
 function clone(v){ return JSON.parse(JSON.stringify(v)); }
 function sourceRecord(item){
