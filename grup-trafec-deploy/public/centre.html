@@ -48,7 +48,7 @@ const map={
  crm:{label:'CRM',url:null},
  commercial:{label:'Comercial / Grups',url:null},
  fitxatges:{label:'Fitxatges',hash:'fitxatges.html'},
- gestio_cuina:{label:'Gestió cuina',hash:'#kitchen'},
+ gestio_cuina:{label:'Gestió cuina',local:'/cuina.html'},
  gestio_magatzem:{label:'Gestió magatzem',hash:'#products'},
  control_normatiu:{label:'APPCC / Control Normatiu',hash:'#control'},
  gestio_general:{label:'Gestió general',hash:'#home'},
@@ -65,6 +65,7 @@ async function api(path,opt={}){
 function operationalUrl(key,center){
  const m=map[key];
  if(!m)return '#';
+ if(m.local)return m.local;
  const q=new URLSearchParams({companyId:'company_grup_trafec'});
  if(/sarriera/i.test(center.name||center.code||''))q.set('centreId','restaurant_sarriera');
  if(m.hash==='fitxatges.html')return OPERATIVE+'fitxatges.html?'+q.toString();
