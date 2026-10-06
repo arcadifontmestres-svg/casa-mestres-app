@@ -14,7 +14,9 @@
   const params = new URLSearchParams(location.search);
   const incomingContext = {
     companyId: String(params.get('companyId') || '').trim(),
-    centreId: String(params.get('centreId') || '').trim()
+    centreId: String(params.get('centreId') || '').trim(),
+    centreName: String(params.get('centreName') || '').trim(),
+    miniapp: params.get('miniapp') === '1'
   };
   A.context = { companyId: '', centreId: '', ...savedContext() };
   if (incomingContext.companyId) {
@@ -96,15 +98,25 @@
       A.context.centreId = '';
     }
     const centres = A.centres(A.context.companyId);
+    if (incomingContext.centreName) {
+      const wanted = incomingContext.centreName.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+      const matched = centres.find(x => String(x.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim() === wanted);
+      if (matched) A.context.centreId = matched.id;
+    }
     if (A.context.centreId && !centres.some(x => x.id === A.context.centreId)) A.context.centreId = '';
     const companyName = orgs.find(x => x.id === A.context.companyId)?.name || 'Empresa';
     const centreName = centres.find(x => x.id === A.context.centreId)?.name || 'Tot el grup';
-    bar.innerHTML = `
-      <div><small>EMPRESA</small><select id="arcadiCompanySelect">${orgs.map(x => option(x.id, x.name, A.context.companyId)).join('')}</select></div>
-      <div><small>CENTRE DE TREBALL</small><select id="arcadiCentreSelect">${option('', 'Tot el grup · visió de Direcció', A.context.centreId)}${centres.map(x => option(x.id, x.name, A.context.centreId)).join('')}</select></div>
-      <div class="arcadiContextCurrent"><small>CONTEXT ACTIU</small><b>${A.esc(companyName)} · ${A.esc(centreName)}</b></div>`;
-    document.getElementById('arcadiCompanySelect').onchange = event => A.setContext(event.target.value, '');
-    document.getElementById('arcadiCentreSelect').onchange = event => A.setContext(A.context.companyId, event.target.value);
+    if (incomingContext.miniapp) {
+      bar.innerHTML = `<div class="arcadiContextCurrent"><small>CENTRE ACTIU</small><b>${A.esc(centreName)}</b></div>`;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(A.context));
+    } else {
+      bar.innerHTML = `
+        <div><small>EMPRESA</small><select id="arcadiCompanySelect">${orgs.map(x => option(x.id, x.name, A.context.companyId)).join('')}</select></div>
+        <div><small>CENTRE DE TREBALL</small><select id="arcadiCentreSelect">${option('', 'Tot el grup · visió de Direcció', A.context.centreId)}${centres.map(x => option(x.id, x.name, A.context.centreId)).join('')}</select></div>
+        <div class="arcadiContextCurrent"><small>CONTEXT ACTIU</small><b>${A.esc(companyName)} · ${A.esc(centreName)}</b></div>`;
+      document.getElementById('arcadiCompanySelect').onchange = event => A.setContext(event.target.value, '');
+      document.getElementById('arcadiCentreSelect').onchange = event => A.setContext(A.context.companyId, event.target.value);
+    }
   }
 
   const originalLoad = A.load.bind(A);
