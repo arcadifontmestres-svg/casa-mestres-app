@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARCADI GESTIÓ · Centre</title>
+<style>
+:root{font-family:Arial,sans-serif;color:#0b2533;background:#0b2533}
+*{box-sizing:border-box}body{margin:0;background:#0b2533;min-height:100vh;display:grid;place-items:center}
+.card{width:min(92vw,760px);background:#fff;border-radius:28px;padding:34px;box-shadow:0 18px 55px #0005}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:28px}.logo{width:60px;height:60px;border-radius:16px;background:#1ea4a7;color:#fff;display:grid;place-items:center;font-weight:800;font-size:26px}.brand b{font-size:28px}.brand small{display:block;letter-spacing:4px;color:#7c8b94;font-weight:700}
+h1{font-size:38px;margin:10px 0}p{font-size:18px;line-height:1.45;color:#667984}
+label{display:block;font-weight:700;margin:18px 0 8px}input{width:100%;font-size:22px;padding:18px;border:1px solid #c8d2d7;border-radius:16px}
+button{width:100%;padding:18px;border:0;border-radius:16px;font-size:21px;font-weight:800;cursor:pointer;margin-top:18px}.primary{background:#1ea4a7;color:#fff}.secondary{background:#e8eef1;color:#0b2533}
+.status{margin-top:18px;padding:14px;border-radius:14px;background:#f3f6f7}.hidden{display:none}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:22px}.module{padding:22px;border:1px solid #d7e0e4;border-radius:18px;text-align:left;background:#fff}.module b{display:block;font-size:20px}.module span{display:block;margin-top:6px;color:#6b7d87}.topline{display:flex;justify-content:space-between;gap:12px;align-items:center}.pill{background:#e7f5f5;color:#0b6d70;padding:8px 12px;border-radius:999px;font-weight:700}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.card{padding:24px}h1{font-size:32px}}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="brand"><div class="logo">AG</div><div><b>ARCADI GESTIÓ</b><small>APP DE CENTRE</small></div></div>
+
+  <section id="activate">
+    <h1>Activar aquest centre</h1>
+    <p>Aquesta pantalla encara no està vinculada. Introdueix les dades facilitades per Direcció.</p>
+    <label>Codi del centre</label><input id="centerCode" autocomplete="off" placeholder="SARRIERA1930">
+    <label>Codi d’activació</label><input id="activationCode" inputmode="numeric" maxlength="6" placeholder="000000">
+    <button class="primary" id="activateBtn">Activar centre</button>
+    <div class="status hidden" id="activationStatus"></div>
+  </section>
+
+  <section id="app" class="hidden">
+    <div class="topline"><div><h1 id="centreName">Centre</h1><p id="centreCompany"></p></div><span class="pill">VINCULAT</span></div>
+    <p>Només es mostren els mòduls autoritzats per Direcció.</p>
+    <div class="grid" id="moduleGrid"></div>
+    <button class="secondary" id="unlinkBtn">Desvincular aquest dispositiu</button>
+  </section>
+</main>
+<script>
+(()=>{
+'use strict';
+const TOKEN_KEY='arcadi_center_device_token_v1';
+const OPERATIVE='https://grup-trafec-operatiu.onrender.com/';
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const map={
+ reservations:{label:'Reserves / Ocupació',url:null},
+ crm:{label:'CRM',url:null},
+ commercial:{label:'Comercial / Grups',url:null},
+ fitxatges:{label:'Fitxatges',hash:'fitxatges.html'},
+ gestio_cuina:{label:'Gestió cuina',hash:'#kitchen'},
+ gestio_magatzem:{label:'Gestió magatzem',hash:'#products'},
+ control_normatiu:{label:'APPCC / Control Normatiu',hash:'#control'},
+ gestio_general:{label:'Gestió general',hash:'#home'},
+ front_office_tpv:{label:'Front Office / TPV',hash:'#tpv'}
+};
+let token=localStorage.getItem(TOKEN_KEY)||'';
+
+async function api(path,opt={}){
+ const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json',...(token?{'X-Center-Device-Token':token}:{}),...(opt.headers||{})}});
+ const d=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(d.error||'Error '+r.status);
+ return d;
+}
+function operationalUrl(key,center){
+ const m=map[key];
+ if(!m)return '#';
+ const q=new URLSearchParams({companyId:'company_grup_trafec'});
+ if(/sarriera/i.test(center.name||center.code||''))q.set('centreId','restaurant_sarriera');
+ if(m.hash==='fitxatges.html')return OPERATIVE+'fitxatges.html?'+q.toString();
+ return OPERATIVE+'?'+q.toString()+(m.hash||'');
+}
+function renderSession(s){
+ $('activate').classList.add('hidden');$('app').classList.remove('hidden');
+ $('centreName').textContent=s.center.name||s.center.code||'Centre';
+ $('centreCompany').textContent=s.center.company||'Grup Tràfec';
+ const items=(s.catalog||[]).filter(x=>x.connected!==false);
+ $('moduleGrid').innerHTML=items.map(x=>{
+   const href=operationalUrl(x.key,s.center);
+   return '<button class="module" data-key="'+esc(x.key)+'"><b>'+esc(x.label)+'</b><span>'+esc(x.area||'')+'</span></button>';
+ }).join('')||'<div class="status">Aquest centre encara no té cap mòdul connectat.</div>';
+ document.querySelectorAll('[data-key]').forEach(btn=>btn.onclick=()=>{location.href=operationalUrl(btn.dataset.key,s.center)});
+}
+async function check(){
+ if(!token)return;
+ try{renderSession(await api('/api/govern/center-session'))}
+ catch{localStorage.removeItem(TOKEN_KEY);token=''}
+}
+$('activateBtn').onclick=async()=>{
+ const b=$('activateBtn'),st=$('activationStatus');b.disabled=true;st.classList.remove('hidden');st.textContent='Validant...';
+ try{
+  const out=await api('/api/govern/activate-center',{method:'POST',body:JSON.stringify({centerCode:$('centerCode').value.trim(),activationCode:$('activationCode').value.trim(),label:navigator.userAgent.slice(0,100)})});
+  token=out.token;localStorage.setItem(TOKEN_KEY,token);renderSession(await api('/api/govern/center-session'));
+ }catch(e){st.textContent=e.message}
+ finally{b.disabled=false}
+};
+$('unlinkBtn').onclick=()=>{localStorage.removeItem(TOKEN_KEY);location.reload()};
+check();
+})();
+</script>
+</body>
+</html>
