@@ -20,6 +20,7 @@ function text(value) { return String(value ?? '').trim(); }
 function code(value) { return text(value).toUpperCase().replace(/\s+/g, '-'); }
 function unique(values) { return [...new Set((Array.isArray(values) ? values : []).map(text).filter(Boolean))]; }
 function emptyFunctions() { return Object.fromEntries(FUNCTION_KEYS.map(key => [key, false])); }
+function activationCode() { return String(crypto.randomInt(0, 1000000)).padStart(6, '0'); }
 
 function createGovernService(store) {
   if (!store) throw new Error('Govern necessita un magatzem de dades.');
@@ -66,7 +67,15 @@ function createGovernService(store) {
     let center;
     store.update(data => {
       assertUniqueCode(data, fields.code);
-      center = { id: `center_${crypto.randomUUID()}`, ...fields, createdAt: now, updatedAt: now };
+      center = {
+        id: `center_${crypto.randomUUID()}`,
+        ...fields,
+        activationCode: activationCode(),
+        activationStatus: 'NO_VINCULAT',
+        satellitePath: '/centre.html',
+        createdAt: now,
+        updatedAt: now
+      };
       data.centers.push(center);
       data.centerPermissions.push({
         centerId: center.id,
@@ -75,6 +84,23 @@ function createGovernService(store) {
       });
     });
     return center;
+  }
+
+  function regenerateActivationCode(id) {
+    let saved;
+    store.update(data => {
+      const center = data.centers.find(item => item.id === id);
+      if (!center) {
+        const error = new Error('Centre no trobat.');
+        error.status = 404;
+        throw error;
+      }
+      center.activationCode = activationCode();
+      center.activationStatus = 'NO_VINCULAT';
+      center.activationUpdatedAt = new Date().toISOString();
+      saved = { ...center };
+    });
+    return saved;
   }
 
   function updateCenter(id, input = {}) {
@@ -201,6 +227,7 @@ function createGovernService(store) {
     getCenter,
     createCenter,
     updateCenter,
+    regenerateActivationCode,
     getPermissions,
     setPermissions,
     listEmployees,
