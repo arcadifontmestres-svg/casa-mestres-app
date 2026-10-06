@@ -11,7 +11,17 @@
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
   }
 
+  const params = new URLSearchParams(location.search);
+  const incomingContext = {
+    companyId: String(params.get('companyId') || '').trim(),
+    centreId: String(params.get('centreId') || '').trim()
+  };
   A.context = { companyId: '', centreId: '', ...savedContext() };
+  if (incomingContext.companyId) {
+    A.context.companyId = incomingContext.companyId;
+    A.context.centreId = incomingContext.centreId;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(A.context));
+  }
 
   A.organisations = function () {
     return Array.isArray(this.state?.organizations) ? this.state.organizations.filter(x => x.status !== 'Inactiva') : [];
