@@ -62,6 +62,17 @@ function createGovernRouter(govern) {
     res.json(session);
   });
 
+  router.get('/center-module/:key', (req, res) => {
+    const token = String(req.headers['x-center-device-token'] || '');
+    const session = govern.centerByDeviceToken(token);
+    if (!session) return res.status(401).json({ error: 'Dispositiu no vinculat.' });
+    const key = String(req.params.key || '');
+    if (session.permissions?.[key] !== true) return res.status(403).json({ error: 'Aquest centre no té permís per aquest mòdul.' });
+    const module = govern.functionCatalog.find(item => item.key === key);
+    if (!module || module.connected === false) return res.status(404).json({ error: 'Mòdul no disponible.' });
+    res.json({ ok: true, center: session.center, module });
+  });
+
   router.get('/employees', (req, res) => {
     res.json({ items: govern.listEmployees({ includeInactive: req.query.includeInactive === '1' }) });
   });
