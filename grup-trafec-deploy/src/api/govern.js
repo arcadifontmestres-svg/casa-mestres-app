@@ -40,6 +40,11 @@ function createGovernRouter(govern) {
     catch (error) { next(error); }
   });
 
+  router.post('/centres/:id/regenerar-activacio', (req, res, next) => {
+    try { res.json(govern.regenerateActivationCode(req.params.id)); }
+    catch (error) { next(error); }
+  });
+
   router.put('/centres/:id/permisos', (req, res, next) => {
     try { res.json(govern.setPermissions(req.params.id, req.body)); }
     catch (error) { next(error); }
