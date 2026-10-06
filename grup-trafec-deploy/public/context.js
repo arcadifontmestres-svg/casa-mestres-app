@@ -67,6 +67,13 @@
           shellActive('back');
           return loadCommercial().catch(showError);
         }
+        if (tool === 'fitxatges') {
+          const label = document.getElementById('centerContextSelect')?.selectedOptions?.[0]?.textContent || '';
+          const params = new URLSearchParams({ companyId: 'company_grup_trafec' });
+          if (/sarriera/i.test(label)) params.set('centreId', 'restaurant_sarriera');
+          window.location.href = 'https://grup-trafec-operatiu.onrender.com/fitxatges.html?' + params.toString();
+          return;
+        }
       };
     });
   }
@@ -193,13 +200,15 @@
   function renderRrhh() {
     shellActive('rrhh');
     const rows = visibleEmployees();
+    const fitxatges = functionAllowed('fitxatges') ? toolCard('App Fitxatges', 'Entrada, pausa, retorn i sortida del personal.', 'fitxatges') : '';
     const pending = pendingCards('RRHH');
     view.innerHTML = `
       <div class="head"><div><h1>RRHH</h1><div class="muted">No hi ha empleats predefinits: només es mostren els que s’han creat.</div></div><button class="btn" id="newEmployee">+ Nou empleat</button></div>
-      ${pending ? `<div class="toolGrid" style="margin-bottom:18px">${pending}</div>` : ''}
+      ${fitxatges || pending ? `<div class="toolGrid" style="margin-bottom:18px">${fitxatges}${pending}</div>` : ''}
       <div class="panel tableWrap"><table><thead><tr><th>Nom</th><th>Funció / rol</th><th>Centre</th><th>Estat</th><th></th></tr></thead><tbody>
         ${rows.map(item => `<tr><td><b>${esc(item.name)}</b></td><td>${esc(item.role || '—')}</td><td>${esc(centerNames(item.centerIds))}</td><td>${item.active === false ? 'Inactiu' : 'Actiu'}</td><td><button class="rowBtn" data-edit-employee="${esc(item.id)}">Editar</button></td></tr>`).join('') || '<tr><td colspan="5" class="empty">No hi ha empleats creats en aquest context.</td></tr>'}
       </tbody></table></div>`;
+    bindToolCards();
     document.getElementById('newEmployee').onclick = () => renderEmployeeForm(null, 'rrhh');
     document.querySelectorAll('[data-edit-employee]').forEach(btn => {
       btn.onclick = () => renderEmployeeForm(employees.find(item => item.id === btn.dataset.editEmployee), 'rrhh');
