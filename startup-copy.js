@@ -5,8 +5,10 @@ const path = require('path');
 const { copyCasaMestresToGrupTrafec } = require('./company-copy.js');
 const { syncCasaMestresMasterCatalog } = require('./catalog-master-sync.js');
 const { repairTrafecOperationalData } = require('./trafec-repair.js');
+const { restoreSeedMasterCatalog } = require('./restore-master-catalog.js');
 
 const ROOT = __dirname;
+const CATALOG_SEED = path.join(ROOT, 'seed', 'catalog.json');
 
 function dataPaths() {
   const configured = String(process.env.DATA_DIR || '').trim();
@@ -29,16 +31,23 @@ function applyStartupCopy() {
   const { dataFile, backupsDir } = dataPaths();
   if (!fs.existsSync(dataFile)) return { applied: false, reason: 'data_missing' };
 
-  const data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+  const raw = fs.readFileSync(dataFile, 'utf8').trim();
+  if (!raw) return { applied: false, reason: 'data_empty' };
+  const data = JSON.parse(raw);
+  const seed = fs.existsSync(CATALOG_SEED)
+    ? JSON.parse(fs.readFileSync(CATALOG_SEED, 'utf8'))
+    : {};
+  const restore = restoreSeedMasterCatalog(data, seed);
   const initial = copyCasaMestresToGrupTrafec(data);
   const catalog = syncCasaMestresMasterCatalog(data);
   const repair = repairTrafecOperationalData(data);
-  const changed = Boolean(initial.applied || catalog.applied || repair.applied);
+  const changed = Boolean(restore.applied || initial.applied || catalog.applied || repair.applied);
 
   if (!changed) {
     return {
       applied: false,
       reason: initial.reason || 'catalog_up_to_date',
+      restore,
       initial,
       catalog,
       repair
@@ -51,17 +60,18 @@ function applyStartupCopy() {
   fs.renameSync(temporary, dataFile);
 
   console.log(
-    `Còpia/sincronització Casa Mestres → Grup Tràfec: inicial ${initial.total || 0}, ` +
+    `Còpia/sincronització Casa Mestres → Grup Tràfec: recuperats ${restore.total || 0}, inicial ${initial.total || 0}, ` +
     `catàleg ${catalog.total || 0}, reassignats ${repair.movedToTrafec || 0}, ` +
     `empleats reactivats ${repair.reactivatedEmployees || 0}, registres RRHH vinculats ${repair.linkedOperationalRecords || 0}.`
   );
 
   return {
     applied: true,
+    restore,
     initial,
     catalog,
     repair,
-    total: (initial.total || 0) + (catalog.total || 0) +
+    total: (restore.total || 0) + (initial.total || 0) + (catalog.total || 0) +
       (repair.movedToTrafec || 0) + (repair.reactivatedEmployees || 0) +
       (repair.linkedOperationalRecords || 0)
   };
