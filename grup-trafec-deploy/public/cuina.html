@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARCADI · Cuina</title>
+<style>
+:root{font-family:Arial,sans-serif;color:#102b38;background:#eef3f5}*{box-sizing:border-box}body{margin:0}
+header{background:#0b2533;color:#fff;padding:18px 26px;display:flex;justify-content:space-between;align-items:center}
+header b{font-size:24px}.badge{background:#dff4ef;color:#126e59;padding:8px 12px;border-radius:999px;font-weight:800}
+main{padding:28px;max-width:1400px;margin:auto}.head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:24px}.head h1{font-size:38px;margin:0}.head p{margin:6px 0 0;color:#657987}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}.card{background:#fff;border:1px solid #d8e1e5;border-radius:20px;padding:24px;min-height:180px;text-align:left}.card strong{display:block;font-size:32px;color:#19a4a7;margin-bottom:18px}.card b{display:block;font-size:22px}.card span{display:block;color:#6b7d87;margin-top:10px;line-height:1.35}
+button{cursor:pointer}.err{background:#fff3f3;color:#8b1e1e;border:1px solid #e9c7c7;padding:18px;border-radius:16px}
+@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div><b>ARCADI GESTIÓ · CUINA</b><div id="centre"></div></div><span class="badge" id="status">VALIDANT</span></header>
+<main>
+<div class="head"><div><h1>Cuina</h1><p>App autònoma del centre. Només accés autoritzat per Direcció.</p></div></div>
+<div id="content"><div class="err">Comprovant permisos...</div></div>
+</main>
+<script>
+(()=>{
+'use strict';
+const TOKEN_KEY='arcadi_center_device_token_v1',token=localStorage.getItem(TOKEN_KEY)||'';
+const $=id=>document.getElementById(id);
+async function api(path){const r=await fetch(path,{headers:{'X-Center-Device-Token':token}}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Error '+r.status);return d}
+async function boot(){
+ try{
+   const s=await api('/api/govern/center-module/gestio_cuina');
+   $('centre').textContent=s.center.name||s.center.code||'Centre';
+   $('status').textContent='AUTORITZAT';
+   $('content').innerHTML='<div class="grid">'+
+    '<button class="card" data-action="new"><strong>+</strong><b>Nou plat o base</b><span>Crear la fitxa mestra culinària.</span></button>'+
+    '<button class="card" data-action="recipes"><strong>0</strong><b>Receptari / Fitxes</b><span>Consultar plats i bases del centre.</span></button>'+
+    '<button class="card" data-action="production"><strong>0</strong><b>Produccions</b><span>Programar quantitats a produir.</span></button>'+
+    '<button class="card" data-action="needs"><strong>0</strong><b>Llista de necessitats</b><span>Mancances físiques de producte; encara no és compra.</span></button>'+
+   '</div>';
+ }catch(e){$('status').textContent='BLOQUEJAT';$('content').innerHTML='<div class="err">'+e.message+'</div>'}
+}
+boot();
+})();
+</script>
+</body></html>
