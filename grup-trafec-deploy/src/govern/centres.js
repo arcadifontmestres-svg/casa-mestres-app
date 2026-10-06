@@ -6,12 +6,12 @@ const FUNCTION_CATALOG = Object.freeze([
   { key: 'reservations', label: 'App Reserves / Ocupació', area: 'Front Office', connected: true },
   { key: 'crm', label: 'CRM', area: 'Back Office', connected: true },
   { key: 'commercial', label: 'Comercial / Grups', area: 'Back Office', connected: true },
-  { key: 'fitxatges', label: 'App Fitxatges', area: 'RRHH', connected: false },
-  { key: 'gestio_cuina', label: 'Gestió cuina', area: 'Back Office', connected: false },
-  { key: 'gestio_magatzem', label: 'Gestió magatzem', area: 'Back Office', connected: false },
-  { key: 'control_normatiu', label: 'Control normatiu / APPCC', area: 'Back Office', connected: false },
+  { key: 'fitxatges', label: 'App Fitxatges', area: 'RRHH', connected: true },
+  { key: 'gestio_cuina', label: 'Gestió cuina', area: 'Back Office', connected: true },
+  { key: 'gestio_magatzem', label: 'Gestió magatzem', area: 'Back Office', connected: true },
+  { key: 'control_normatiu', label: 'Control normatiu / APPCC', area: 'Back Office', connected: true },
   { key: 'gestio_general', label: 'Gestió general', area: 'Back Office', connected: false },
-  { key: 'front_office_tpv', label: 'Front Office / TPV', area: 'Front Office', connected: false }
+  { key: 'front_office_tpv', label: 'Front Office / TPV', area: 'Front Office', connected: true }
 ]);
 
 const FUNCTION_KEYS = Object.freeze(FUNCTION_CATALOG.map(item => item.key));
