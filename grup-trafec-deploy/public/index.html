@@ -3,12 +3,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>GRUP TRÀFEC · GESTIÓ</title>
-  <meta http-equiv="refresh" content="0; url=https://grup-trafec-operatiu.onrender.com/">
-  <link rel="canonical" href="https://grup-trafec-operatiu.onrender.com/">
-  <script>location.replace('https://grup-trafec-operatiu.onrender.com/');</script>
+  <title>GESTIÓ GRUP TRÀFEC</title>
+  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/gestio.css">
 </head>
 <body>
-  <p>Redirigint a la versió operativa de Gestió Grup Tràfec…</p>
+  <div class="app">
+    <aside class="side">
+      <div class="brand">GESTIÓ GRUP TRÀFEC</div>
+      <button class="active" data-shell="home">Inici</button>
+      <button data-shell="front">Front Office</button>
+      <button data-shell="back">Back Office</button>
+      <button data-shell="rrhh">RRHH</button>
+      <button data-shell="config">Configuració</button>
+      <div class="legacyNav" aria-hidden="true">
+        <button data-view="home">Inici antic</button>
+        <button data-view="crm">CRM</button>
+        <button data-view="commercial">Comercial / Grups</button>
+        <button data-view="reservations">Reserves / Ocupació</button>
+      </div>
+    </aside>
+    <main class="main">
+      <div id="status" class="status"></div>
+      <div id="view"></div>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+  <script src="/context.js"></script>
+  <script src="/govern-menu-v2.js"></script>
 </body>
 </html>
