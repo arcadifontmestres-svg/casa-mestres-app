@@ -75,8 +75,9 @@ const PERMISSION_MODULES=['Horaris','Criteris de torns','Fitxatges GPS','Resum d
 const PERMISSION_ACTIONS=['Consultar','Crear','Editar','Eliminar','Imprimir'];
 const PERMISSION_LEVELS=['C1','C2','C3','S1','S2','S3','Runner'];
 function permissionDefaults(){return Object.fromEntries(PERMISSION_MODULES.map(m=>[m,Object.fromEntries(PERMISSION_ACTIONS.map(a=>[a,false]))]));}
-function permissionCompanyOptions(value){return (fullData?.organizations||[]).map(x=>`<option value="${esc(x.id)}" ${x.id===value?'selected':''}>${esc(x.name)}</option>`).join('')}
-function permissionCentreOptions(companyId,value){return (fullData?.restaurants||[]).filter(x=>x.organizationId===companyId&&x.kind!=='GROUP'&&x.status!=='Inactiu').map(x=>`<option value="${esc(x.id)}" ${x.id===value?'selected':''}>${esc(x.name)}</option>`).join('')}
+function permissionSource(){return window.ArcadiERP?.state||fullData||data||{}}
+function permissionCompanyOptions(value){const source=permissionSource();return (source.organizations||[]).map(x=>`<option value="${esc(x.id)}" ${x.id===value?'selected':''}>${esc(x.name)}</option>`).join('')}
+function permissionCentreOptions(companyId,value){const source=permissionSource();return (source.restaurants||[]).filter(x=>x.organizationId===companyId&&x.kind!=='GROUP'&&x.status!=='Inactiu').map(x=>`<option value="${esc(x.id)}" ${x.id===value?'selected':''}>${esc(x.name)}</option>`).join('')}
 function directionAccessPanel(configured){
  const confirmField=configured?'':'<div><label>Repeteix la contrasenya</label><input id="direction_password_confirm" type="password" autocomplete="new-password" required></div>';
  $('view').innerHTML=`<div class="panel"><h3>${configured?'Accés a Direcció':'Crear contrasenya de Direcció'}</h3><p>${configured?'Introdueix la contrasenya per accedir a permisos i configuracions sensibles.':'Aquest primer pas crea la contrasenya protegida de Direcció. No es desa en text visible.'}</p><form id="directionAccessForm"><div class="grid"><div><label>Contrasenya</label><input id="direction_password" type="password" autocomplete="${configured?'current-password':'new-password'}" minlength="8" required></div>${confirmField}</div><div class="actions"><button class="btn" type="submit">${configured?'Desbloquejar Direcció':'Crear contrasenya'}</button></div></form></div>`;
