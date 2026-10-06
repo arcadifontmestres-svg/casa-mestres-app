@@ -11,7 +11,8 @@ const DEFAULT_DATA = Object.freeze({
   crmContacts: [],
   commercialProposals: [],
   reservations: [],
-  occupancyBlocks: []
+  occupancyBlocks: [],
+  centerDevices: []
 });
 
 function clone(value) {
@@ -28,6 +29,7 @@ function ensureShape(data) {
   if (!Array.isArray(out.commercialProposals)) out.commercialProposals = [];
   if (!Array.isArray(out.reservations)) out.reservations = [];
   if (!Array.isArray(out.occupancyBlocks)) out.occupancyBlocks = [];
+  if (!Array.isArray(out.centerDevices)) out.centerDevices = [];
   return out;
 }
 
