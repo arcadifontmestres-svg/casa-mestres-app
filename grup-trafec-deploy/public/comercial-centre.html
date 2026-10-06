@@ -1,0 +1,17 @@
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ARCADI · Comercial / Grups</title><style>
+:root{font-family:Arial,sans-serif;color:#102b38;background:#eef3f5}*{box-sizing:border-box}body{margin:0;background:#eef3f5}
+header{background:#0b2533;color:#fff;padding:18px 26px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+header b{font-size:24px}.badge{background:#dff4ef;color:#126e59;padding:8px 12px;border-radius:999px;font-weight:800}
+main{padding:28px;max-width:1400px;margin:auto}.head{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:24px}.head h1{font-size:38px;margin:0}.head p{margin:6px 0 0;color:#657987}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}.card{background:#fff;border:1px solid #d8e1e5;border-radius:20px;padding:24px;min-height:150px;text-align:left}
+.card strong{display:block;font-size:30px;color:#19a4a7;margin-bottom:14px}.card b{display:block;font-size:21px}.card span{display:block;color:#6b7d87;margin-top:9px;line-height:1.35}
+.panel{background:#fff;border:1px solid #d8e1e5;border-radius:20px;padding:20px;margin-top:20px}.err{background:#fff3f3;color:#8b1e1e;border:1px solid #e9c7c7;padding:18px;border-radius:16px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;border-bottom:1px solid #e4eaed}th{font-size:13px;text-transform:uppercase;color:#667985}
+button{cursor:pointer;border:0}.back{background:#e8eef1;color:#0b2533;padding:12px 16px;border-radius:12px;font-weight:800}.muted{color:#6b7d87}
+@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.grid{grid-template-columns:1fr}.head{align-items:flex-start;flex-direction:column}}
+</style></head>
+<body><header><div><b>ARCADI GESTIÓ · COMERCIAL / GRUPS</b><div id="centreName"></div></div><span class="badge" id="status">VALIDANT</span></header>
+<main><div class="head"><div><h1>Comercial / Grups</h1><p>App autònoma del centre. Accés controlat per Direcció.</p></div><button class="back" onclick="backButton()">← Centre</button></div>
+<div id="content"><div class="panel" id="commercialPanel">Carregant propostes...</div></div></main><script src="/center-app.js"></script><script>
+(async()=>{try{const s=await sessionFor('commercial');shellTitle('Comercial / Grups',s.center);const out=await api('/api/comercial/proposals?centerId='+encodeURIComponent(s.center.id));const rows=out.items||[];document.getElementById('commercialPanel').innerHTML='<h3>Propostes del centre</h3><table><thead><tr><th>Proposta</th><th>Client</th><th>Data</th><th>Estat</th></tr></thead><tbody>'+(rows.map(x=>'<tr><td><b>'+esc(x.title||x.name||x.id||'')+'</b></td><td>'+esc(x.clientName||x.client||'')+'</td><td>'+esc(x.date||x.eventDate||'')+'</td><td>'+esc(x.status||'')+'</td></tr>').join('')||'<tr><td colspan="4">Sense propostes comercials en aquest centre.</td></tr>')+'</tbody></table>';}catch(e){blocked(e)}})();
+</script></body></html>
