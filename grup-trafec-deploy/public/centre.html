@@ -44,15 +44,15 @@ const OPERATIVE='https://grup-trafec-operatiu.onrender.com/';
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const map={
- reservations:{label:'Reserves / Ocupació',url:null},
- crm:{label:'CRM',url:null},
- commercial:{label:'Comercial / Grups',url:null},
- fitxatges:{label:'Fitxatges',hash:'fitxatges.html'},
+ reservations:{label:'Reserves / Ocupació',local:'/reserves-centre.html'},
+ crm:{label:'CRM',local:'/crm-centre.html'},
+ commercial:{label:'Comercial / Grups',local:'/comercial-centre.html'},
+ fitxatges:{label:'Fitxatges',local:'/fitxatges-centre.html'},
  gestio_cuina:{label:'Gestió cuina',local:'/cuina.html'},
- gestio_magatzem:{label:'Gestió magatzem',hash:'#products'},
- control_normatiu:{label:'APPCC / Control Normatiu',hash:'#control'},
+ gestio_magatzem:{label:'Gestió magatzem',local:'/magatzem.html'},
+ control_normatiu:{label:'APPCC / Control Normatiu',local:'/appcc.html'},
  gestio_general:{label:'Gestió general',hash:'#home'},
- front_office_tpv:{label:'Front Office / TPV',hash:'#tpv'}
+ front_office_tpv:{label:'Front Office / TPV',local:'/tpv.html'}
 };
 let token=localStorage.getItem(TOKEN_KEY)||'';
 
