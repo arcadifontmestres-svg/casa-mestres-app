@@ -156,6 +156,77 @@ function createGovernService(store) {
     return saved;
   }
 
+  function normalizedCentreKey(value) {
+    return text(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  }
+
+  function hashToken(value) {
+    return crypto.createHash('sha256').update(String(value || '')).digest('hex');
+  }
+
+  function safeTextEqual(a, b) {
+    const aa = Buffer.from(String(a || ''));
+    const bb = Buffer.from(String(b || ''));
+    return aa.length === bb.length && aa.length > 0 && crypto.timingSafeEqual(aa, bb);
+  }
+
+  function activateCenterDevice(input = {}) {
+    const requestedCode = normalizedCentreKey(input.centerCode);
+    const requestedActivation = text(input.activationCode);
+    if (!requestedCode || !requestedActivation) {
+      const error = new Error('Falten el codi del centre o el codi d’activació.');
+      error.status = 400;
+      throw error;
+    }
+    let output;
+    store.update(data => {
+      const center = data.centers.find(item =>
+        item.active !== false &&
+        (normalizedCentreKey(item.code) === requestedCode || normalizedCentreKey(item.name) === requestedCode)
+      );
+      if (!center || !safeTextEqual(center.activationCode, requestedActivation)) {
+        const error = new Error('Codi de centre o codi d’activació no vàlid.');
+        error.status = 403;
+        throw error;
+      }
+      const token = crypto.randomBytes(32).toString('base64url');
+      const now = new Date().toISOString();
+      const device = {
+        id: `device_${crypto.randomUUID()}`,
+        centerId: center.id,
+        label: text(input.label || 'TPV / dispositiu centre').slice(0, 120),
+        tokenHash: hashToken(token),
+        active: true,
+        createdAt: now,
+        lastSeenAt: now
+      };
+      data.centerDevices = Array.isArray(data.centerDevices) ? data.centerDevices : [];
+      data.centerDevices.push(device);
+      center.activationStatus = 'VINCULAT';
+      center.activationUpdatedAt = now;
+      output = { token, center: { ...center } };
+    });
+    return output;
+  }
+
+  function centerByDeviceToken(token) {
+    const tokenHash = hashToken(token);
+    if (!token) return null;
+    const data = store.read();
+    const device = (data.centerDevices || []).find(item =>
+      item.active !== false && safeTextEqual(item.tokenHash, tokenHash)
+    );
+    if (!device) return null;
+    const center = data.centers.find(item => item.id === device.centerId && item.active !== false);
+    if (!center) return null;
+    const permissions = data.centerPermissions.find(item => item.centerId === center.id)?.functions || {};
+    return {
+      center,
+      permissions: { ...emptyFunctions(), ...permissions },
+      catalog: FUNCTION_CATALOG.filter(item => permissions[item.key] === true)
+    };
+  }
+
   function listEmployees({ includeInactive = false } = {}) {
     return store.read().employees
       .filter(item => includeInactive || item.active !== false)
@@ -228,6 +299,8 @@ function createGovernService(store) {
     createCenter,
     updateCenter,
     regenerateActivationCode,
+    activateCenterDevice,
+    centerByDeviceToken,
     getPermissions,
     setPermissions,
     listEmployees,
