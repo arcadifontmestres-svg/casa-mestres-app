@@ -45,10 +45,13 @@ function uid(prefix){return prefix+'_'+Date.now().toString(36)+'_'+Math.random()
 function orderTotal(o){return (o?.lines||[]).reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0)}
 function activeOrder(zone,tableId){return (state.orders||[]).find(o=>o.zone===zone&&o.tableId===tableId&&o.status!=='closed')}
 function allItems(){
- const z=zoneId;
- const dishes=(state.dishes||[]).filter(x=>x.active!==false&&x.onMenu!==false).map(x=>({id:x.id,name:x.name,family:x.cat||x.category||'PLATS',type:'dish',price:Number(x.sale||x.price||0),zones:x.zones||[]}));
- const sale=(state.saleItems||[]).filter(x=>x.active!==false&&x.onMenu!==false).map(x=>({id:x.id,name:x.name,family:x.family||'ALTRES',type:'sale',price:Number(x.sale||x.price||0),zones:x.zones||[]}));
- return [...dishes,...sale].filter(x=>!x.zones.length||x.zones.includes(z));
+ const dishes=(state.dishes||[])
+   .filter(x=>x.active!==false&&x.onMenu!==false)
+   .map(x=>({id:x.id,name:x.name,family:x.cat||x.category||'PLATS',type:'dish',price:Number(x.sale||x.price||0)}));
+ const sale=(state.saleItems||[])
+   .filter(x=>x.active!==false&&x.onMenu!==false)
+   .map(x=>({id:x.id,name:x.name,family:x.family||'ALTRES',type:'sale',price:Number(x.sale||x.price||0)}));
+ return [...dishes,...sale];
 }
 function render(){
  $('centreName').textContent=state.center?.name||'Centre';
