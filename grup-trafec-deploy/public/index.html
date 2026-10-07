@@ -1,35 +1,23 @@
 <!doctype html>
 <html lang="ca">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>GESTIÓ GRUP TRÀFEC</title>
-  <link rel="stylesheet" href="/app.css">
-  <link rel="stylesheet" href="/gestio.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIRECCIÓ · GRUP TRÀFEC</title>
+<link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/gestio.css">
+<style>
+body{margin:0}.app{display:block!important}.governTop{position:sticky;top:0;z-index:10;background:#0b2533;color:#fff;padding:14px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}.governTop .brand{font-weight:900;font-size:22px;margin-right:auto}.governTop button{border:0;border-radius:10px;padding:11px 18px;font-weight:800;cursor:pointer}.governTop button.active{background:#1ea4a7;color:#fff}.governTop button:not(.active){background:#e8eef1;color:#0b2533}.main{margin:0!important;max-width:1500px;padding:24px;margin-inline:auto!important}.contextBox{display:flex;align-items:center;gap:8px}.contextBox label{font-size:12px}.contextBox select{padding:8px;border-radius:8px}
+</style>
 </head>
 <body>
-  <div class="app">
-    <aside class="side">
-      <div class="brand">GESTIÓ GRUP TRÀFEC</div>
-      <button class="active" data-shell="home">Inici</button>
-      <button data-shell="front">Front Office</button>
-      <button data-shell="back">Back Office</button>
-      <button data-shell="rrhh">RRHH</button>
-      <button data-shell="config">Configuració</button>
-      <div class="legacyNav" aria-hidden="true">
-        <button data-view="home">Inici antic</button>
-        <button data-view="crm">CRM</button>
-        <button data-view="commercial">Comercial / Grups</button>
-        <button data-view="reservations">Reserves / Ocupació</button>
-      </div>
-    </aside>
-    <main class="main">
-      <div id="status" class="status"></div>
-      <div id="view"></div>
-    </main>
-  </div>
-  <script src="/app.js"></script>
-  <script src="/context.js"></script>
-  <script src="/govern-menu-v2.js"></script>
-</body>
-</html>
+<div class="app">
+<header class="governTop">
+  <div class="brand">DIRECCIÓ · GRUP TRÀFEC</div>
+  <div id="centerContextMount"></div>
+  <button data-shell="front">FRONT</button>
+  <button data-shell="back">BACK</button>
+  <button data-shell="config">CONFIG</button>
+</header>
+<main class="main"><div id="status" class="status"></div><div id="view"></div></main>
+</div>
+<script src="/app.js"></script><script src="/context.js"></script>
+</body></html>
