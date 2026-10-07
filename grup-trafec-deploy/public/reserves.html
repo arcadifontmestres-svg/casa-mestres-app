@@ -82,16 +82,27 @@ function renderForm(){
   <label><input id="marketing" type="checkbox" style="width:auto"> Accepto rebre comunicacions comercials. Opcional.</label>
   <button id="submit" class="btn">Confirmar reserva</button>
   <div id="result"></div>`;
- $('zone').onchange=updateTables;$('pax').onchange=updateTables;$('offer').onchange=updateOffer;
+ $('zone').onchange=updateTables;$('pax').onchange=updateTables;$('date').onchange=updateTables;$('time').onchange=updateTables;$('offer').onchange=updateOffer;
  $('submit').onclick=submit;updateTables();updateOffer();
 }
 
-function updateTables(){
+async function updateTables(){
  const zoneId=$('zone')?.value||'',pax=Number($('pax')?.value||1),sel=$('table');if(!sel)return;
- const zone=(cfg.layout?.zones||[]).find(z=>z.id===zoneId);
- const tables=(zone?.tables||[]).filter(t=>Number(t.max||999)>=pax);
+ const date=$('date')?.value||'',time=$('time')?.value||'';
+ let tables=[];
+ if(zoneId&&date&&time){
+  try{
+   const out=await api('/api/reserves-public/availability?centerId='+encodeURIComponent(cfg.center.id)+'&date='+encodeURIComponent(date)+'&time='+encodeURIComponent(time)+'&pax='+encodeURIComponent(pax)+'&zoneId='+encodeURIComponent(zoneId));
+   tables=out.zones?.[0]?.tables||[];
+  }catch{tables=[]}
+ }else{
+   const zone=(cfg.layout?.zones||[]).find(z=>z.id===zoneId);
+   tables=(zone?.tables||[]).filter(t=>Number(t.max||999)>=pax);
+ }
  sel.innerHTML='<option value="">Assignació automàtica</option>'+tables.map(t=>'<option value="'+esc(t.id)+'">'+esc(t.name)+' · '+Number(t.min||1)+'–'+Number(t.max||1)+' pax</option>').join('');
- $('tableHint').textContent=zoneId?(tables.length?tables.length+' taules compatibles amb '+pax+' pax.':'No hi ha cap taula compatible; el centre farà l’assignació.'):'Selecciona una zona per veure les taules.';
+ if(!zoneId)$('tableHint').textContent='Selecciona una zona per veure les taules.';
+ else if(!date||!time)$('tableHint').textContent='Selecciona data i hora per veure disponibilitat real.';
+ else $('tableHint').textContent=tables.length?tables.length+' taules disponibles per '+pax+' pax.':'No hi ha cap taula lliure compatible; el centre farà l’assignació.';
 }
 function updateOffer(){
  const o=(cfg.offers||[]).find(x=>x.id===$('offer')?.value);
