@@ -3,6 +3,7 @@
 const express = require('express');
 const path = require('path');
 const { createStore } = require('./dades/store');
+const { createMiniappState } = require('./dades/miniapp-state');
 const { createCrmService } = require('./funcions/crm');
 const { createReservationService } = require('./funcions/reserves');
 const { createCommercialService } = require('./funcions/comercial');
@@ -19,6 +20,7 @@ const PORT = process.env.PORT || 3000;
 const publicDir = path.join(__dirname, '..', 'public');
 
 const store = createStore();
+const miniappState = createMiniappState({ legacyStore: store });
 const crm = createCrmService(store);
 const reservations = createReservationService(store);
 const commercial = createCommercialService(store, crm, reservations);
@@ -36,7 +38,7 @@ app.use('/api/govern', createGovernRouter(govern));
 app.use('/api/crm', createCrmContextRouter(crm, links, govern));
 app.use('/api/comercial', createCommercialContextRouter(commercial, links, govern));
 app.use('/api/reserves', createReservationContextRouter(reservations, links, govern));
-app.use('/api/tpv-center', createTpvCenterRouter(store, govern));
+app.use('/api/tpv-center', createTpvCenterRouter(store, govern, miniappState));
 
 app.use((error, _req, res, _next) => {
   console.error(error);
@@ -49,4 +51,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { app, store, crm, reservations, commercial, govern, links };
+module.exports = { app, store, miniappState, crm, reservations, commercial, govern, links };
