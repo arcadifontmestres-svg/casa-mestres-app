@@ -151,7 +151,7 @@ function createReservesCenterRouter(store, govern, links, miniappState) {
       const reservation = (current.reservations || []).find(x => x.id === req.params.id);
       if (!reservation) return res.status(404).json({ error:'Reserva no trobada.' });
       if (reservation.status !== 'CONFIRMADA') return res.status(409).json({ error:'Només s’envien confirmacions de reserves confirmades.' });
-      const notifications = await sendReservationConfirmation(s.center, reservation);
+      const notifications = await sendReservationConfirmation(miniappState,s.center, reservation);
       await miniappState.update('reserves', s.center.id, () => legacyState(s.center), state => {
         const found = (state.reservations || []).find(x => x.id === reservation.id);
         if (found) {
