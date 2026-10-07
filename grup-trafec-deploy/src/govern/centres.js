@@ -172,6 +172,25 @@ function createGovernService(store) {
     return crypto.createHash('sha256').update(String(value || '')).digest('hex');
   }
 
+  function tokenSecret() {
+    return String(process.env.CENTER_TOKEN_SECRET || 'arcadi-centre-token-fallback-change-me');
+  }
+
+  function signPayload(payload) {
+    const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+    const signature = crypto.createHmac('sha256', tokenSecret()).update(body).digest('base64url');
+    return body + '.' + signature;
+  }
+
+  function readSignedPayload(token) {
+    const [body, signature] = String(token || '').split('.');
+    if (!body || !signature) return null;
+    const expected = crypto.createHmac('sha256', tokenSecret()).update(body).digest('base64url');
+    if (!safeTextEqual(expected, signature)) return null;
+    try { return JSON.parse(Buffer.from(body, 'base64url').toString('utf8')); }
+    catch { return null; }
+  }
+
   function safeTextEqual(a, b) {
     const aa = Buffer.from(String(a || ''));
     const bb = Buffer.from(String(b || ''));
@@ -197,19 +216,20 @@ function createGovernService(store) {
         error.status = 403;
         throw error;
       }
-      const token = crypto.randomBytes(32).toString('base64url');
       const now = new Date().toISOString();
-      const device = {
-        id: `device_${crypto.randomUUID()}`,
-        centerId: center.id,
-        label: text(input.label || 'TPV / dispositiu centre').slice(0, 120),
-        tokenHash: hashToken(token),
-        active: true,
-        createdAt: now,
-        lastSeenAt: now
-      };
-      data.centerDevices = Array.isArray(data.centerDevices) ? data.centerDevices : [];
-      data.centerDevices.push(device);
+      const permissions = data.centerPermissions.find(item => item.centerId === center.id)?.functions || {};
+      const token = signPayload({
+        v: 1,
+        center: {
+          id: center.id,
+          code: center.code,
+          name: center.name,
+          type: center.type || '',
+          company: center.company || ''
+        },
+        permissions: { ...emptyFunctions(), ...permissions },
+        issuedAt: now
+      });
       center.activationStatus = 'VINCULAT';
       center.activationUpdatedAt = now;
       output = { token, center: { ...center } };
@@ -218,8 +238,24 @@ function createGovernService(store) {
   }
 
   function centerByDeviceToken(token) {
-    const tokenHash = hashToken(token);
     if (!token) return null;
+    const signed = readSignedPayload(token);
+    if (signed?.v === 1 && signed.center?.id) {
+      const data = store.read();
+      const current = data.centers.find(item => item.id === signed.center.id && item.active !== false);
+      const center = current || signed.center;
+      const currentPermissions = current
+        ? (data.centerPermissions.find(item => item.centerId === current.id)?.functions || null)
+        : null;
+      const permissions = { ...emptyFunctions(), ...(currentPermissions || signed.permissions || {}) };
+      return {
+        center,
+        permissions,
+        catalog: FUNCTION_CATALOG.filter(item => permissions[item.key] === true)
+      };
+    }
+
+    const tokenHash = hashToken(token);
     const data = store.read();
     const device = (data.centerDevices || []).find(item =>
       item.active !== false && safeTextEqual(item.tokenHash, tokenHash)
