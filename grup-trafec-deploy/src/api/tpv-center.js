@@ -3,7 +3,7 @@
 const express = require('express');
 const crypto = require('crypto');
 
-function createTpvCenterRouter(store, govern) {
+function createTpvCenterRouter(store, govern, miniappState) {
   const router = express.Router();
 
   function session(req) {
@@ -44,51 +44,70 @@ function createTpvCenterRouter(store, govern) {
     };
   }
 
+  function legacyState(center) {
+    const data = store.read();
+    return {
+      config: data.tpvConfigs.find(x => x.centerId === center.id) || defaultConfig(center),
+      orders: (data.tpvOrders || []).filter(x => x.centerId === center.id),
+      catalogConfigs: (data.tpvCatalogConfigs || []).filter(x => x.centerId === center.id)
+    };
+  }
+
+  async function tpvState(center) {
+    return miniappState.read('tpv', center.id, () => legacyState(center));
+  }
+
+  async function operationalCatalog(center) {
+    let source = { dishes: [], saleItems: [], products: [] };
+    try {
+      const response = await fetch('https://grup-trafec-operatiu.onrender.com/api/tpv-catalog', {
+        headers: {
+          'X-Arcadi-Company-Id': 'company_grup_trafec',
+          'X-Arcadi-Centre-Id': /sarriera/i.test(String(center.name || center.code || '')) ? 'restaurant_sarriera' : ''
+        }
+      });
+      if (response.ok) source = await response.json();
+    } catch {}
+    return {
+      dishes: Array.isArray(source.dishes) ? source.dishes : [],
+      saleItems: Array.isArray(source.saleItems) ? source.saleItems : [],
+      products: Array.isArray(source.products) ? source.products : []
+    };
+  }
+
+  function applyPublication(item, cfg) {
+    if (!cfg || cfg.active !== true) return null;
+    return {
+      ...item,
+      name: cfg.label || item.name,
+      family: cfg.family || item.family || 'ALTRES',
+      price: Number(cfg.price ?? item.price ?? 0),
+      zones: Array.isArray(cfg.zoneIds) ? cfg.zoneIds : [],
+      sort: Number(cfg.sort || 0),
+      onMenu: true
+    };
+  }
+
   router.get('/bootstrap', async (req, res, next) => {
     try {
       const s = session(req);
-      const data = store.read();
-      const config = data.tpvConfigs.find(x => x.centerId === s.center.id) || defaultConfig(s.center);
-      const orders = (data.tpvOrders || []).filter(x => x.centerId === s.center.id);
-      let catalog = { saleItems: [], dishes: [], products: [] };
-      try {
-        const response = await fetch('https://grup-trafec-operatiu.onrender.com/api/tpv-catalog', {
-          headers: {
-            'X-Arcadi-Company-Id': 'company_grup_trafec',
-            'X-Arcadi-Centre-Id': /sarriera/i.test(String(s.center.name || s.center.code || '')) ? 'restaurant_sarriera' : ''
-          }
-        });
-        if (response.ok) {
-          const state = await response.json();
-          catalog = {
-            saleItems: Array.isArray(state.saleItems) ? state.saleItems : [],
-            dishes: Array.isArray(state.dishes) ? state.dishes : [],
-            products: Array.isArray(state.products) ? state.products : []
-          };
-        }
-      } catch {}
-      const published = (data.tpvCatalogConfigs || []).filter(x => x.centerId === s.center.id && x.active === true);
+      const own = await tpvState(s.center);
+      const source = await operationalCatalog(s.center);
+      const published = Array.isArray(own.catalogConfigs) ? own.catalogConfigs.filter(x => x.active === true) : [];
       const byKey = new Map(published.map(x => [x.sourceType + ':' + x.sourceId, x]));
-      const apply = item => {
-        const sourceType = item.type === 'dish' ? 'dish' : 'sale';
-        const cfg = byKey.get(sourceType + ':' + item.id);
-        if (!cfg) return null;
-        return {
-          ...item,
-          name: cfg.label || item.name,
-          family: cfg.family || item.family || 'ALTRES',
-          price: Number(cfg.price ?? item.price ?? 0),
-          zones: Array.isArray(cfg.zoneIds) ? cfg.zoneIds : [],
-          sort: Number(cfg.sort || 0),
-          onMenu: true
-        };
-      };
-      catalog = {
-        dishes: (catalog.dishes || []).map(apply).filter(Boolean).sort((a,b)=>(a.sort||0)-(b.sort||0)),
-        saleItems: (catalog.saleItems || []).map(apply).filter(Boolean).sort((a,b)=>(a.sort||0)-(b.sort||0)),
-        products: (catalog.products || []).map(apply).filter(Boolean).sort((a,b)=>(a.sort||0)-(b.sort||0))
-      };
-      res.json({ center: s.center, config, orders, ...catalog });
+      const map = (items, sourceType) => (items || [])
+        .map(item => applyPublication(item, byKey.get(sourceType + ':' + item.id)))
+        .filter(Boolean)
+        .sort((a,b)=>(a.sort||0)-(b.sort||0));
+      res.json({
+        center: s.center,
+        config: own.config || defaultConfig(s.center),
+        orders: own.orders || [],
+        dishes: map(source.dishes, 'dish'),
+        saleItems: map(source.saleItems, 'sale'),
+        products: map(source.products, 'product'),
+        persistent: miniappState.hasPersistentBackend()
+      });
     } catch (error) { next(error); }
   });
 
@@ -97,18 +116,9 @@ function createTpvCenterRouter(store, govern) {
       const centerId = String(req.query.centerId || '');
       const center = govern.getCenter(centerId);
       if (!center) return res.status(404).json({ error: 'Centre no trobat.' });
-      const data = store.read();
-      let source = { dishes: [], saleItems: [], products: [] };
-      try {
-        const response = await fetch('https://grup-trafec-operatiu.onrender.com/api/tpv-catalog', {
-          headers: {
-            'X-Arcadi-Company-Id': 'company_grup_trafec',
-            'X-Arcadi-Centre-Id': /sarriera/i.test(String(center.name || center.code || '')) ? 'restaurant_sarriera' : ''
-          }
-        });
-        if (response.ok) source = await response.json();
-      } catch {}
-      const saved = (data.tpvCatalogConfigs || []).filter(x => x.centerId === centerId);
+      const own = await tpvState(center);
+      const source = await operationalCatalog(center);
+      const saved = Array.isArray(own.catalogConfigs) ? own.catalogConfigs : [];
       const configByKey = new Map(saved.map(x => [x.sourceType + ':' + x.sourceId, x]));
       const items = [
         ...(source.dishes || []).map(item => ({ ...item, sourceType:'dish' })),
@@ -125,22 +135,27 @@ function createTpvCenterRouter(store, govern) {
           sort: 0
         }
       }));
-      const tpvConfig = data.tpvConfigs.find(x => x.centerId === centerId) || defaultConfig(center);
-      res.json({ center, tpvConfig, items });
+      res.json({
+        center,
+        tpvConfig: own.config || defaultConfig(center),
+        items,
+        persistent: miniappState.hasPersistentBackend()
+      });
     } catch (error) { next(error); }
   });
 
-  router.put('/admin/catalog/:centerId', (req, res, next) => {
+  router.put('/admin/catalog/:centerId', async (req, res, next) => {
     try {
       const centerId = String(req.params.centerId || '');
-      if (!govern.getCenter(centerId)) return res.status(404).json({ error:'Centre no trobat.' });
+      const center = govern.getCenter(centerId);
+      if (!center) return res.status(404).json({ error:'Centre no trobat.' });
       const input = req.body || {};
       const items = Array.isArray(input.items) ? input.items : [];
-      store.update(data => {
-        data.tpvCatalogConfigs = (data.tpvCatalogConfigs || []).filter(x => x.centerId !== centerId);
+      await miniappState.update('tpv', centerId, () => legacyState(center), state => {
+        state.catalogConfigs = [];
         for (const item of items) {
           if (!item.sourceId || !['dish','sale','product'].includes(item.sourceType)) continue;
-          data.tpvCatalogConfigs.push({
+          state.catalogConfigs.push({
             centerId,
             sourceType: item.sourceType,
             sourceId: String(item.sourceId),
@@ -158,12 +173,12 @@ function createTpvCenterRouter(store, govern) {
     } catch (error) { next(error); }
   });
 
-  router.put('/config', (req, res, next) => {
+  router.put('/config', async (req, res, next) => {
     try {
       const s = session(req);
       const input = req.body && typeof req.body === 'object' ? req.body : {};
       let saved;
-      store.update(data => {
+      await miniappState.update('tpv', s.center.id, () => legacyState(s.center), state => {
         const zones = Array.isArray(input.zones) ? input.zones.map(zone => ({
           id: String(zone.id || '').trim().slice(0,80),
           name: String(zone.name || '').trim().slice(0,120),
@@ -174,7 +189,7 @@ function createTpvCenterRouter(store, govern) {
             max: Math.max(1, Number(table.max) || Number(table.min) || 1)
           })).filter(x => x.id && x.name) : []
         })).filter(x => x.id && x.name) : [];
-        const previous = data.tpvConfigs.find(x => x.centerId === s.center.id) || defaultConfig(s.center);
+        const previous = state.config || defaultConfig(s.center);
         saved = {
           centerId: s.center.id,
           zones,
@@ -194,20 +209,21 @@ function createTpvCenterRouter(store, govern) {
           },
           updatedAt: new Date().toISOString()
         };
-        const i = data.tpvConfigs.findIndex(x => x.centerId === s.center.id);
-        if (i < 0) data.tpvConfigs.push(saved);
-        else data.tpvConfigs[i] = saved;
+        state.config = saved;
+        if (!Array.isArray(state.orders)) state.orders = [];
+        if (!Array.isArray(state.catalogConfigs)) state.catalogConfigs = [];
       });
       res.json(saved);
     } catch (error) { next(error); }
   });
 
-  router.post('/orders', (req, res, next) => {
+  router.post('/orders', async (req, res, next) => {
     try {
       const s = session(req);
       const input = req.body || {};
       let order;
-      store.update(data => {
+      await miniappState.update('tpv', s.center.id, () => legacyState(s.center), state => {
+        if (!Array.isArray(state.orders)) state.orders = [];
         order = {
           id: 'ord_' + crypto.randomUUID(),
           centerId: s.center.id,
@@ -220,18 +236,19 @@ function createTpvCenterRouter(store, govern) {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
-        data.tpvOrders.push(order);
+        state.orders.push(order);
       });
       res.status(201).json(order);
     } catch (error) { next(error); }
   });
 
-  router.put('/orders/:id', (req, res, next) => {
+  router.put('/orders/:id', async (req, res, next) => {
     try {
       const s = session(req);
       let saved;
-      store.update(data => {
-        const order = data.tpvOrders.find(x => x.id === req.params.id && x.centerId === s.center.id);
+      await miniappState.update('tpv', s.center.id, () => legacyState(s.center), state => {
+        if (!Array.isArray(state.orders)) state.orders = [];
+        const order = state.orders.find(x => x.id === req.params.id && x.centerId === s.center.id);
         if (!order) {
           const error = new Error('Comanda no trobada.');
           error.status = 404;
@@ -254,6 +271,18 @@ function createTpvCenterRouter(store, govern) {
         saved = { ...order };
       });
       res.json(saved);
+    } catch (error) { next(error); }
+  });
+
+  router.get('/shared-layout', async (req, res, next) => {
+    try {
+      const s = session(req);
+      const own = await tpvState(s.center);
+      res.json({
+        centerId: s.center.id,
+        zones: own.config?.zones || [],
+        updatedAt: own.config?.updatedAt || null
+      });
     } catch (error) { next(error); }
   });
 
