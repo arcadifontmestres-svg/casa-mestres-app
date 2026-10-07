@@ -318,6 +318,40 @@
     </div></div>`;
   }
 
+  async function refreshGmailStatus(centerId) {
+    const box = document.getElementById('gmailStatus');
+    const connect = document.getElementById('connectGmail');
+    const disconnect = document.getElementById('disconnectGmail');
+    if (!box || !centerId) return;
+    try {
+      const s = await govApi('/api/reserves-gmail/status/' + encodeURIComponent(centerId));
+      if (!s.ready) {
+        box.innerHTML = '<b>Gmail: SERVIDOR PENDENT DE GOOGLE OAUTH</b><div class="muted">Calen les credencials OAuth de Google al servei.</div>';
+        connect.disabled = true;
+        disconnect.disabled = true;
+        return;
+      }
+      if (s.connected) {
+        box.innerHTML = '<b>Gmail: CONNECTAT</b><div class="muted">' + esc(s.email || '') + '</div>';
+        connect.textContent = 'Reconnectar Gmail';
+        connect.disabled = false;
+        disconnect.disabled = false;
+      } else {
+        box.innerHTML = '<b>Gmail: NO CONNECTAT</b><div class="muted">Autoritza el compte que enviarà les confirmacions.</div>';
+        connect.textContent = 'Connectar Gmail';
+        connect.disabled = false;
+        disconnect.disabled = true;
+      }
+    } catch (error) {
+      box.textContent = error.message || 'Error Gmail';
+    }
+  }
+
+  async function startGmail(centerId) {
+    const out = await govApi('/api/reserves-gmail/start/' + encodeURIComponent(centerId), { method:'POST', body:'{}' });
+    if (out.url) window.location.href = out.url;
+  }
+
   function renderCenterForm(center = null) {
     shellActive('config');
     const c = center || {};
@@ -353,6 +387,14 @@
           <div class="wide"><label>Política de cancel·lació</label><textarea id="c_cancelPolicy">${esc(criteria.reservations?.cancellationPolicy || '')}</textarea></div>
         </div>
       </div>
+      ${center ? `<h3>Reserves · Gmail</h3>
+      <div class="panel" style="margin:16px 0">
+        <div id="gmailStatus">Comprovant Gmail...</div>
+        <div class="toolbar" style="margin-top:12px">
+          <button type="button" class="btn" id="connectGmail">Connectar Gmail</button>
+          <button type="button" class="btn secondary" id="disconnectGmail">Desconnectar</button>
+        </div>
+      </div>` : ''}
       <h3>Eines / miniapps del centre</h3>
       <div class="checkGrid">${catalog.map(item => `<label class="checkItem"><input type="checkbox" name="centerTool" value="${esc(item.key)}" ${permissions[item.key] === true ? 'checked' : ''}><span><b>${esc(item.label)}</b>${item.connected ? '' : '<span class="tag">pendent connexió</span>'}<br><span class="muted">${esc(item.area)}</span></span></label>`).join('')}</div>
       <div class="toolbar formActions"><label class="inlineCheck"><input id="g_active" type="checkbox" ${c.active === false ? '' : 'checked'}> Centre actiu</label><button class="btn" type="submit">Guardar centre</button></div></form>`;
@@ -367,6 +409,19 @@
         setStatus('Nou codi generat');
       } catch (error) { showError(error); }
     };
+    if (center) {
+      refreshGmailStatus(center.id);
+      const connectGmail = document.getElementById('connectGmail');
+      const disconnectGmail = document.getElementById('disconnectGmail');
+      if (connectGmail) connectGmail.onclick = () => startGmail(center.id).catch(showError);
+      if (disconnectGmail) disconnectGmail.onclick = async () => {
+        try {
+          await govApi('/api/reserves-gmail/' + encodeURIComponent(center.id), { method:'DELETE' });
+          await refreshGmailStatus(center.id);
+        } catch (error) { showError(error); }
+      };
+    }
+
     document.getElementById('centerForm').onsubmit = async event => {
       event.preventDefault();
       const f = id => document.getElementById(id);
