@@ -46,11 +46,11 @@ function orderTotal(o){return (o?.lines||[]).reduce((s,l)=>s+(Number(l.qty)||0)*
 function activeOrder(zone,tableId){return (state.orders||[]).find(o=>o.zone===zone&&o.tableId===tableId&&o.status!=='closed')}
 function allItems(){
  const dishes=(state.dishes||[])
-   .filter(x=>x.active!==false&&x.onMenu!==false)
-   .map(x=>({id:x.id,name:x.name,family:x.cat||x.category||'PLATS',type:'dish',price:Number(x.sale||x.price||0)}));
+   .filter(x=>x.active!==false)
+   .map(x=>({id:x.id,name:x.name,family:x.family||x.cat||x.category||'PLATS',type:'dish',price:Number(x.price||x.sale||0)}));
  const sale=(state.saleItems||[])
-   .filter(x=>x.active!==false&&x.onMenu!==false)
-   .map(x=>({id:x.id,name:x.name,family:x.family||'ALTRES',type:'sale',price:Number(x.sale||x.price||0)}));
+   .filter(x=>x.active!==false)
+   .map(x=>({id:x.id,name:x.name,family:x.family||'ALTRES',type:'sale',price:Number(x.price||x.sale||0)}));
  return [...dishes,...sale];
 }
 function render(){
@@ -91,6 +91,11 @@ async function openTable(zid,tid){
 }
 function renderOrder(){
  const items=allItems(),families=[...new Set(items.map(x=>x.family||'ALTRES'))];
+ if(!items.length){
+   document.getElementById('modalBack')?.remove();
+   document.body.insertAdjacentHTML('beforeend','<div class="modalBack" id="modalBack"><div class="modal"><div class="top"><div><h2>'+esc(order.tableName)+'</h2><div class="muted">'+esc(order.pax)+' pax</div></div><button class="btn secondary" onclick="TPV.closeModal()">← Taules</button></div><div class="err">El TPV no està rebent cap plat ni article actiu del catàleg d’aquest centre.</div></div></div>');
+   return;
+ }
  if(!family||!families.includes(family))family=families[0]||'';
  const visible=items.filter(x=>(x.family||'ALTRES')===family);
  const lines=(order.lines||[]).map((l,i)=>'<div class="line"><button onclick="TPV.qty('+i+',-1)">−</button><div><b>'+esc(l.name)+'</b><small>'+l.qty+' × '+money(l.price)+'</small></div><strong>'+money(l.qty*l.price)+'</strong><button onclick="TPV.qty('+i+',1)">+</button></div>').join('')||'<div class="muted">Comanda buida</div>';
