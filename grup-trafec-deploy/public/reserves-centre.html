@@ -12,7 +12,7 @@ main{padding:24px;max-width:1400px;margin:auto}.head{display:flex;justify-conten
 <div id="content"><div class="panel">Carregant...</div></div></main>
 <script>
 (()=>{'use strict';
-const token=localStorage.getItem('arcadi_center_device_token_v1')||'', $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const SESSION_KEY='arcadi_direction_center_token_v1',params=new URLSearchParams(location.search),incoming=params.get('direction_token')||'',token=incoming||sessionStorage.getItem(SESSION_KEY)||localStorage.getItem('arcadi_center_device_token_v1')||'';if(incoming)sessionStorage.setItem(SESSION_KEY,incoming), $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state=null;
 async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json','X-Center-Device-Token':token,...(opt.headers||{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Error '+r.status);return d}
 async function boot(){try{state=await api('/api/reserves-center/bootstrap');$('centreName').textContent=state.center?.name||'';$('status').textContent=state.persistent?'AUTORITZAT · PERSISTENT':'AUTORITZAT';renderReservations()}catch(e){$('status').textContent='BLOQUEJAT';$('content').innerHTML='<div class="err">'+esc(e.message)+'</div>'}}
