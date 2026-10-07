@@ -49,7 +49,10 @@ function createTpvCenterRouter(store, govern, miniappState) {
     return {
       config: data.tpvConfigs.find(x => x.centerId === center.id) || defaultConfig(center),
       orders: (data.tpvOrders || []).filter(x => x.centerId === center.id),
-      catalogConfigs: (data.tpvCatalogConfigs || []).filter(x => x.centerId === center.id)
+      catalogConfigs: (data.tpvCatalogConfigs || []).filter(x => x.centerId === center.id),
+      tickets: [],
+      cashSessions: [],
+      counters: { ticket: 0 }
     };
   }
 
@@ -271,6 +274,114 @@ function createTpvCenterRouter(store, govern, miniappState) {
         saved = { ...order };
       });
       res.json(saved);
+    } catch (error) { next(error); }
+  });
+
+  router.get('/backoffice', async (req, res, next) => {
+    try {
+      const s = session(req);
+      const own = await tpvState(s.center);
+      res.json({
+        config: own.config || defaultConfig(s.center),
+        tickets: own.tickets || [],
+        cashSessions: own.cashSessions || [],
+        openCash: (own.cashSessions || []).find(x => !x.closedAt) || null
+      });
+    } catch (error) { next(error); }
+  });
+
+  router.post('/cash/open', async (req, res, next) => {
+    try {
+      const s = session(req);
+      let opened;
+      await miniappState.update('tpv', s.center.id, () => legacyState(s.center), state => {
+        state.cashSessions = state.cashSessions || [];
+        const current = state.cashSessions.find(x => !x.closedAt);
+        if (current) { opened = current; return; }
+        opened = {
+          id: 'cash_' + crypto.randomUUID(),
+          centerId: s.center.id,
+          openingAmount: Math.max(0, Number(req.body?.openingAmount) || 0),
+          openedAt: new Date().toISOString(),
+          closedAt: null
+        };
+        state.cashSessions.push(opened);
+      });
+      res.status(201).json(opened);
+    } catch (error) { next(error); }
+  });
+
+  router.post('/cash/close', async (req, res, next) => {
+    try {
+      const s = session(req);
+      let closed;
+      await miniappState.update('tpv', s.center.id, () => legacyState(s.center), state => {
+        state.cashSessions = state.cashSessions || [];
+        state.tickets = state.tickets || [];
+        const current = state.cashSessions.find(x => !x.closedAt);
+        if (!current) {
+          const error = new Error('No hi ha cap caixa oberta.');
+          error.status = 400;
+          throw error;
+        }
+        const tickets = state.tickets.filter(t => t.cashSessionId === current.id);
+        const totals = {};
+        for (const t of tickets) totals[t.paymentMethod || 'ALTRES'] = (totals[t.paymentMethod || 'ALTRES'] || 0) + Number(t.total || 0);
+        current.closingAmount = Math.max(0, Number(req.body?.closingAmount) || 0);
+        current.closedAt = new Date().toISOString();
+        current.totals = totals;
+        current.ticketCount = tickets.length;
+        closed = { ...current };
+      });
+      res.json(closed);
+    } catch (error) { next(error); }
+  });
+
+  router.post('/payments', async (req, res, next) => {
+    try {
+      const s = session(req);
+      let result;
+      await miniappState.update('tpv', s.center.id, () => legacyState(s.center), state => {
+        state.orders = state.orders || [];
+        state.tickets = state.tickets || [];
+        state.cashSessions = state.cashSessions || [];
+        state.counters = state.counters || { ticket: 0 };
+        const order = state.orders.find(x => x.id === String(req.body?.orderId || '') && x.centerId === s.center.id);
+        if (!order) {
+          const error = new Error('Comanda no trobada.');
+          error.status = 404;
+          throw error;
+        }
+        if (order.status === 'closed' && order.ticketId) {
+          result = state.tickets.find(x => x.id === order.ticketId) || null;
+          return;
+        }
+        const openCash = state.cashSessions.find(x => !x.closedAt) || null;
+        state.counters.ticket = Number(state.counters.ticket || 0) + 1;
+        const year = new Date().getFullYear();
+        const number = String(state.counters.ticket).padStart(6, '0');
+        const total = (order.lines || []).reduce((sum,l)=>sum+(Number(l.qty)||0)*(Number(l.price)||0),0);
+        const ticket = {
+          id: 'ticket_' + crypto.randomUUID(),
+          centerId: s.center.id,
+          number: year + '-' + number,
+          orderId: order.id,
+          tableName: order.tableName,
+          pax: order.pax,
+          lines: order.lines || [],
+          total,
+          paymentMethod: String(req.body?.paymentMethod || 'EFECTIU').toUpperCase(),
+          cashSessionId: openCash?.id || null,
+          createdAt: new Date().toISOString()
+        };
+        state.tickets.push(ticket);
+        order.status = 'closed';
+        order.closedAt = ticket.createdAt;
+        order.ticketId = ticket.id;
+        order.paymentMethod = ticket.paymentMethod;
+        result = ticket;
+      });
+      res.status(201).json(result);
     } catch (error) { next(error); }
   });
 
