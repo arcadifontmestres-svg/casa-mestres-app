@@ -19,7 +19,7 @@ input,select{width:100%;padding:9px;border:1px solid #ccd6db;border-radius:9px}.
 <script>
 (()=>{
 'use strict';
-const token=localStorage.getItem('arcadi_center_device_token_v1')||'';
+const token=sessionStorage.getItem('arcadi_direction_center_token_v1')||localStorage.getItem('arcadi_center_device_token_v1')||'';
 let centerId='';
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state=null,currentFilter='all';
