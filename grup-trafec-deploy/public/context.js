@@ -518,5 +518,19 @@
   document.querySelector('[data-shell="back"]').onclick = renderBackOffice;
   document.querySelector('[data-shell="config"]').onclick = () => refreshGovernState().then(renderConfig).catch(showError);
 
-  refreshGovernState().then(renderHome).catch(showError);
+  const bootQuery = new URLSearchParams(location.search);
+  refreshGovernState().then(() => {
+    if (bootQuery.get('gmail') === 'connected' && bootQuery.get('centerId')) {
+      currentCenterId = bootQuery.get('centerId');
+      localStorage.setItem(STORAGE_KEY, currentCenterId);
+      renderSelector();
+      renderBadge();
+      const center = centers.find(item => item.id === currentCenterId);
+      if (center) {
+        history.replaceState({}, '', '/');
+        return renderCenterForm(center);
+      }
+    }
+    renderHome();
+  }).catch(showError);
 })();
