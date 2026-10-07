@@ -5,129 +5,108 @@
 <title>ARCADI · TPV</title>
 <style>
 :root{font-family:Arial,sans-serif;color:#102b38;background:#eef3f5}*{box-sizing:border-box}body{margin:0;background:#eef3f5}
-header{background:#0b2533;color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
-header b{font-size:24px}.badge{background:#dff4ef;color:#126e59;padding:8px 12px;border-radius:999px;font-weight:800}
+header{background:#0b2533;color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center}header b{font-size:24px}
+.badge{background:#dff4ef;color:#126e59;padding:8px 12px;border-radius:999px;font-weight:800}
 main{padding:20px;max-width:1500px;margin:auto}.top{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:18px}
 h1{margin:0;font-size:34px}.muted{color:#6b7d87}.panel{background:#fff;border:1px solid #d8e1e5;border-radius:18px;padding:18px;margin-bottom:16px}
 .tabs{display:flex;gap:8px;flex-wrap:wrap}.tab,.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer}.tab{background:#e8eef1}.tab.active,.btn.primary{background:#1ea4a7;color:#fff}.btn.secondary{background:#e8eef1}.btn.bad{background:#8f2f2f;color:#fff}
-.tables{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}.table{border:1px solid #d8e1e5;border-radius:16px;background:#fff;padding:18px;text-align:left;min-height:120px;cursor:pointer}.table.occupied{border-color:#1ea4a7;background:#f0fbfb}.table.bill{border-color:#c58d22;background:#fff8e8}.table b,.table strong{display:block}.table strong{font-size:24px;margin-bottom:8px}
-.err{background:#fff0f0;border:1px solid #e3b3b3;color:#7d1d1d;padding:16px;border-radius:14px}.ok{background:#eef9f5;border:1px solid #b9dfd0;padding:14px;border-radius:14px}
-.configZone{border:1px solid #d8e1e5;border-radius:16px;padding:16px;margin-top:14px}.zoneHead{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}.tableLine{display:grid;grid-template-columns:1.4fr .7fr .7fr auto;gap:8px;margin-top:8px}
-input{width:100%;padding:12px;border:1px solid #cbd5da;border-radius:10px;font-size:16px}
-.modalBack{position:fixed;inset:0;background:#0008;display:grid;place-items:center;padding:18px;z-index:20}.modal{background:#fff;width:min(1100px,96vw);max-height:94vh;overflow:auto;border-radius:18px;padding:18px}.orderGrid{display:grid;grid-template-columns:360px 1fr;gap:16px}
-.ticket{border:1px solid #d8e1e5;border-radius:14px;padding:14px}.line{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #edf1f3}.prodGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.prod{border:1px solid #d8e1e5;border-radius:12px;background:#fff;padding:14px;text-align:left}.prod b{display:block}.familyBar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-@media(max-width:800px){.orderGrid{grid-template-columns:1fr}.tableLine{grid-template-columns:1fr 1fr}.tableLine button{grid-column:1/-1}}
-</style>
-</head>
+.tables{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}.table{border:1px solid #d8e1e5;border-radius:16px;background:#fff;padding:18px;text-align:left;min-height:120px;cursor:pointer}.table.occupied{border-color:#1ea4a7;background:#f0fbfb}.table.bill{border-color:#c58d22;background:#fff8e8}
+.table strong{display:block;font-size:24px;margin-bottom:8px}.err{background:#fff0f0;border:1px solid #e3b3b3;color:#7d1d1d;padding:16px;border-radius:14px}
+.configZone{border:1px solid #d8e1e5;border-radius:16px;padding:16px;margin-top:14px}.zoneHead{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.tableLine{display:grid;grid-template-columns:1.4fr .7fr .7fr auto;gap:8px;margin-top:8px}
+input,textarea,select{width:100%;padding:12px;border:1px solid #cbd5da;border-radius:10px;font-size:16px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.wide{grid-column:1/-1}
+.modalBack{position:fixed;inset:0;background:#0008;display:grid;place-items:center;padding:18px;z-index:20}.modal{background:#fff;width:min(1180px,96vw);max-height:94vh;overflow:auto;border-radius:18px;padding:18px}
+.orderGrid{display:grid;grid-template-columns:390px 1fr;gap:16px}.ticket{border:1px solid #d8e1e5;border-radius:14px;padding:14px}.line{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #edf1f3}.line small{display:block}.note{display:block;color:#8a5b00;font-size:12px}
+.prodGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.prod{border:1px solid #d8e1e5;border-radius:12px;background:#fff;padding:14px;text-align:left}.prod b{display:block}.familyBar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.pax{display:flex;align-items:center;gap:8px}.pax input{width:90px}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat{background:#fff;border:1px solid #d8e1e5;border-radius:14px;padding:14px}
+@media(max-width:800px){.orderGrid,.grid2,.summary{grid-template-columns:1fr}.tableLine{grid-template-columns:1fr 1fr}.tableLine button{grid-column:1/-1}}
+</style></head>
 <body>
 <header><div><b>ARCADI GESTIÓ · FRONT OFFICE / TPV</b><div id="centreName"></div></div><span id="status" class="badge">VALIDANT</span></header>
 <main>
-<div class="top"><div><h1>TPV</h1><div class="muted">Configuració pròpia de cada centre</div></div><button class="btn secondary" onclick="location.href='/centre.html'">← Centre</button></div>
+<div class="top"><div><h1>TPV</h1><div class="muted">Miniapp autònoma del centre</div></div><button class="btn secondary" onclick="location.href='/centre.html'">← Centre</button></div>
 <div id="content"><div class="panel">Carregant...</div></div>
 </main>
 <script>
-(()=>{
-'use strict';
-const TOKEN_KEY='arcadi_center_device_token_v1';
-const token=localStorage.getItem(TOKEN_KEY)||'';
-const $=id=>document.getElementById(id);
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+(()=>{'use strict';
+const TOKEN_KEY='arcadi_center_device_token_v1',token=localStorage.getItem(TOKEN_KEY)||'';
+const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=v=>(Number(v)||0).toLocaleString('ca-ES',{style:'currency',currency:'EUR'});
 let state=null,zoneId='',order=null,family='',draftZones=[];
-
-async function api(path,opt={}){
- const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json','X-Center-Device-Token':token,...(opt.headers||{})}});
- const d=await r.json().catch(()=>({}));
- if(!r.ok)throw new Error(d.error||'Error '+r.status);
- return d;
-}
-function uid(prefix){return prefix+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7)}
-function orderTotal(o){return (o?.lines||[]).reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0)}
-function activeOrder(zone,tableId){return (state.orders||[]).find(o=>o.zone===zone&&o.tableId===tableId&&o.status!=='closed')}
-function allItems(){
- const dishes=(state.dishes||[])
-   .filter(x=>x.active!==false)
-   .map(x=>({id:x.id,name:x.name,family:x.family||x.cat||x.category||'PLATS',type:'dish',price:Number(x.price||x.sale||0)}));
- const sale=(state.saleItems||[])
-   .filter(x=>x.active!==false)
-   .map(x=>({id:x.id,name:x.name,family:x.family||'ALTRES',type:'sale',price:Number(x.price||x.sale||0)}));
- return [...dishes,...sale];
+async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json','X-Center-Device-Token':token,...(opt.headers||{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Error '+r.status);return d}
+function uid(p){return p+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7)}
+function orderTotal(o){return(o?.lines||[]).reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0)}
+function activeOrder(z,t){return(state.orders||[]).find(o=>o.zone===z&&o.tableId===t&&o.status!=='closed')}
+function items(){
+ const norm=(a,type)=>(a||[]).filter(x=>x.active!==false).map(x=>({id:x.id,name:x.name,family:x.family||x.cat||x.category||'ALTRES',type,price:Number(x.price||x.sale||0)}));
+ return[...norm(state.dishes,'dish'),...norm(state.saleItems,'sale'),...norm(state.products,'product')];
 }
 function render(){
- $('centreName').textContent=state.center?.name||'Centre';
- $('status').textContent='AUTORITZAT';
- if(!(state.config?.zones||[]).length)return renderConfig();
+ $('centreName').textContent=state.center?.name||'Centre';$('status').textContent=state.persistent?'AUTORITZAT · PERSISTENT':'AUTORITZAT';
+ if(!(state.config?.zones||[]).length)return config();
  if(!zoneId)zoneId=state.config.zones[0].id;
- const zone=state.config.zones.find(z=>z.id===zoneId)||state.config.zones[0];
- const open=(state.orders||[]).filter(o=>o.status!=='closed').length;
- $('content').innerHTML=
- '<div class="panel"><div class="tabs">'+state.config.zones.map(z=>'<button class="tab '+(z.id===zone.id?'active':'')+'" onclick="TPV.setZone(\''+esc(z.id)+'\')">'+esc(z.name)+'</button>').join('')+
- '<button class="btn secondary" onclick="TPV.config()">Configurar TPV</button><span style="margin-left:auto"><b>'+open+'</b> serveis oberts</span></div></div>'+
- '<div class="tables">'+(zone.tables||[]).map(t=>{const o=activeOrder(zone.id,t.id);return '<button class="table '+(o?'occupied ':'')+(o?.status==='bill'?'bill':'')+'" onclick="TPV.openTable(\''+esc(zone.id)+'\',\''+esc(t.id)+'\')"><strong>'+esc(t.name)+'</strong><span>'+t.min+'–'+t.max+' pax</span><b>'+(o?(o.status==='bill'?'COMPTE':o.status==='sent'?'ENVIADA':'OBERTA'):'LLIURE')+'</b>'+(o?'<small>'+o.pax+' pax · '+money(orderTotal(o))+'</small>':'')+'</button>'}).join('')+'</div>';
+ const zone=state.config.zones.find(z=>z.id===zoneId)||state.config.zones[0],open=(state.orders||[]).filter(o=>o.status!=='closed').length;
+ $('content').innerHTML='<div class="panel"><div class="tabs">'+state.config.zones.map(z=>'<button class="tab '+(z.id===zone.id?'active':'')+'" onclick="TPV.zone(\''+esc(z.id)+'\')">'+esc(z.name)+'</button>').join('')+
+ '<button class="btn secondary" onclick="TPV.config()">Configurar TPV</button><button class="btn secondary" onclick="TPV.backoffice()">Back Office TPV</button><span style="margin-left:auto"><b>'+open+'</b> serveis oberts</span></div></div>'+
+ '<div class="tables">'+(zone.tables||[]).map(t=>{const o=activeOrder(zone.id,t.id);return'<button class="table '+(o?'occupied ':'')+(o?.status==='bill'?'bill':'')+'" onclick="TPV.open(\''+esc(zone.id)+'\',\''+esc(t.id)+'\')"><strong>'+esc(t.name)+'</strong><span>'+t.min+'–'+t.max+' pax</span><b>'+(o?(o.status==='bill'?'COMPTE':o.status==='sent'?'ENVIADA':'OBERTA'):'LLIURE')+'</b>'+(o?'<small>'+o.pax+' pax · '+money(orderTotal(o))+'</small>':'')+'</button>'}).join('')+'</div>';
 }
-function renderConfig(){
- draftZones=JSON.parse(JSON.stringify(state.config?.zones||[]));
- drawConfig();
-}
+function config(){draftZones=JSON.parse(JSON.stringify(state.config?.zones||[]));drawConfig()}
 function drawConfig(){
- $('content').innerHTML='<div class="panel"><h2>Configurar TPV del centre</h2><p class="muted">Crea només les zones i taules reals d’aquest centre. No hi ha cap estructura predefinida.</p><div id="zonesEditor"></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btn secondary" onclick="TPV.addZone()">+ Afegir zona</button><button class="btn primary" onclick="TPV.saveConfig()">Guardar configuració</button></div></div>';
- const host=$('zonesEditor');
- host.innerHTML=draftZones.map((z,zi)=>'<div class="configZone"><div class="zoneHead"><input value="'+esc(z.name)+'" oninput="TPV.renameZone('+zi+',this.value)" placeholder="Nom de la zona"><button class="btn bad" onclick="TPV.removeZone('+zi+')">Eliminar zona</button></div><div>'+(z.tables||[]).map((t,ti)=>'<div class="tableLine"><input value="'+esc(t.name)+'" oninput="TPV.renameTable('+zi+','+ti+',this.value)" placeholder="Nom taula"><input type="number" min="1" value="'+t.min+'" oninput="TPV.setTableMin('+zi+','+ti+',this.value)"><input type="number" min="1" value="'+t.max+'" oninput="TPV.setTableMax('+zi+','+ti+',this.value)"><button class="btn bad" onclick="TPV.removeTable('+zi+','+ti+')">Eliminar</button></div>').join('')+'</div><button class="btn secondary" style="margin-top:10px" onclick="TPV.addTable('+zi+')">+ Afegir taula</button></div>').join('');
+ const b=state.config?.business||{},p=state.config?.printer||{};
+ $('content').innerHTML='<div class="panel"><h2>Zones i taules</h2><div id="zones"></div><button class="btn secondary" style="margin-top:12px" onclick="TPV.addZone()">+ Zona</button></div>'+
+ '<div class="panel"><h2>Dades del tiquet</h2><div class="grid2"><div><label>Nom</label><input id="bn" value="'+esc(b.name||state.center?.name||'')+'"></div><div><label>NIF/CIF</label><input id="tax" value="'+esc(b.taxId||'')+'"></div><div class="wide"><label>Adreça</label><input id="addr" value="'+esc(b.address||'')+'"></div><div><label>Telèfon</label><input id="phone" value="'+esc(b.phone||'')+'"></div><div><label>Logo</label><input id="logo" type="file" accept="image/*"></div><div class="wide"><label>Peu del tiquet</label><textarea id="footer">'+esc(b.receiptFooter||'')+'</textarea></div></div></div>'+
+ '<div class="panel"><h2>Impressora</h2><div class="grid2"><div><label>Paper</label><select id="paper"><option value="80" '+(String(p.paperWidth||'80')==='80'?'selected':'')+'>80 mm</option><option value="58" '+(String(p.paperWidth)==='58'?'selected':'')+'>58 mm</option></select></div><div><label>Impressora</label><input id="printer" value="'+esc(p.printerName||'')+'"></div><div><label><input id="auto" type="checkbox" style="width:auto" '+(p.autoPrint?'checked':'')+'> imprimir automàticament</label></div><div><button class="btn secondary" onclick="TPV.testPrint()">Prova impressió</button></div></div></div>'+
+ '<div class="panel"><button class="btn primary" onclick="TPV.saveConfig()">Guardar configuració</button></div>';
+ $('zones').innerHTML=draftZones.map((z,zi)=>'<div class="configZone"><div class="zoneHead"><input value="'+esc(z.name)+'" oninput="TPV.rz('+zi+',this.value)"><button class="btn bad" onclick="TPV.dz('+zi+')">Eliminar zona</button></div>'+(z.tables||[]).map((t,ti)=>'<div class="tableLine"><input value="'+esc(t.name)+'" oninput="TPV.rt('+zi+','+ti+',this.value)"><input type="number" min="1" value="'+t.min+'" oninput="TPV.tmin('+zi+','+ti+',this.value)"><input type="number" min="1" value="'+t.max+'" oninput="TPV.tmax('+zi+','+ti+',this.value)"><button class="btn bad" onclick="TPV.dt('+zi+','+ti+')">Eliminar</button></div>').join('')+'<button class="btn secondary" style="margin-top:10px" onclick="TPV.addTable('+zi+')">+ Taula</button></div>').join('');
 }
 async function saveConfig(){
- const clean=draftZones.map((z,zi)=>({id:z.id||uid('zone'),name:String(z.name||'').trim(),tables:(z.tables||[]).map(t=>({id:t.id||uid('table'),name:String(t.name||'').trim(),min:Math.max(1,Number(t.min)||1),max:Math.max(1,Number(t.max)||1)})).filter(t=>t.name)})).filter(z=>z.name);
- if(!clean.length)return alert('Cal crear almenys una zona.');
- await api('/api/tpv-center/config',{method:'PUT',body:JSON.stringify({zones:clean})});
+ const zones=draftZones.map(z=>({id:z.id||uid('zone'),name:String(z.name||'').trim(),tables:(z.tables||[]).map(t=>({id:t.id||uid('table'),name:String(t.name||'').trim(),min:Math.max(1,Number(t.min)||1),max:Math.max(1,Number(t.max)||1)})).filter(t=>t.name)})).filter(z=>z.name);
+ if(!zones.length)return alert('Cal almenys una zona.');
+ let logo=state.config?.business?.logo||'';const file=$('logo')?.files?.[0];if(file)logo=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result||''));r.onerror=no;r.readAsDataURL(file)});
+ await api('/api/tpv-center/config',{method:'PUT',body:JSON.stringify({zones,business:{name:$('bn').value.trim(),taxId:$('tax').value.trim(),address:$('addr').value.trim(),phone:$('phone').value.trim(),logo,receiptFooter:$('footer').value.trim()},printer:{paperWidth:$('paper').value,printerName:$('printer').value.trim(),autoPrint:$('auto').checked}})});
  await boot();
 }
 async function openTable(zid,tid){
  const zone=state.config.zones.find(z=>z.id===zid),table=zone?.tables.find(t=>t.id===tid);if(!table)return;
  order=activeOrder(zid,tid);
- if(!order){
-   order=await api('/api/tpv-center/orders',{method:'POST',body:JSON.stringify({zone:zid,tableId:tid,tableName:table.name,pax:table.min||1})});
-   state.orders.push(order);
- }
+ if(!order){order=await api('/api/tpv-center/orders',{method:'POST',body:JSON.stringify({zone:zid,tableId:tid,tableName:table.name,pax:table.min||1})});state.orders.push(order)}
  family='';renderOrder();
 }
 function renderOrder(){
- const items=allItems(),families=[...new Set(items.map(x=>x.family||'ALTRES'))];
- if(!items.length){
-   document.getElementById('modalBack')?.remove();
-   document.body.insertAdjacentHTML('beforeend','<div class="modalBack" id="modalBack"><div class="modal"><div class="top"><div><h2>'+esc(order.tableName)+'</h2><div class="muted">'+esc(order.pax)+' pax</div></div><button class="btn secondary" onclick="TPV.closeModal()">← Taules</button></div><div class="err">El TPV no està rebent cap plat ni article actiu del catàleg d’aquest centre.</div></div></div>');
-   return;
- }
- if(!family||!families.includes(family))family=families[0]||'';
- const visible=items.filter(x=>(x.family||'ALTRES')===family);
- const lines=(order.lines||[]).map((l,i)=>'<div class="line"><button onclick="TPV.qty('+i+',-1)">−</button><div><b>'+esc(l.name)+'</b><small>'+l.qty+' × '+money(l.price)+'</small></div><strong>'+money(l.qty*l.price)+'</strong><button onclick="TPV.qty('+i+',1)">+</button></div>').join('')||'<div class="muted">Comanda buida</div>';
- document.body.insertAdjacentHTML('beforeend','<div class="modalBack" id="modalBack"><div class="modal"><div class="top"><div><h2>'+esc(order.tableName)+'</h2><div class="muted">'+esc(order.pax)+' pax</div></div><button class="btn secondary" onclick="TPV.closeModal()">← Taules</button></div><div class="orderGrid"><div class="ticket">'+lines+'<div style="display:flex;justify-content:space-between;font-size:24px;margin-top:14px"><b>TOTAL</b><b>'+money(orderTotal(order))+'</b></div><div style="display:grid;gap:8px;margin-top:14px"><button class="btn primary" onclick="TPV.status(\'sent\')">ENVIAR CUINA</button><button class="btn secondary" onclick="TPV.status(\'bill\')">COMPTE</button><button class="btn bad" onclick="TPV.status(\'closed\')">TANCAR TAULA</button></div></div><div><div class="familyBar">'+families.map(f=>'<button class="tab '+(f===family?'active':'')+'" onclick="TPV.family(\''+esc(f).replace(/'/g,"\\'")+'\')">'+esc(f)+'</button>').join('')+'</div><div class="prodGrid">'+visible.map(x=>'<button class="prod" onclick="TPV.addItem(\''+x.type+'\',\''+esc(x.id)+'\',\''+esc(x.name).replace(/'/g,"\\'")+'\','+x.price+')"><b>'+esc(x.name)+'</b><span>'+money(x.price)+'</span></button>').join('')+'</div></div></div></div></div>');
+ const all=items(),families=[...new Set(all.map(x=>x.family||'ALTRES'))];if(!family||!families.includes(family))family=families[0]||'';
+ const visible=all.filter(x=>(x.family||'ALTRES')===family);
+ const lines=(order.lines||[]).map((l,i)=>'<div class="line"><button onclick="TPV.qty('+i+',-1)">−</button><div><b>'+esc(l.name)+'</b><small>'+l.qty+' × '+money(l.price)+'</small>'+(l.notes?'<span class="note">'+esc(l.notes)+'</span>':'')+'</div><strong>'+money(l.qty*l.price)+'</strong><div><button onclick="TPV.qty('+i+',1)">+</button><button class="btn secondary" style="padding:6px;margin-left:4px" onclick="TPV.note('+i+')">Obs.</button></div></div>').join('')||'<div class="muted">Comanda buida</div>';
+ document.getElementById('modalBack')?.remove();
+ document.body.insertAdjacentHTML('beforeend','<div class="modalBack" id="modalBack"><div class="modal"><div class="top"><div><h2>'+esc(order.tableName)+'</h2><div class="pax"><label>Comensals</label><input type="number" min="1" value="'+order.pax+'" onchange="TPV.pax(this.value)"></div></div><button class="btn secondary" onclick="TPV.close()">← Taules</button></div><div class="orderGrid"><div class="ticket">'+lines+'<div style="display:flex;justify-content:space-between;font-size:24px;margin-top:14px"><b>TOTAL</b><b>'+money(orderTotal(order))+'</b></div><div style="display:grid;gap:8px;margin-top:14px"><button class="btn primary" onclick="TPV.status(\'sent\')">ENVIAR CUINA</button><button class="btn secondary" onclick="TPV.status(\'bill\')">COMPTE</button><button class="btn primary" onclick="TPV.pay()">COBRAR</button></div></div><div><div class="familyBar">'+families.map(f=>'<button class="tab '+(f===family?'active':'')+'" onclick="TPV.family(\''+esc(f).replace(/'/g,"\\'")+'\')">'+esc(f)+'</button>').join('')+'</div><div class="prodGrid">'+visible.map(x=>'<button class="prod" onclick="TPV.add(\''+x.type+'\',\''+esc(x.id)+'\',\''+esc(x.name).replace(/'/g,"\\'")+'\','+x.price+')"><b>'+esc(x.name)+'</b><span>'+money(x.price)+'</span></button>').join('')+'</div></div></div></div></div>');
 }
-async function persistOrder(){
- order=await api('/api/tpv-center/orders/'+encodeURIComponent(order.id),{method:'PUT',body:JSON.stringify(order)});
- const i=state.orders.findIndex(x=>x.id===order.id);if(i>=0)state.orders[i]=order;
+async function persist(){order=await api('/api/tpv-center/orders/'+encodeURIComponent(order.id),{method:'PUT',body:JSON.stringify(order)});const i=state.orders.findIndex(x=>x.id===order.id);if(i>=0)state.orders[i]=order}
+function receipt(ticket){
+ const b=state.config?.business||{},p=state.config?.printer||{},w=String(p.paperWidth||'80')==='58'?'58mm':'80mm';
+ const rows=(ticket.lines||[]).map(l=>'<tr><td>'+esc(l.qty)+' × '+esc(l.name)+(l.notes?'<br><small>'+esc(l.notes)+'</small>':'')+'</td><td style="text-align:right">'+money(l.qty*l.price)+'</td></tr>').join('');
+ const h='<!doctype html><html><head><meta charset="utf-8"><style>@page{size:'+w+' auto;margin:4mm}body{font-family:monospace;width:'+w+';margin:0;font-size:12px}img{max-width:70%;max-height:70px;display:block;margin:auto}h2,p{text-align:center;margin:4px 0}table{width:100%}.t{font-size:16px;font-weight:bold;border-top:1px dashed #000}</style></head><body>'+(b.logo?'<img src="'+b.logo+'">':'')+'<h2>'+esc(b.name||state.center?.name||'')+'</h2><p>'+esc(b.taxId||'')+'</p><p>'+esc(b.address||'')+'</p><p>'+esc(b.phone||'')+'</p><hr><p>Tiquet '+esc(ticket.number||'PROVA')+' · '+esc(ticket.tableName||'')+'</p><table>'+rows+'<tr class="t"><td>TOTAL</td><td style="text-align:right">'+money(ticket.total||0)+'</td></tr></table><p>'+esc(b.receiptFooter||'')+'</p><script>window.onload=()=>window.print()<\/script></body></html>';
+ const win=window.open('','_blank','width=420,height=700');if(!win)return alert('Finestra d’impressió bloquejada.');win.document.write(h);win.document.close();
 }
-async function boot(){
- try{state=await api('/api/tpv-center/bootstrap');render()}catch(e){$('status').textContent='BLOQUEJAT';$('content').innerHTML='<div class="err">'+esc(e.message)+'</div>'}
+async function backoffice(){
+ const d=await api('/api/tpv-center/backoffice');const by={};(d.tickets||[]).forEach(t=>by[t.paymentMethod]=(by[t.paymentMethod]||0)+Number(t.total||0));
+ $('content').innerHTML='<div class="panel"><div class="top"><h2>Back Office TPV</h2><button class="btn secondary" onclick="TPV.home()">← TPV</button></div><div class="summary"><div class="stat"><b>Caixa</b><div>'+(d.openCash?'OBERTA':'TANCADA')+'</div></div><div class="stat"><b>Tiquets</b><div>'+((d.tickets||[]).length)+'</div></div><div class="stat"><b>Efectiu</b><div>'+money(by.EFECTIU||0)+'</div></div><div class="stat"><b>Targeta/Bizum</b><div>'+money((by.VISA||0)+(by.BIZUM||0))+'</div></div></div><div style="display:flex;gap:8px;margin-top:14px"><button class="btn primary" onclick="TPV.openCash()">Obrir caixa</button><button class="btn bad" onclick="TPV.closeCash()">Tancar caixa</button></div></div><div class="panel"><h3>Últims tiquets</h3>'+(d.tickets||[]).slice().reverse().slice(0,50).map(t=>'<div style="padding:8px 0;border-bottom:1px solid #eee"><b>'+esc(t.number)+'</b> · '+esc(t.paymentMethod)+' · '+money(t.total)+' · '+esc(t.tableName||'')+'</div>').join('')+'</div>';
 }
+async function boot(){try{state=await api('/api/tpv-center/bootstrap');render()}catch(e){$('status').textContent='BLOQUEJAT';$('content').innerHTML='<div class="err">'+esc(e.message)+'</div>'}}
 window.TPV={
- setZone:id=>{zoneId=id;render()},
- config:()=>renderConfig(),
- addZone:()=>{draftZones.push({id:uid('zone'),name:'',tables:[]});drawConfig()},
- removeZone:i=>{draftZones.splice(i,1);drawConfig()},
- renameZone:(i,v)=>draftZones[i].name=v,
- addTable:i=>{draftZones[i].tables=draftZones[i].tables||[];draftZones[i].tables.push({id:uid('table'),name:'',min:1,max:2});drawConfig()},
- removeTable:(zi,ti)=>{draftZones[zi].tables.splice(ti,1);drawConfig()},
- renameTable:(zi,ti,v)=>draftZones[zi].tables[ti].name=v,
- setTableMin:(zi,ti,v)=>draftZones[zi].tables[ti].min=Math.max(1,Number(v)||1),
- setTableMax:(zi,ti,v)=>draftZones[zi].tables[ti].max=Math.max(1,Number(v)||1),
- saveConfig,
- openTable,
- closeModal:()=>{document.getElementById('modalBack')?.remove();order=null;render()},
- family:f=>{family=f;document.getElementById('modalBack')?.remove();renderOrder()},
- addItem:async(type,id,name,price)=>{let l=(order.lines||[]).find(x=>x.type===type&&x.itemId===id);if(l)l.qty++;else(order.lines||(order.lines=[])).push({key:type+':'+id,type,itemId:id,name,qty:1,price:Number(price)||0});await persistOrder();document.getElementById('modalBack')?.remove();renderOrder()},
- qty:async(i,d)=>{if(!order.lines[i])return;order.lines[i].qty+=d;if(order.lines[i].qty<=0)order.lines.splice(i,1);await persistOrder();document.getElementById('modalBack')?.remove();renderOrder()},
- status:async st=>{order.status=st;await persistOrder();document.getElementById('modalBack')?.remove();order=null;render()}
+ zone:id=>{zoneId=id;render()},config,home:()=>render(),backoffice,
+ addZone:()=>{draftZones.push({id:uid('zone'),name:'',tables:[]});drawConfig()},dz:i=>{draftZones.splice(i,1);drawConfig()},rz:(i,v)=>draftZones[i].name=v,
+ addTable:i=>{draftZones[i].tables=draftZones[i].tables||[];draftZones[i].tables.push({id:uid('table'),name:'',min:1,max:2});drawConfig()},dt:(zi,ti)=>{draftZones[zi].tables.splice(ti,1);drawConfig()},
+ rt:(zi,ti,v)=>draftZones[zi].tables[ti].name=v,tmin:(zi,ti,v)=>draftZones[zi].tables[ti].min=Math.max(1,Number(v)||1),tmax:(zi,ti,v)=>draftZones[zi].tables[ti].max=Math.max(1,Number(v)||1),
+ saveConfig,open:openTable,close:()=>{document.getElementById('modalBack')?.remove();order=null;render()},family:f=>{family=f;renderOrder()},
+ add:async(type,id,name,price)=>{let l=(order.lines||[]).find(x=>x.type===type&&x.itemId===id&&!(x.notes||''));if(l)l.qty++;else(order.lines||(order.lines=[])).push({key:type+':'+id+':'+Date.now(),type,itemId:id,name,qty:1,price:Number(price)||0,notes:''});await persist();renderOrder()},
+ qty:async(i,d)=>{if(!order.lines[i])return;order.lines[i].qty+=d;if(order.lines[i].qty<=0)order.lines.splice(i,1);await persist();renderOrder()},
+ note:async i=>{if(!order.lines[i])return;const v=prompt('Observacions: sense sal, sense salsa, poc fet, al punt, fet...',order.lines[i].notes||'');if(v===null)return;order.lines[i].notes=v.trim();await persist();renderOrder()},
+ pax:async v=>{order.pax=Math.max(1,Number(v)||1);await persist()},
+ status:async s=>{order.status=s;await persist();renderOrder()},
+ pay:async()=>{const method=(prompt('Forma de cobrament: EFECTIU, VISA, BIZUM o ALTRES','VISA')||'').trim().toUpperCase();if(!method)return;const t=await api('/api/tpv-center/payments',{method:'POST',body:JSON.stringify({orderId:order.id,paymentMethod:method})});receipt(t);document.getElementById('modalBack')?.remove();order=null;await boot()},
+ openCash:async()=>{const a=Number(prompt('Fons inicial de caixa','0')||0);await api('/api/tpv-center/cash/open',{method:'POST',body:JSON.stringify({openingAmount:a})});await backoffice()},
+ closeCash:async()=>{const a=Number(prompt('Import comptat al tancament','0')||0);const d=await api('/api/tpv-center/cash/close',{method:'POST',body:JSON.stringify({closingAmount:a})});alert('Caixa tancada. Tiquets: '+(d.ticketCount||0));await backoffice()},
+ testPrint:()=>receipt({number:'PROVA',tableName:'PROVA',total:1,lines:[{name:'Article prova',qty:1,price:1,notes:'Sense sal'}]})
 };
 boot();
 })();
-</script>
-</body></html>
+</script></body></html>
