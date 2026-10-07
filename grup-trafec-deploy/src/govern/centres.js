@@ -241,6 +241,7 @@ function createGovernService(store) {
     if (!token) return null;
     const signed = readSignedPayload(token);
     if (signed?.v === 1 && signed.center?.id) {
+      if (signed.expiresAt && Date.parse(signed.expiresAt) < Date.now()) return null;
       const data = store.read();
       const current = data.centers.find(item => item.id === signed.center.id && item.active !== false);
       const center = current || signed.center;
@@ -268,6 +269,34 @@ function createGovernService(store) {
       center,
       permissions: { ...emptyFunctions(), ...permissions },
       catalog: FUNCTION_CATALOG.filter(item => permissions[item.key] === true)
+    };
+  }
+
+  function issueDirectionAccessToken(centerId) {
+    const center = getCenter(centerId);
+    if (!center || center.active === false) {
+      const error = new Error('Centre no trobat.');
+      error.status = 404;
+      throw error;
+    }
+    const permissions = getPermissions(centerId).functions;
+    const now = new Date();
+    return {
+      token: signPayload({
+        v: 1,
+        scope: 'direction',
+        center: {
+          id: center.id,
+          code: center.code,
+          name: center.name,
+          type: center.type || '',
+          company: center.company || ''
+        },
+        permissions: { ...emptyFunctions(), ...permissions },
+        issuedAt: now.toISOString(),
+        expiresAt: new Date(now.getTime() + 30 * 60 * 1000).toISOString()
+      }),
+      expiresAt: new Date(now.getTime() + 30 * 60 * 1000).toISOString()
     };
   }
 
@@ -345,6 +374,7 @@ function createGovernService(store) {
     regenerateActivationCode,
     activateCenterDevice,
     centerByDeviceToken,
+    issueDirectionAccessToken,
     getPermissions,
     setPermissions,
     listEmployees,
