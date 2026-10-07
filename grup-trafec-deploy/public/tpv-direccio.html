@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Direcció · Configurar TPV</title>
+<title>TPV · Back Office catàleg</title>
 <style>
 :root{font-family:Arial,sans-serif;color:#102b38;background:#eef3f5}*{box-sizing:border-box}body{margin:0;background:#eef3f5}
 header{background:#0b2533;color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center}
@@ -11,18 +11,19 @@ input,select{width:100%;padding:9px;border:1px solid #ccd6db;border-radius:9px}.
 .zoneChecks{display:flex;gap:8px;flex-wrap:wrap}.zoneChecks label{font-size:13px;white-space:nowrap}.status{margin-left:auto;font-weight:800}
 </style></head>
 <body>
-<header><div><b>DIRECCIÓ · CONFIGURACIÓ TPV</b><div id="centreName"></div></div><div id="status">CARREGANT</div></header>
+<header><div><b>TPV · BACK OFFICE / CATÀLEG</b><div id="centreName"></div></div><div id="status">CARREGANT</div></header>
 <main>
-<div class="panel"><div class="toolbar"><button class="btn secondary" onclick="history.back()">← Tornar</button><div><h1>Publicació al TPV</h1><div class="muted">Selecciona què apareix al TPV d’aquest centre i com es mostra.</div></div><button class="btn primary" style="margin-left:auto" id="saveBtn">Guardar publicació</button></div></div>
+<div class="panel"><div class="toolbar"><button class="btn secondary" onclick="location.href='/tpv.html'">← Tornar</button><div><h1>Publicació al TPV</h1><div class="muted">Selecciona què apareix al TPV d’aquest centre i com es mostra.</div></div><button class="btn primary" style="margin-left:auto" id="saveBtn">Guardar publicació</button></div></div>
 <div class="panel"><div class="toolbar" style="margin-bottom:12px"><button class="btn secondary" onclick="TPVFilter.show('all')">Tot</button><button class="btn secondary" onclick="TPVFilter.show('dish')">Plats</button><button class="btn secondary" onclick="TPVFilter.show('sale')">Begudes / articles de venda</button><button class="btn secondary" onclick="TPVFilter.show('product')">Productes</button><span style="flex:1"></span><select id="bulkZone" style="width:auto;min-width:160px"><option value="">Zona...</option></select><button class="btn secondary" onclick="TPVFilter.zoneVisible(true)">Aplicar zona</button><button class="btn secondary" onclick="TPVFilter.zoneVisible(false)">Treure zona</button><button class="btn secondary" onclick="TPVFilter.selectVisible(true)">Seleccionar tots</button><button class="btn secondary" onclick="TPVFilter.selectVisible(false)">Desmarcar tots</button></div><div id="content">Carregant catàleg...</div></div>
 </main>
 <script>
 (()=>{
 'use strict';
-const q=new URLSearchParams(location.search),centerId=q.get('centerId')||'';
+const token=localStorage.getItem('arcadi_center_device_token_v1')||'';
+let centerId='';
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state=null,currentFilter='all';
-async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json',...(opt.headers||{})}}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Error '+r.status);return d}
+async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json','X-Center-Device-Token':token,...(opt.headers||{})}}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Error '+r.status);return d}
 function render(){
  $('centreName').textContent=state.center?.name||'';
  const zones=state.tpvConfig?.zones||[];
@@ -66,6 +67,6 @@ $('saveBtn').onclick=async()=>{
   $('status').textContent='GUARDAT';
  }catch(e){$('status').textContent='ERROR';alert(e.message)}
 };
-(async()=>{try{state=await api('/api/tpv-center/admin/catalog?centerId='+encodeURIComponent(centerId));render()}catch(e){$('content').innerHTML='<div>'+esc(e.message)+'</div>'; $('status').textContent='ERROR'}})();
+(async()=>{try{const s=await api('/api/govern/center-session');centerId=s.center.id;state=await api('/api/tpv-center/admin/catalog');render()}catch(e){$('content').innerHTML='<div>'+esc(e.message)+'</div>'; $('status').textContent='ERROR'}})();
 })();
 </script></body></html>
