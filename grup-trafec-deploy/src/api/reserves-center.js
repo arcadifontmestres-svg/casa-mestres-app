@@ -2,6 +2,7 @@
 
 const express = require('express');
 const crypto = require('crypto');
+const { sendReservationConfirmation } = require('../funcions/reserves-notifications');
 
 function createReservesCenterRouter(store, govern, links, miniappState) {
   const router = express.Router();
@@ -109,6 +110,7 @@ function createReservesCenterRouter(store, govern, links, miniappState) {
           status: String(input.status || 'CONFIRMADA'),
           paymentStatus: String(input.paymentStatus || 'NO_REQUERIT'),
           stripePaymentIntentId: String(input.stripePaymentIntentId || ''),
+          notifications: null,
           createdAt: now,
           updatedAt: now
         };
@@ -139,6 +141,25 @@ function createReservesCenterRouter(store, govern, links, miniappState) {
         saved = { ...item };
       });
       res.json(saved);
+    } catch (error) { next(error); }
+  });
+
+  router.post('/reservations/:id/notify', async (req, res, next) => {
+    try {
+      const s = session(req);
+      const current = await own(s.center);
+      const reservation = (current.reservations || []).find(x => x.id === req.params.id);
+      if (!reservation) return res.status(404).json({ error:'Reserva no trobada.' });
+      if (reservation.status !== 'CONFIRMADA') return res.status(409).json({ error:'Només s’envien confirmacions de reserves confirmades.' });
+      const notifications = await sendReservationConfirmation(s.center, reservation);
+      await miniappState.update('reserves', s.center.id, () => legacyState(s.center), state => {
+        const found = (state.reservations || []).find(x => x.id === reservation.id);
+        if (found) {
+          found.notifications = notifications;
+          found.updatedAt = new Date().toISOString();
+        }
+      });
+      res.json({ ok:true, notifications });
     } catch (error) { next(error); }
   });
 
