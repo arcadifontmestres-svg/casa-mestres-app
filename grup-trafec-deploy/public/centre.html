@@ -12,7 +12,7 @@
 h1{font-size:38px;margin:10px 0}p{font-size:18px;line-height:1.45;color:#667984}
 label{display:block;font-weight:700;margin:18px 0 8px}input{width:100%;font-size:22px;padding:18px;border:1px solid #c8d2d7;border-radius:16px}
 button{width:100%;padding:18px;border:0;border-radius:16px;font-size:21px;font-weight:800;cursor:pointer;margin-top:18px}.primary{background:#1ea4a7;color:#fff}.secondary{background:#e8eef1;color:#0b2533}
-.status{margin-top:18px;padding:14px;border-radius:14px;background:#f3f6f7}.hidden{display:none}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:22px}.module{padding:22px;border:1px solid #d7e0e4;border-radius:18px;text-align:left;background:#fff}.module b{display:block;font-size:20px}.module span{display:block;margin-top:6px;color:#6b7d87}.topline{display:flex;justify-content:space-between;gap:12px;align-items:center}.pill{background:#e7f5f5;color:#0b6d70;padding:8px 12px;border-radius:999px;font-weight:700}
+.status{margin-top:18px;padding:14px;border-radius:14px;background:#f3f6f7}.hidden{display:none}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:22px}.module{padding:22px;border:1px solid #d7e0e4;border-radius:18px;text-align:left;background:#fff}.module b{display:block;font-size:20px}.module span{display:block;margin-top:6px;color:#6b7d87}.online{color:#126e59!important;font-weight:800}.offline{color:#8f2f2f!important;font-weight:800}.checking{color:#7c8b94!important;font-weight:800}.topline{display:flex;justify-content:space-between;gap:12px;align-items:center}.pill{background:#e7f5f5;color:#0b6d70;padding:8px 12px;border-radius:999px;font-weight:700}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.card{padding:24px}h1{font-size:32px}}
 </style>
 </head>
@@ -78,10 +78,36 @@ function renderSession(s){
  const items=(s.catalog||[]).filter(x=>x.connected!==false);
  $('moduleGrid').innerHTML=items.map(x=>{
    const href=operationalUrl(x.key,s.center);
-   return '<button class="module" data-key="'+esc(x.key)+'"><b>'+esc(x.label)+'</b><span>'+esc(x.area||'')+'</span></button>';
+   return '<button class="module" data-key="'+esc(x.key)+'"><b>'+esc(x.label)+'</b><span>'+esc(x.area||'')+'</span><span class="checking" data-online="'+esc(x.key)+'">COMPROVANT...</span></button>';
  }).join('')||'<div class="status">Aquest centre encara no té cap mòdul connectat.</div>';
  document.querySelectorAll('[data-key]').forEach(btn=>btn.onclick=()=>{location.href=operationalUrl(btn.dataset.key,s.center)});
+ checkOnline(items);
 }
+async function checkOnline(items){
+ const endpoints={
+  reservations:'/api/reserves-center/bootstrap',
+  front_office_tpv:'/api/tpv-center/bootstrap',
+  fitxatges:'/api/fitxatges-center/bootstrap',
+  gestio_cuina:'/api/miniapps-center/cuina/bootstrap',
+  control_normatiu:'/api/miniapps-center/appcc/bootstrap'
+ };
+ for(const item of items){
+  const el=document.querySelector('[data-online="'+CSS.escape(item.key)+'"]');
+  if(!el)continue;
+  const endpoint=endpoints[item.key];
+  if(!endpoint){el.textContent='CONNECTADA';el.className='online';continue}
+  try{
+   await api(endpoint);
+   el.textContent='ONLINE';
+   el.className='online';
+  }catch(e){
+   el.textContent='OFFLINE';
+   el.className='offline';
+   el.title=e.message||'No disponible';
+  }
+ }
+}
+
 async function check(){
  if(!token)return;
  try{renderSession(await api('/api/govern/center-session'))}
