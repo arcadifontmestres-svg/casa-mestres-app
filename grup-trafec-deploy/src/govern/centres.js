@@ -20,6 +20,56 @@ function text(value) { return String(value ?? '').trim(); }
 function code(value) { return text(value).toUpperCase().replace(/\s+/g, '-'); }
 function unique(values) { return [...new Set((Array.isArray(values) ? values : []).map(text).filter(Boolean))]; }
 function emptyFunctions() { return Object.fromEntries(FUNCTION_KEYS.map(key => [key, false])); }
+function defaultOperatingCriteria() {
+  const day = (open=false,lunchStart='',lunchEnd='',dinnerStart='',dinnerEnd='') => ({ open, lunchStart, lunchEnd, dinnerStart, dinnerEnd });
+  return {
+    openingHours: {
+      mon: day(false),
+      tue: day(false),
+      wed: day(false),
+      thu: day(true,'13:00','15:30','',''),
+      fri: day(true,'13:00','15:30','',''),
+      sat: day(true,'13:00','15:30','',''),
+      sun: day(true,'13:00','15:30','','')
+    },
+    reservations: {
+      maxPax: 10,
+      slotMinutes: 10,
+      oneReservationPerSlot: true,
+      groupPhone: '',
+      cancellationPolicy: ''
+    }
+  };
+}
+
+function cleanOperatingCriteria(input = {}, current = {}) {
+  const base = defaultOperatingCriteria();
+  const src = input && typeof input === 'object' ? input : {};
+  const prev = current && typeof current === 'object' ? current : {};
+  const openingHours = {};
+  for (const key of ['mon','tue','wed','thu','fri','sat','sun']) {
+    const d = src.openingHours?.[key] || prev.openingHours?.[key] || base.openingHours[key];
+    openingHours[key] = {
+      open: d.open === true,
+      lunchStart: text(d.lunchStart).slice(0,5),
+      lunchEnd: text(d.lunchEnd).slice(0,5),
+      dinnerStart: text(d.dinnerStart).slice(0,5),
+      dinnerEnd: text(d.dinnerEnd).slice(0,5)
+    };
+  }
+  const r = src.reservations || prev.reservations || base.reservations;
+  return {
+    openingHours,
+    reservations: {
+      maxPax: Math.max(1, Number(r.maxPax || 10) || 10),
+      slotMinutes: Math.max(5, Math.min(60, Number(r.slotMinutes || 10) || 10)),
+      oneReservationPerSlot: r.oneReservationPerSlot !== false,
+      groupPhone: text(r.groupPhone).slice(0,80),
+      cancellationPolicy: text(r.cancellationPolicy).slice(0,2000)
+    }
+  };
+}
+
 function activationCode() { return String(crypto.randomInt(0, 1000000)).padStart(6, '0'); }
 
 function createGovernService(store) {
@@ -30,6 +80,7 @@ function createGovernService(store) {
       if (!center.activationCode) center.activationCode = activationCode();
       if (!center.activationStatus) center.activationStatus = 'NO_VINCULAT';
       if (!center.satellitePath) center.satellitePath = '/centre.html';
+      center.operatingCriteria = cleanOperatingCriteria(center.operatingCriteria, center.operatingCriteria);
     }
   });
 
@@ -56,6 +107,7 @@ function createGovernService(store) {
       name,
       type: text(input.type ?? current.type),
       company: text(input.company ?? current.company),
+      operatingCriteria: cleanOperatingCriteria(input.operatingCriteria, current.operatingCriteria),
       active: input.active == null ? current.active !== false : input.active !== false
     };
   }
