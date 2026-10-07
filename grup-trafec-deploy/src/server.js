@@ -54,7 +54,10 @@ app.use((error, _req, res, _next) => {
 
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`GRUP TRÀFEC actiu al port ${PORT}`);
+    console.log(`DIRECCIÓ activa al port ${PORT}`);
+    miniappState.probe()
+      .then(ok => console.log('MINIAPPS PERSISTÈNCIA:', ok ? 'OK' : 'NO DISPONIBLE'))
+      .catch(error => console.error('MINIAPPS PERSISTÈNCIA:', error.message));
   });
 }
 
