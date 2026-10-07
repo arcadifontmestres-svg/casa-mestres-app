@@ -55,6 +55,11 @@ function createGovernRouter(govern) {
     catch (error) { next(error); }
   });
 
+  router.post('/centres/:id/access-token', (req, res, next) => {
+    try { res.json(govern.issueDirectionAccessToken(req.params.id)); }
+    catch (error) { next(error); }
+  });
+
   router.get('/center-session', (req, res) => {
     const token = String(req.headers['x-center-device-token'] || '');
     const session = govern.centerByDeviceToken(token);
