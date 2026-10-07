@@ -10,7 +10,7 @@ function createReservesPublicRouter(govern, miniappState) {
   function publicCenters() {
     return govern.listCenters({ includeInactive:false })
       .filter(center => govern.getPermissions(center.id).functions.reservations === true)
-      .map(center => ({ id:center.id, code:center.code, name:center.name, company:center.company || '' }));
+      .map(center => ({ id:center.id, code:center.code, name:center.name, company:center.company || '', operatingCriteria:center.operatingCriteria || {} }));
   }
 
   function centerCriteria(center) {
