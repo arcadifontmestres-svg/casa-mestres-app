@@ -27,6 +27,19 @@ function createTpvCenterRouter(store, govern) {
       centerId: center.id,
       zones: [],
       familyOrder: [],
+      business: {
+        name: center.name || '',
+        taxId: '',
+        address: '',
+        phone: '',
+        logo: '',
+        receiptFooter: ''
+      },
+      printer: {
+        paperWidth: '80',
+        printerName: '',
+        autoPrint: false
+      },
       updatedAt: null
     };
   }
@@ -37,7 +50,7 @@ function createTpvCenterRouter(store, govern) {
       const data = store.read();
       const config = data.tpvConfigs.find(x => x.centerId === s.center.id) || defaultConfig(s.center);
       const orders = (data.tpvOrders || []).filter(x => x.centerId === s.center.id);
-      let catalog = { saleItems: [], dishes: [] };
+      let catalog = { saleItems: [], dishes: [], products: [] };
       try {
         const response = await fetch('https://grup-trafec-operatiu.onrender.com/api/tpv-catalog', {
           headers: {
@@ -49,7 +62,8 @@ function createTpvCenterRouter(store, govern) {
           const state = await response.json();
           catalog = {
             saleItems: Array.isArray(state.saleItems) ? state.saleItems : [],
-            dishes: Array.isArray(state.dishes) ? state.dishes : []
+            dishes: Array.isArray(state.dishes) ? state.dishes : [],
+            products: Array.isArray(state.products) ? state.products : []
           };
         }
       } catch {}
@@ -71,7 +85,8 @@ function createTpvCenterRouter(store, govern) {
       };
       catalog = {
         dishes: (catalog.dishes || []).map(apply).filter(Boolean).sort((a,b)=>(a.sort||0)-(b.sort||0)),
-        saleItems: (catalog.saleItems || []).map(apply).filter(Boolean).sort((a,b)=>(a.sort||0)-(b.sort||0))
+        saleItems: (catalog.saleItems || []).map(apply).filter(Boolean).sort((a,b)=>(a.sort||0)-(b.sort||0)),
+        products: (catalog.products || []).map(apply).filter(Boolean).sort((a,b)=>(a.sort||0)-(b.sort||0))
       };
       res.json({ center: s.center, config, orders, ...catalog });
     } catch (error) { next(error); }
@@ -83,7 +98,7 @@ function createTpvCenterRouter(store, govern) {
       const center = govern.getCenter(centerId);
       if (!center) return res.status(404).json({ error: 'Centre no trobat.' });
       const data = store.read();
-      let source = { dishes: [], saleItems: [] };
+      let source = { dishes: [], saleItems: [], products: [] };
       try {
         const response = await fetch('https://grup-trafec-operatiu.onrender.com/api/tpv-catalog', {
           headers: {
@@ -97,7 +112,8 @@ function createTpvCenterRouter(store, govern) {
       const configByKey = new Map(saved.map(x => [x.sourceType + ':' + x.sourceId, x]));
       const items = [
         ...(source.dishes || []).map(item => ({ ...item, sourceType:'dish' })),
-        ...(source.saleItems || []).map(item => ({ ...item, sourceType:'sale' }))
+        ...(source.saleItems || []).map(item => ({ ...item, sourceType:'sale' })),
+        ...(source.products || []).map(item => ({ ...item, sourceType:'product' }))
       ].map(item => ({
         ...item,
         config: configByKey.get(item.sourceType + ':' + item.id) || {
@@ -123,7 +139,7 @@ function createTpvCenterRouter(store, govern) {
       store.update(data => {
         data.tpvCatalogConfigs = (data.tpvCatalogConfigs || []).filter(x => x.centerId !== centerId);
         for (const item of items) {
-          if (!item.sourceId || !['dish','sale'].includes(item.sourceType)) continue;
+          if (!item.sourceId || !['dish','sale','product'].includes(item.sourceType)) continue;
           data.tpvCatalogConfigs.push({
             centerId,
             sourceType: item.sourceType,
@@ -158,10 +174,24 @@ function createTpvCenterRouter(store, govern) {
             max: Math.max(1, Number(table.max) || Number(table.min) || 1)
           })).filter(x => x.id && x.name) : []
         })).filter(x => x.id && x.name) : [];
+        const previous = data.tpvConfigs.find(x => x.centerId === s.center.id) || defaultConfig(s.center);
         saved = {
           centerId: s.center.id,
           zones,
-          familyOrder: Array.isArray(input.familyOrder) ? input.familyOrder.map(String).slice(0,80) : [],
+          familyOrder: Array.isArray(input.familyOrder) ? input.familyOrder.map(String).slice(0,80) : (previous.familyOrder || []),
+          business: {
+            name: String(input.business?.name ?? previous.business?.name ?? s.center.name ?? '').slice(0,160),
+            taxId: String(input.business?.taxId ?? previous.business?.taxId ?? '').slice(0,80),
+            address: String(input.business?.address ?? previous.business?.address ?? '').slice(0,240),
+            phone: String(input.business?.phone ?? previous.business?.phone ?? '').slice(0,80),
+            logo: String(input.business?.logo ?? previous.business?.logo ?? '').slice(0,1500000),
+            receiptFooter: String(input.business?.receiptFooter ?? previous.business?.receiptFooter ?? '').slice(0,500)
+          },
+          printer: {
+            paperWidth: ['58','80'].includes(String(input.printer?.paperWidth)) ? String(input.printer.paperWidth) : String(previous.printer?.paperWidth || '80'),
+            printerName: String(input.printer?.printerName ?? previous.printer?.printerName ?? '').slice(0,160),
+            autoPrint: input.printer?.autoPrint === true
+          },
           updatedAt: new Date().toISOString()
         };
         const i = data.tpvConfigs.findIndex(x => x.centerId === s.center.id);
@@ -216,7 +246,8 @@ function createTpvCenterRouter(store, govern) {
           itemId: String(line.itemId || ''),
           name: String(line.name || '').slice(0,200),
           qty: Math.max(0, Number(line.qty) || 0),
-          price: Math.max(0, Number(line.price) || 0)
+          price: Math.max(0, Number(line.price) || 0),
+          notes: String(line.notes || '').slice(0,300)
         }));
         if (order.status === 'closed' && !order.closedAt) order.closedAt = new Date().toISOString();
         order.updatedAt = new Date().toISOString();
