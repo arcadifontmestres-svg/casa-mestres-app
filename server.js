@@ -1098,7 +1098,20 @@ const server = http.createServer(async (req, res) => {
           zones: Array.isArray(item.zones) ? item.zones : []
         }));
 
-      return send(res, 200, { companyId: context.companyId, centreId: context.centreId, dishes, saleItems });
+      const products = mergeById(live.products || [], master.products || [])
+        .filter(item => item.active !== false)
+        .map(item => ({
+          id: item.id,
+          type: 'product',
+          code: item.code || '',
+          name: item.name || '',
+          family: item.family || 'ALTRES',
+          price: Number(item.sale || item.price || 0),
+          onMenu: item.onMenu === true,
+          zones: Array.isArray(item.zones) ? item.zones : []
+        }));
+
+      return send(res, 200, { companyId: context.companyId, centreId: context.centreId, dishes, saleItems, products });
     }
 
     if (pathname === '/api/state' && req.method === 'GET') {
