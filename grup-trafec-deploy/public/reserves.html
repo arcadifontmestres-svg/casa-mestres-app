@@ -57,9 +57,16 @@ async function loadCenter(centerId){
  }catch(e){holder.innerHTML='<div class="err">'+esc(e.message)+'</div>'}
 }
 
-function timeOptions(){
+function dayKey(date){
+ const p=String(date||'').split('-').map(Number);
+ if(p.length!==3||!p.every(Number.isFinite))return '';
+ return ['sun','mon','tue','wed','thu','fri','sat'][new Date(Date.UTC(p[0],p[1]-1,p[2])).getUTCDay()]||'';
+}
+function timeOptions(date){
  const rules=cfg.config?.bookingRules||{},step=Math.max(5,Number(rules.slotMinutes||10));
- const windows=[[rules.lunchStart||'13:00',rules.lunchEnd||'15:30'],[rules.dinnerStart||'',rules.dinnerEnd||'']];
+ const day=cfg.config?.openingHours?.[dayKey(date)]||{};
+ if(day.open!==true)return [];
+ const windows=[[day.lunchStart||'',day.lunchEnd||''],[day.dinnerStart||'',day.dinnerEnd||'']];
  const out=[];
  const toMin=v=>{const m=String(v||'').match(/^(\d{1,2}):(\d{2})$/);return m?Number(m[1])*60+Number(m[2]):null};
  const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
@@ -74,7 +81,7 @@ function offerAvailableOnDate(o,date){
 }
 function renderForm(){
  const max=Math.max(1,Number(cfg.config?.maxPax||10));
- const zones=cfg.layout?.zones||[],offers=cfg.offers||[],times=timeOptions();
+ const zones=cfg.layout?.zones||[],offers=cfg.offers||[],times=[];
  const holder=$('centerForm');
  holder.innerHTML=`
   <div class="grid">
@@ -97,10 +104,17 @@ function renderForm(){
   <label><input id="marketing" type="checkbox" style="width:auto"> Accepto rebre comunicacions comercials. Opcional.</label>
   <button id="submit" class="btn">Confirmar reserva</button>
   <div id="result"></div>`;
- $('zone').onchange=updateTables;$('pax').onchange=()=>{updateTables();updateOffer()};$('date').onchange=()=>{updateTables();refreshOffers()};$('time').onchange=updateTables;$('offer').onchange=updateOffer;
+ $('zone').onchange=updateTables;$('pax').onchange=()=>{updateTables();updateOffer()};$('date').onchange=()=>{refreshTimes();updateTables();refreshOffers()};$('time').onchange=updateTables;$('offer').onchange=updateOffer;
  $('submit').onclick=submit;updateTables();refreshOffers();
 }
 
+function refreshTimes(){
+ const date=$('date')?.value||'',sel=$('time');if(!sel)return;
+ const times=timeOptions(date),previous=sel.value;
+ sel.innerHTML='<option value="">Selecciona...</option>'+times.map(t=>'<option value="'+t+'">'+t+'</option>').join('');
+ if(times.includes(previous))sel.value=previous;
+ if(date&&!times.length)$('tableHint').textContent='Aquest centre està tancat aquest dia o no té horaris de reserva configurats.';
+}
 async function updateTables(){
  const zoneId=$('zone')?.value||'',pax=Number($('pax')?.value||1),sel=$('table');if(!sel)return;
  const date=$('date')?.value||'',time=$('time')?.value||'';
