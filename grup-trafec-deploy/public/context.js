@@ -31,6 +31,18 @@
     return data;
   }
 
+  async function openMiniapp(path) {
+    const center = selectedCenter();
+    if (!center) {
+      showError(new Error('Selecciona primer un centre.'));
+      return;
+    }
+    const access = await govApi('/api/govern/centres/' + encodeURIComponent(center.id) + '/access-token', { method: 'POST', body: '{}' });
+    const url = new URL(path, window.location.origin);
+    url.searchParams.set('direction_token', access.token);
+    window.location.href = url.pathname + url.search;
+  }
+
   function selectedCenter() {
     return centers.find(item => item.id === currentCenterId) || null;
   }
@@ -173,7 +185,7 @@
       <div class="toolGrid">${cards || '<div class="panel empty">Aquest centre no té eines Front assignades.</div>'}</div>`;
     setStatus('');
     const routes = {front_tpv:'/tpv.html',front_reserves:'/reserves-centre.html',front_fitxatges:'/fitxatges-centre.html'};
-    document.querySelectorAll('[data-tool]').forEach(btn => btn.onclick = () => { const url=routes[btn.dataset.tool]; if(url) location.href=url; });
+    document.querySelectorAll('[data-tool]').forEach(btn => btn.onclick = () => { const url=routes[btn.dataset.tool]; if(url) openMiniapp(url).catch(showError); });
   }
 
   function renderBackOffice() {
@@ -199,7 +211,7 @@
         const t = btn.dataset.tool;
         if (t === 'rrhh_admin') return refreshGovernState().then(renderRrhh).catch(showError);
         const routes = {mini_tpv:'/tpv.html',mini_reserves:'/reserves-centre.html',mini_fitxatges:'/fitxatges-centre.html',mini_cuina:'/cuina.html',mini_appcc:'/appcc.html',mini_magatzem:'/magatzem.html'};
-        if (routes[t]) return window.location.href = routes[t];
+        if (routes[t]) return openMiniapp(routes[t]).catch(showError);
         if (t === 'crm') return loadCrm().catch(showError);
         if (t === 'commercial') return loadCommercial().catch(showError);
       };
