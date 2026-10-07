@@ -87,6 +87,31 @@ function createReservesPublicRouter(govern, miniappState) {
     } catch(error){next(error)}
   });
 
+  router.get('/availability', async (req,res,next)=>{
+    try {
+      const centerId=String(req.query.centerId||'');
+      const date=String(req.query.date||'');
+      const time=String(req.query.time||'');
+      const pax=Math.max(1,Math.trunc(Number(req.query.pax)||1));
+      const zoneId=String(req.query.zoneId||'');
+      const center=publicCenters().find(x=>x.id===centerId);
+      if(!center)return res.status(404).json({error:'Centre no disponible per reserves online.'});
+      const {reserves,tpv}=await centerState(center);
+      const blocked=new Set((reserves.reservations||[])
+        .filter(r=>r.date===date && r.time===time && !['CANCEL_LADA','Cancel·lada','CANCELLED'].includes(String(r.status||'')))
+        .map(r=>String(r.tableId||''))
+        .filter(Boolean));
+      const zones=(tpv.config?.zones||[])
+        .filter(z=>!zoneId||z.id===zoneId)
+        .map(z=>({
+          id:z.id,name:z.name,
+          tables:(z.tables||[]).filter(t=>Number(t.max||999)>=pax && !blocked.has(String(t.id)))
+            .map(t=>({id:t.id,name:t.name,min:t.min,max:t.max}))
+        }));
+      res.json({zones});
+    } catch(error){next(error)}
+  });
+
   router.post('/reservations', async (req,res,next)=>{
     try {
       const input=req.body||{};
@@ -117,6 +142,14 @@ function createReservesPublicRouter(govern, miniappState) {
         if(duplicate){
           const error=new Error('Ja existeix una reserva amb aquest nom per aquest dia.');
           error.status=409;throw error;
+        }
+        const requestedTable=String(input.tableId||'');
+        if(requestedTable){
+          const occupied=state.reservations.find(r=>r.date===date && r.time===time && String(r.tableId||'')===requestedTable && !['CANCEL_LADA','Cancel·lada','CANCELLED'].includes(String(r.status||'')));
+          if(occupied){
+            const error=new Error('Aquesta taula ja no està disponible per aquesta data i hora.');
+            error.status=409;throw error;
+          }
         }
         const offer=(state.offers||[]).find(o=>o.id===String(input.offerId||'') && o.active!==false)||null;
         const now=new Date().toISOString();
