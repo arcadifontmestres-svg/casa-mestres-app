@@ -202,8 +202,9 @@
   function renderFrontOffice() {
     shellActive('front');
     const cards = [
+      toolCard('RESERVES ONLINE', 'Obre el front públic que es pot enllaçar des de Google o la web.', 'public_reserves'),
       functionAllowed('front_office_tpv') ? toolCard('TPV', 'Obre la miniapp TPV independent.', 'front_tpv') : '',
-      functionAllowed('reservations') ? toolCard('Reserves / Ocupació', 'Obre la miniapp Reserves independent.', 'front_reserves') : '',
+      functionAllowed('reservations') ? toolCard('Reserves / Ocupació', 'Obre la miniapp interna Reserves del centre.', 'front_reserves') : '',
       functionAllowed('fitxatges') ? toolCard('Fitxatges', 'Obre la miniapp Fitxatges independent.', 'front_fitxatges') : ''
     ].join('');
     view.innerHTML = `
@@ -211,7 +212,11 @@
       <div class="toolGrid">${cards || '<div class="panel empty">Aquest centre no té eines Front assignades.</div>'}</div>`;
     setStatus('');
     const routes = {front_tpv:'/tpv.html',front_reserves:'/reserves-centre.html',front_fitxatges:'/fitxatges-centre.html'};
-    document.querySelectorAll('[data-tool]').forEach(btn => btn.onclick = () => { const url=routes[btn.dataset.tool]; if(url) openMiniapp(url).catch(showError); });
+    document.querySelectorAll('[data-tool]').forEach(btn => btn.onclick = () => {
+      if (btn.dataset.tool === 'public_reserves') return window.open('/reserves','_blank');
+      const url=routes[btn.dataset.tool];
+      if(url) openMiniapp(url).catch(showError);
+    });
   }
 
   function renderBackOffice() {
