@@ -1058,27 +1058,46 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/tpv-catalog' && req.method === 'GET') {
       const context = requestContext(req);
       if (!context.companyId || !context.centreId) return send(res, 400, { error: 'Falten empresa o centre.' });
-      const state = readContextData(readData(), context);
-      const dishes = (state.dishes || []).filter(item => item.active !== false).map(item => ({
-        id: item.id,
-        type: 'dish',
-        code: item.code || '',
-        name: item.name || '',
-        family: item.cat || item.category || 'PLATS',
-        price: Number(item.sale || item.price || 0),
-        onMenu: item.onMenu === true,
-        zones: Array.isArray(item.zones) ? item.zones : []
-      }));
-      const saleItems = (state.saleItems || []).filter(item => item.active !== false).map(item => ({
-        id: item.id,
-        type: 'sale',
-        code: item.code || '',
-        name: item.name || '',
-        family: item.family || 'ALTRES',
-        price: Number(item.sale || item.price || 0),
-        onMenu: item.onMenu === true,
-        zones: Array.isArray(item.zones) ? item.zones : []
-      }));
+
+      const live = readContextData(readData(), context);
+      let master = { dishes: [], saleItems: [] };
+      try {
+        if (fs.existsSync(CATALOG_DATA)) master = JSON.parse(fs.readFileSync(CATALOG_DATA, 'utf8'));
+      } catch {}
+
+      function mergeById(primary, fallback) {
+        const map = new Map();
+        for (const item of fallback || []) if (item?.id) map.set(String(item.id), item);
+        for (const item of primary || []) if (item?.id) map.set(String(item.id), item);
+        return [...map.values()];
+      }
+
+      const dishes = mergeById(live.dishes || [], master.dishes || [])
+        .filter(item => item.active !== false)
+        .map(item => ({
+          id: item.id,
+          type: 'dish',
+          code: item.code || '',
+          name: item.name || item.title || '',
+          family: item.cat || item.category || item.family || 'PLATS',
+          price: Number(item.sale || item.price || item.pvp || 0),
+          onMenu: item.onMenu === true,
+          zones: Array.isArray(item.zones) ? item.zones : []
+        }));
+
+      const saleItems = mergeById(live.saleItems || [], master.saleItems || [])
+        .filter(item => item.active !== false)
+        .map(item => ({
+          id: item.id,
+          type: 'sale',
+          code: item.code || '',
+          name: item.name || '',
+          family: item.family || item.cat || 'ALTRES',
+          price: Number(item.sale || item.price || 0),
+          onMenu: item.onMenu === true,
+          zones: Array.isArray(item.zones) ? item.zones : []
+        }));
+
       return send(res, 200, { companyId: context.companyId, centreId: context.centreId, dishes, saleItems });
     }
 
