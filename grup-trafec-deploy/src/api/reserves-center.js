@@ -31,6 +31,14 @@ function createReservesCenterRouter(store, govern, links, miniappState) {
         groupPhone: '',
         cancellationPolicy: '',
         currency: 'EUR',
+        bookingRules: {
+          lunchStart: '13:00',
+          lunchEnd: '15:30',
+          dinnerStart: '',
+          dinnerEnd: '',
+          slotMinutes: 10,
+          oneReservationPerSlot: true
+        },
         stripe: { enabled: false, mode: 'disabled' },
         updatedAt: null
       },
@@ -148,6 +156,14 @@ function createReservesCenterRouter(store, govern, links, miniappState) {
           groupPhone: String(input.groupPhone ?? current.groupPhone ?? '').slice(0,80),
           cancellationPolicy: String(input.cancellationPolicy ?? current.cancellationPolicy ?? '').slice(0,2000),
           currency: String(input.currency ?? current.currency ?? 'EUR').toUpperCase().slice(0,3),
+          bookingRules: {
+            lunchStart: String(input.bookingRules?.lunchStart ?? current.bookingRules?.lunchStart ?? '13:00').slice(0,5),
+            lunchEnd: String(input.bookingRules?.lunchEnd ?? current.bookingRules?.lunchEnd ?? '15:30').slice(0,5),
+            dinnerStart: String(input.bookingRules?.dinnerStart ?? current.bookingRules?.dinnerStart ?? '').slice(0,5),
+            dinnerEnd: String(input.bookingRules?.dinnerEnd ?? current.bookingRules?.dinnerEnd ?? '').slice(0,5),
+            slotMinutes: Math.max(5, Math.min(60, Number(input.bookingRules?.slotMinutes ?? current.bookingRules?.slotMinutes ?? 10) || 10)),
+            oneReservationPerSlot: input.bookingRules?.oneReservationPerSlot == null ? current.bookingRules?.oneReservationPerSlot !== false : input.bookingRules.oneReservationPerSlot === true
+          },
           stripe: {
             enabled: input.stripe?.enabled === true,
             mode: ['disabled','test','live'].includes(String(input.stripe?.mode)) ? String(input.stripe.mode) : String(current.stripe?.mode || 'disabled')
@@ -173,6 +189,9 @@ function createReservesCenterRouter(store, govern, links, miniappState) {
           price: Math.max(0, Number(x.price) || 0),
           depositType: ['fixed','percent'].includes(String(x.depositType)) ? String(x.depositType) : 'fixed',
           depositValue: Math.max(0, Number(x.depositValue) || 0),
+          dateFrom: String(x.dateFrom || '').slice(0,10),
+          dateTo: String(x.dateTo || '').slice(0,10),
+          special: x.special === true,
           active: x.active !== false,
           updatedAt: new Date().toISOString()
         }));
