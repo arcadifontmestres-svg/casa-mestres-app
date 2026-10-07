@@ -1,0 +1,147 @@
+'use strict';
+
+const express = require('express');
+const crypto = require('crypto');
+
+function createTpvCenterRouter(store, govern) {
+  const router = express.Router();
+
+  function session(req) {
+    const token = String(req.headers['x-center-device-token'] || '');
+    const s = govern.centerByDeviceToken(token);
+    if (!s) {
+      const error = new Error('Dispositiu no vinculat.');
+      error.status = 401;
+      throw error;
+    }
+    if (s.permissions?.front_office_tpv !== true) {
+      const error = new Error('Aquest centre no té permís de Front Office / TPV.');
+      error.status = 403;
+      throw error;
+    }
+    return s;
+  }
+
+  function defaultConfig(center) {
+    return {
+      centerId: center.id,
+      zones: [],
+      familyOrder: [],
+      updatedAt: null
+    };
+  }
+
+  router.get('/bootstrap', async (req, res, next) => {
+    try {
+      const s = session(req);
+      const data = store.read();
+      const config = data.tpvConfigs.find(x => x.centerId === s.center.id) || defaultConfig(s.center);
+      const orders = (data.tpvOrders || []).filter(x => x.centerId === s.center.id);
+      let catalog = { saleItems: [], dishes: [] };
+      try {
+        const response = await fetch('https://grup-trafec-operatiu.onrender.com/api/state', {
+          headers: {
+            'X-Arcadi-Company-Id': 'company_grup_trafec',
+            'X-Arcadi-Centre-Id': /sarriera/i.test(String(s.center.name || s.center.code || '')) ? 'restaurant_sarriera' : ''
+          }
+        });
+        if (response.ok) {
+          const state = await response.json();
+          catalog = {
+            saleItems: Array.isArray(state.saleItems) ? state.saleItems : [],
+            dishes: Array.isArray(state.dishes) ? state.dishes : []
+          };
+        }
+      } catch {}
+      res.json({ center: s.center, config, orders, ...catalog });
+    } catch (error) { next(error); }
+  });
+
+  router.put('/config', (req, res, next) => {
+    try {
+      const s = session(req);
+      const input = req.body && typeof req.body === 'object' ? req.body : {};
+      let saved;
+      store.update(data => {
+        const zones = Array.isArray(input.zones) ? input.zones.map(zone => ({
+          id: String(zone.id || '').trim().slice(0,80),
+          name: String(zone.name || '').trim().slice(0,120),
+          tables: Array.isArray(zone.tables) ? zone.tables.map(table => ({
+            id: String(table.id || '').trim().slice(0,80),
+            name: String(table.name || '').trim().slice(0,120),
+            min: Math.max(1, Number(table.min) || 1),
+            max: Math.max(1, Number(table.max) || Number(table.min) || 1)
+          })).filter(x => x.id && x.name) : []
+        })).filter(x => x.id && x.name) : [];
+        saved = {
+          centerId: s.center.id,
+          zones,
+          familyOrder: Array.isArray(input.familyOrder) ? input.familyOrder.map(String).slice(0,80) : [],
+          updatedAt: new Date().toISOString()
+        };
+        const i = data.tpvConfigs.findIndex(x => x.centerId === s.center.id);
+        if (i < 0) data.tpvConfigs.push(saved);
+        else data.tpvConfigs[i] = saved;
+      });
+      res.json(saved);
+    } catch (error) { next(error); }
+  });
+
+  router.post('/orders', (req, res, next) => {
+    try {
+      const s = session(req);
+      const input = req.body || {};
+      let order;
+      store.update(data => {
+        order = {
+          id: 'ord_' + crypto.randomUUID(),
+          centerId: s.center.id,
+          zone: String(input.zone || ''),
+          tableId: String(input.tableId || ''),
+          tableName: String(input.tableName || ''),
+          pax: Math.max(1, Number(input.pax) || 1),
+          status: 'open',
+          lines: [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        data.tpvOrders.push(order);
+      });
+      res.status(201).json(order);
+    } catch (error) { next(error); }
+  });
+
+  router.put('/orders/:id', (req, res, next) => {
+    try {
+      const s = session(req);
+      let saved;
+      store.update(data => {
+        const order = data.tpvOrders.find(x => x.id === req.params.id && x.centerId === s.center.id);
+        if (!order) {
+          const error = new Error('Comanda no trobada.');
+          error.status = 404;
+          throw error;
+        }
+        const input = req.body || {};
+        if (input.pax != null) order.pax = Math.max(1, Number(input.pax) || 1);
+        if (input.status != null) order.status = String(input.status);
+        if (Array.isArray(input.lines)) order.lines = input.lines.slice(0,500).map(line => ({
+          key: String(line.key || ''),
+          type: String(line.type || ''),
+          itemId: String(line.itemId || ''),
+          name: String(line.name || '').slice(0,200),
+          qty: Math.max(0, Number(line.qty) || 0),
+          price: Math.max(0, Number(line.price) || 0)
+        }));
+        if (order.status === 'closed' && !order.closedAt) order.closedAt = new Date().toISOString();
+        order.updatedAt = new Date().toISOString();
+        saved = { ...order };
+      });
+      res.json(saved);
+    } catch (error) { next(error); }
+  });
+
+  return router;
+}
+
+module.exports = { createTpvCenterRouter };
