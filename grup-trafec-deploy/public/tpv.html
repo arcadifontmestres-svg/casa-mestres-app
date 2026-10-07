@@ -29,7 +29,7 @@ input,textarea,select{width:100%;padding:12px;border:1px solid #cbd5da;border-ra
 </main>
 <script>
 (()=>{'use strict';
-const TOKEN_KEY='arcadi_center_device_token_v1',SESSION_KEY='arcadi_direction_center_token_v1',params=new URLSearchParams(location.search),incoming=params.get('direction_token')||'',token=incoming||sessionStorage.getItem(SESSION_KEY)||localStorage.getItem(TOKEN_KEY)||'';if(incoming)sessionStorage.setItem(SESSION_KEY,incoming);
+const TOKEN_KEY='arcadi_center_device_token_v1',SESSION_KEY='arcadi_direction_center_token_v1',params=new URLSearchParams(location.search),incoming=params.get('direction_token')||'',token=incoming||localStorage.getItem(TOKEN_KEY)||sessionStorage.getItem(SESSION_KEY)||'';if(incoming)sessionStorage.setItem(SESSION_KEY,incoming);
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=v=>(Number(v)||0).toLocaleString('ca-ES',{style:'currency',currency:'EUR'});
 let state=null,zoneId='',order=null,family='',draftZones=[];
