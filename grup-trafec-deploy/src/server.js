@@ -17,6 +17,7 @@ const { createTpvCenterRouter } = require('./api/tpv-center');
 const { createReservesCenterRouter } = require('./api/reserves-center');
 const { createFitxatgesCenterRouter } = require('./api/fitxatges-center');
 const { createMiniappsCenterRouter } = require('./api/miniapps-center');
+const { createReservesPublicRouter } = require('./api/reserves-public');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -46,6 +47,7 @@ app.use('/api/tpv-center', createTpvCenterRouter(store, govern, miniappState));
 app.use('/api/reserves-center', createReservesCenterRouter(store, govern, links, miniappState));
 app.use('/api/fitxatges-center', createFitxatgesCenterRouter(govern, miniappState));
 app.use('/api/miniapps-center', createMiniappsCenterRouter(govern, miniappState));
+app.use('/api/reserves-public', createReservesPublicRouter(govern, miniappState));
 
 app.use((error, _req, res, _next) => {
   console.error(error);
