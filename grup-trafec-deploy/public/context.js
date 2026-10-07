@@ -302,10 +302,22 @@
     setStatus('');
   }
 
+  function dayRow(key, label, criteria) {
+    const d = criteria.openingHours?.[key] || {};
+    return `<div class="panel" style="padding:12px;margin:8px 0"><div class="grid">
+      <div><label><input type="checkbox" data-day="${key}" data-field="open" ${d.open ? 'checked' : ''}> ${label} obert</label></div>
+      <div><label>Inici migdia</label><input type="time" data-day="${key}" data-field="lunchStart" value="${esc(d.lunchStart || '')}"></div>
+      <div><label>Última reserva migdia</label><input type="time" data-day="${key}" data-field="lunchEnd" value="${esc(d.lunchEnd || '')}"></div>
+      <div><label>Inici nit</label><input type="time" data-day="${key}" data-field="dinnerStart" value="${esc(d.dinnerStart || '')}"></div>
+      <div><label>Última reserva nit</label><input type="time" data-day="${key}" data-field="dinnerEnd" value="${esc(d.dinnerEnd || '')}"></div>
+    </div></div>`;
+  }
+
   function renderCenterForm(center = null) {
     shellActive('config');
     const c = center || {};
     const permissions = c.permissions || {};
+    const criteria = c.operatingCriteria || { openingHours:{}, reservations:{ maxPax:10, slotMinutes:10, oneReservationPerSlot:true, groupPhone:'', cancellationPolicy:'' } };
     view.innerHTML = `
       <div class="head"><div><h1>${center ? 'Configurar centre' : 'Nou centre'}</h1><div class="muted">El centre es crea buit: tu decideixes quines eines o miniapps hi poses.</div></div><button class="btn secondary" id="backConfig">← Configuració</button></div>
       <form class="panel" id="centerForm"><div class="grid">
@@ -315,6 +327,27 @@
         <div><label>Empresa</label><input id="g_company" value="${esc(c.company || '')}"></div>
       </div>
       ${center ? `<div class="panel" style="margin:16px 0"><h3>Activació del centre</h3><div class="grid"><div><label>Codi d'activació</label><input value="${esc(c.activationCode || '')}" readonly></div><div><label>Estat</label><input value="${esc(c.activationStatus === 'VINCULAT' ? 'Vinculat' : 'No vinculat')}" readonly></div><div class="wide"><label>HTML / URL satèl·lit</label><input value="${esc(c.satellitePath || '/centre.html')}" readonly></div></div><div class="toolbar" style="margin-top:12px"><button type="button" class="btn secondary" id="regenActivation">Regenerar codi</button></div></div>` : ''}
+      <h3>Criteris operatius del centre</h3>
+      <div class="panel" style="margin:16px 0">
+        <h4>Horaris i dies d'obertura</h4>
+        ${dayRow('mon','Dilluns',criteria)}
+        ${dayRow('tue','Dimarts',criteria)}
+        ${dayRow('wed','Dimecres',criteria)}
+        ${dayRow('thu','Dijous',criteria)}
+        ${dayRow('fri','Divendres',criteria)}
+        ${dayRow('sat','Dissabte',criteria)}
+        ${dayRow('sun','Diumenge',criteria)}
+      </div>
+      <div class="panel" style="margin:16px 0">
+        <h4>Criteris de Reserves</h4>
+        <div class="grid">
+          <div><label>Màxim pax online</label><input id="c_maxPax" type="number" min="1" value="${Number(criteria.reservations?.maxPax || 10)}"></div>
+          <div><label>Interval reserves (min)</label><input id="c_slotMinutes" type="number" min="5" step="5" value="${Number(criteria.reservations?.slotMinutes || 10)}"></div>
+          <div><label><input id="c_onePerSlot" type="checkbox" ${criteria.reservations?.oneReservationPerSlot === false ? '' : 'checked'}> Una reserva online per interval</label></div>
+          <div><label>Telèfon grups</label><input id="c_groupPhone" value="${esc(criteria.reservations?.groupPhone || '')}"></div>
+          <div class="wide"><label>Política de cancel·lació</label><textarea id="c_cancelPolicy">${esc(criteria.reservations?.cancellationPolicy || '')}</textarea></div>
+        </div>
+      </div>
       <h3>Eines / miniapps del centre</h3>
       <div class="checkGrid">${catalog.map(item => `<label class="checkItem"><input type="checkbox" name="centerTool" value="${esc(item.key)}" ${permissions[item.key] === true ? 'checked' : ''}><span><b>${esc(item.label)}</b>${item.connected ? '' : '<span class="tag">pendent connexió</span>'}<br><span class="muted">${esc(item.area)}</span></span></label>`).join('')}</div>
       <div class="toolbar formActions"><label class="inlineCheck"><input id="g_active" type="checkbox" ${c.active === false ? '' : 'checked'}> Centre actiu</label><button class="btn" type="submit">Guardar centre</button></div></form>`;
@@ -332,11 +365,32 @@
     document.getElementById('centerForm').onsubmit = async event => {
       event.preventDefault();
       const f = id => document.getElementById(id);
+      const openingHours = {};
+      for (const key of ['mon','tue','wed','thu','fri','sat','sun']) {
+        const pick = field => document.querySelector('[data-day="'+key+'"][data-field="'+field+'"]');
+        openingHours[key] = {
+          open: pick('open')?.checked === true,
+          lunchStart: pick('lunchStart')?.value || '',
+          lunchEnd: pick('lunchEnd')?.value || '',
+          dinnerStart: pick('dinnerStart')?.value || '',
+          dinnerEnd: pick('dinnerEnd')?.value || ''
+        };
+      }
       const payload = {
         code: f('g_code').value.trim(),
         name: f('g_name').value.trim(),
         type: f('g_type').value.trim(),
         company: f('g_company').value.trim(),
+        operatingCriteria: {
+          openingHours,
+          reservations: {
+            maxPax: Number(f('c_maxPax').value || 10),
+            slotMinutes: Number(f('c_slotMinutes').value || 10),
+            oneReservationPerSlot: f('c_onePerSlot').checked,
+            groupPhone: f('c_groupPhone').value.trim(),
+            cancellationPolicy: f('c_cancelPolicy').value.trim()
+          }
+        },
         active: f('g_active').checked
       };
       const selected = new Set([...document.querySelectorAll('input[name="centerTool"]:checked')].map(item => item.value));
