@@ -1,17 +1,36 @@
 <!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ARCADI · Fitxatges</title><style>
 :root{font-family:Arial,sans-serif;color:#102b38;background:#eef3f5}*{box-sizing:border-box}body{margin:0;background:#eef3f5}
-header{background:#0b2533;color:#fff;padding:18px 26px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-header b{font-size:24px}.badge{background:#dff4ef;color:#126e59;padding:8px 12px;border-radius:999px;font-weight:800}
-main{padding:28px;max-width:1400px;margin:auto}.head{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:24px}.head h1{font-size:38px;margin:0}.head p{margin:6px 0 0;color:#657987}
-.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}.card{background:#fff;border:1px solid #d8e1e5;border-radius:20px;padding:24px;min-height:150px;text-align:left}
-.card strong{display:block;font-size:30px;color:#19a4a7;margin-bottom:14px}.card b{display:block;font-size:21px}.card span{display:block;color:#6b7d87;margin-top:9px;line-height:1.35}
-.panel{background:#fff;border:1px solid #d8e1e5;border-radius:20px;padding:20px;margin-top:20px}.err{background:#fff3f3;color:#8b1e1e;border:1px solid #e9c7c7;padding:18px;border-radius:16px}
-table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;border-bottom:1px solid #e4eaed}th{font-size:13px;text-transform:uppercase;color:#667985}
-button{cursor:pointer;border:0}.back{background:#e8eef1;color:#0b2533;padding:12px 16px;border-radius:12px;font-weight:800}.muted{color:#6b7d87}
-@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.grid{grid-template-columns:1fr}.head{align-items:flex-start;flex-direction:column}}
-</style></head>
-<body><header><div><b>ARCADI GESTIÓ · FITXATGES</b><div id="centreName"></div></div><span class="badge" id="status">VALIDANT</span></header>
-<main><div class="head"><div><h1>Fitxatges</h1><p>App autònoma del centre. Accés controlat per Direcció.</p></div><button class="back" onclick="backButton()">← Centre</button></div>
-<div id="content"><div class="grid"><div class="card"><strong>ENTRAR</strong><b>Entrada</b><span>Inici de jornada.</span></div><div class="card"><strong>PAUSA</strong><b>Pausa</b><span>Registre de pausa.</span></div><div class="card"><strong>TORNAR</strong><b>Retorn</b><span>Retorn a la jornada.</span></div><div class="card"><strong>SORTIR</strong><b>Sortida</b><span>Final de jornada.</span></div></div><div class="panel"><b>Identificació del personal</b><p class="muted">La validació individual es manté separada del permís general del centre.</p></div></div></main><script src="/center-app.js"></script><script>
-(async()=>{try{const s=await sessionFor('fitxatges');shellTitle('Fitxatges',s.center);}catch(e){blocked(e)}})();
+header{background:#0b2533;color:#fff;padding:18px 26px;display:flex;justify-content:space-between;align-items:center}header b{font-size:24px}.badge{background:#dff4ef;color:#126e59;padding:8px 12px;border-radius:999px;font-weight:800}
+main{padding:24px;max-width:1200px;margin:auto}.head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px}.head h1{margin:0;font-size:36px}.muted{color:#6b7d87}.panel{background:#fff;border:1px solid #d8e1e5;border-radius:18px;padding:18px;margin-bottom:16px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:11px;padding:12px 16px;font-weight:800;cursor:pointer}.primary{background:#1ea4a7;color:#fff}.secondary{background:#e8eef1;color:#0b2533}.bad{background:#8f2f2f;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{padding:24px;border:1px solid #d8e1e5;border-radius:16px;background:#fff;cursor:pointer;text-align:left}.card strong{display:block;font-size:26px;color:#1ea4a7}.card b{display:block;margin-top:8px}
+input,select{width:100%;padding:12px;border:1px solid #cbd5da;border-radius:10px;font-size:16px}table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid #e6ecef;text-align:left}.err{background:#fff0f0;color:#7d1d1d;padding:14px;border-radius:12px}
+@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:520px){.grid{grid-template-columns:1fr}}
+</style></head><body>
+<header><div><b>ARCADI GESTIÓ · FITXATGES</b><div id="centreName"></div></div><span class="badge" id="status">VALIDANT</span></header>
+<main><div class="head"><div><h1>Fitxatges</h1><div class="muted">Miniapp autònoma del centre</div></div><button class="btn secondary" onclick="location.href='/centre.html'">← Centre</button></div>
+<div class="toolbar panel"><button class="btn primary" onclick="F.front()">FRONT</button><button class="btn secondary" onclick="F.back()">BACK</button></div>
+<div id="content"><div class="panel">Carregant...</div></div></main>
+<script>
+(()=>{'use strict';
+const token=localStorage.getItem('arcadi_center_device_token_v1')||'', $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let state=null,employeeId='';
+async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json','X-Center-Device-Token':token,...(opt.headers||{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Error '+r.status);return d}
+async function boot(){try{state=await api('/api/fitxatges-center/bootstrap');$('centreName').textContent=state.center?.name||'';$('status').textContent=state.persistent?'AUTORITZAT · PERSISTENT':'AUTORITZAT';front()}catch(e){$('status').textContent='BLOQUEJAT';$('content').innerHTML='<div class="err">'+esc(e.message)+'</div>'}}
+function front(){
+ const options=(state.employees||[]).map(e=>'<option value="'+esc(e.id)+'">'+esc(e.name)+'</option>').join('');
+ $('content').innerHTML='<div class="panel"><h2>Identificació</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label>Empleat</label><select id="employee"><option value="">Selecciona...</option>'+options+'</select></div><div><label>PIN</label><input id="pin" type="password" inputmode="numeric"></div></div></div><div class="grid"><button class="card" onclick="F.punch(\'ENTRAR\')"><strong>ENTRAR</strong><b>Inici jornada</b></button><button class="card" onclick="F.punch(\'PAUSA\')"><strong>PAUSA</strong><b>Inici pausa</b></button><button class="card" onclick="F.punch(\'TORNAR\')"><strong>TORNAR</strong><b>Retorn</b></button><button class="card" onclick="F.punch(\'SORTIR\')"><strong>SORTIR</strong><b>Fi jornada</b></button></div>';
+}
+function back(){
+ const punches=(state.punches||[]).slice().reverse().slice(0,100);
+ $('content').innerHTML='<div class="panel"><h2>Codis / PIN</h2><table><thead><tr><th>Empleat</th><th>Rol</th><th>PIN</th><th></th></tr></thead><tbody>'+(state.employees||[]).map(e=>'<tr><td><b>'+esc(e.name)+'</b></td><td>'+esc(e.role||'')+'</td><td>'+(e.pinConfigured?'Configurat':'Pendent')+'</td><td><button class="btn secondary" onclick="F.setPin(\''+esc(e.id)+'\')">Assignar PIN</button></td></tr>').join('')+'</tbody></table></div><div class="panel"><h2>Registres</h2><table><thead><tr><th>Data/hora</th><th>Empleat</th><th>Acció</th><th>GPS</th></tr></thead><tbody>'+punches.map(p=>'<tr><td>'+esc(new Date(p.createdAt).toLocaleString('ca-ES'))+'</td><td>'+esc(p.employeeName)+'</td><td>'+esc(p.action)+'</td><td>'+(p.lat==null?'—':esc(p.lat+', '+p.lng))+'</td></tr>').join('')+'</tbody></table></div>';
+}
+async function position(){return new Promise(resolve=>{if(!navigator.geolocation)return resolve({});navigator.geolocation.getCurrentPosition(p=>resolve({lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy}),()=>resolve({}),{enableHighAccuracy:true,timeout:7000})})}
+async function punch(action){
+ const e=$('employee').value,pin=$('pin').value;if(!e)return alert('Selecciona un empleat.');const gps=await position();
+ try{const r=await api('/api/fitxatges-center/punch',{method:'POST',body:JSON.stringify({employeeId:e,pin,action,...gps})});alert(r.employeeName+' · '+r.action+' registrat');await boot()}catch(err){alert(err.message)}
+}
+window.F={front,back,punch,setPin:async id=>{const pin=prompt('Nou PIN de 4 a 8 dígits');if(pin===null)return;try{await api('/api/fitxatges-center/profiles/'+encodeURIComponent(id),{method:'PUT',body:JSON.stringify({pin})});await boot();back()}catch(e){alert(e.message)}}};
+boot();
+})();
 </script></body></html>
