@@ -18,6 +18,7 @@ const { createReservesCenterRouter } = require('./api/reserves-center');
 const { createFitxatgesCenterRouter } = require('./api/fitxatges-center');
 const { createMiniappsCenterRouter } = require('./api/miniapps-center');
 const { createReservesPublicRouter, createReservesStripeWebhookHandler } = require('./api/reserves-public');
+const { createReservesGmailRouter } = require('./api/reserves-gmail');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -50,6 +51,7 @@ app.use('/api/reserves-center', createReservesCenterRouter(store, govern, links,
 app.use('/api/fitxatges-center', createFitxatgesCenterRouter(govern, miniappState));
 app.use('/api/miniapps-center', createMiniappsCenterRouter(govern, miniappState));
 app.use('/api/reserves-public', createReservesPublicRouter(govern, miniappState));
+app.use('/api/reserves-gmail', createReservesGmailRouter(govern, miniappState));
 
 app.use((error, _req, res, _next) => {
   console.error(error);
