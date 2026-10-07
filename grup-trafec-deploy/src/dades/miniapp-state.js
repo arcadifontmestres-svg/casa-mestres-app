@@ -54,7 +54,16 @@ function createMiniappState({ legacyStore } = {}) {
     return result;
   }
 
-  return { read, write, update, hasPersistentBackend: () => Boolean(url) };
+  async function probe() {
+    const redis = await connection().catch(() => null);
+    if (!redis) return false;
+    const k = 'arcadi:miniapp:health';
+    const v = String(Date.now());
+    await redis.set(k, v, { EX: 60 });
+    return (await redis.get(k)) === v;
+  }
+
+  return { read, write, update, probe, hasPersistentBackend: () => Boolean(url) };
 }
 
 module.exports = { createMiniappState };
