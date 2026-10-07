@@ -164,13 +164,16 @@
   function renderFrontOffice() {
     shellActive('front');
     const cards = [
-      functionAllowed('reservations') ? toolCard('Reserves / Ocupació', 'Obre l’eina de reserves existent.', 'reserves') : ''
-    ].join('') + pendingCards('Front Office');
+      functionAllowed('front_office_tpv') ? toolCard('TPV', 'Obre la miniapp TPV independent.', 'front_tpv') : '',
+      functionAllowed('reservations') ? toolCard('Reserves / Ocupació', 'Obre la miniapp Reserves independent.', 'front_reserves') : '',
+      functionAllowed('fitxatges') ? toolCard('Fitxatges', 'Obre la miniapp Fitxatges independent.', 'front_fitxatges') : ''
+    ].join('');
     view.innerHTML = `
-      <div class="head"><div><h1>Front Office</h1><div class="muted">Aquí només apareixen eines reals connectades o assignacions pendents identificades com a tals.</div></div></div>
-      <div class="toolGrid">${cards || '<div class="panel empty">Aquest centre no té eines de Front Office assignades.</div>'}</div>`;
+      <div class="head"><div><h1>FRONT</h1><div class="muted">Accessos a miniapps operatives. Direcció no les incorpora.</div></div></div>
+      <div class="toolGrid">${cards || '<div class="panel empty">Aquest centre no té eines Front assignades.</div>'}</div>`;
     setStatus('');
-    bindToolCards();
+    const routes = {front_tpv:'/tpv.html',front_reserves:'/reserves-centre.html',front_fitxatges:'/fitxatges-centre.html'};
+    document.querySelectorAll('[data-tool]').forEach(btn => btn.onclick = () => { const url=routes[btn.dataset.tool]; if(url) location.href=url; });
   }
 
   function renderBackOffice() {
