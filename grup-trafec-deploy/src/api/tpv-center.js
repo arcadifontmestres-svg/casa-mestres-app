@@ -87,6 +87,8 @@ function createTpvCenterRouter(store, govern, miniappState) {
       price: Number(cfg.price ?? item.price ?? 0),
       zones: Array.isArray(cfg.zoneIds) ? cfg.zoneIds : [],
       sort: Number(cfg.sort || 0),
+      image: String(cfg.image || item.image || ''),
+      buttonColor: String(cfg.buttonColor || ''),
       onMenu: true
     };
   }
@@ -135,7 +137,9 @@ function createTpvCenterRouter(store, govern, miniappState) {
           family: item.family || '',
           price: Number(item.price || 0),
           zoneIds: Array.isArray(item.zones) ? item.zones : [],
-          sort: 0
+          sort: 0,
+          image: item.image || '',
+          buttonColor: ''
         }
       }));
       res.json({
@@ -169,6 +173,8 @@ function createTpvCenterRouter(store, govern, miniappState) {
             price: Math.max(0, Number(item.price) || 0),
             zoneIds: Array.isArray(item.zoneIds) ? item.zoneIds.map(String).slice(0,50) : [],
             sort: Number(item.sort || 0),
+            image: String(item.image || '').slice(0,1500000),
+            buttonColor: String(item.buttonColor || '').slice(0,32),
             updatedAt: new Date().toISOString()
           });
         }
