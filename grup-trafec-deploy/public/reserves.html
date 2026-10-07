@@ -82,7 +82,7 @@ function renderForm(){
   <label><input id="marketing" type="checkbox" style="width:auto"> Accepto rebre comunicacions comercials. Opcional.</label>
   <button id="submit" class="btn">Confirmar reserva</button>
   <div id="result"></div>`;
- $('zone').onchange=updateTables;$('pax').onchange=updateTables;$('date').onchange=updateTables;$('time').onchange=updateTables;$('offer').onchange=updateOffer;
+ $('zone').onchange=updateTables;$('pax').onchange=()=>{updateTables();updateOffer()};$('date').onchange=updateTables;$('time').onchange=updateTables;$('offer').onchange=updateOffer;
  $('submit').onclick=submit;updateTables();updateOffer();
 }
 
@@ -105,8 +105,11 @@ async function updateTables(){
  else $('tableHint').textContent=tables.length?tables.length+' taules disponibles per '+pax+' pax.':'No hi ha cap taula lliure compatible; el centre farà l’assignació.';
 }
 function updateOffer(){
- const o=(cfg.offers||[]).find(x=>x.id===$('offer')?.value);
- $('offerInfo').innerHTML=o?'<b>'+esc(o.name)+'</b>'+(o.price?' · '+euro(o.price):'')+(o.description?'<br>'+esc(o.description):''):'Sense oferta seleccionada.';
+ const o=(cfg.offers||[]).find(x=>x.id===$('offer')?.value),pax=Number($('pax')?.value||1);
+ if(!o){$('offerInfo').innerHTML='Sense oferta seleccionada.';if($('submit'))$('submit').textContent='Confirmar reserva';return}
+ const deposit=o.depositType==='percent'?Number(o.price||0)*pax*Number(o.depositValue||0)/100:pax*Number(o.depositValue||0);
+ $('offerInfo').innerHTML='<b>'+esc(o.name)+'</b>'+(o.price?' · '+euro(o.price):'')+(o.description?'<br>'+esc(o.description):'')+(deposit>0?'<br>Fiança: <b>'+euro(deposit)+'</b>':'');
+ if($('submit'))$('submit').textContent=deposit>0?'Continuar al pagament':'Confirmar reserva';
 }
 async function submit(){
  const out=$('result'),btn=$('submit');out.className='';out.textContent='';
@@ -126,7 +129,20 @@ async function submit(){
   btn.textContent='Reserva registrada';
  }catch(e){out.className='err';out.textContent=e.message;btn.disabled=false;btn.textContent='Confirmar reserva'}
 }
-loadCenters();
+const query=new URLSearchParams(location.search);
+if(query.get('stripe')==='success'&&query.get('session_id')){
+ $('app').innerHTML='<div class="ok"><b>Comprovant pagament...</b></div>';
+ api('/api/reserves-public/stripe/confirm?session_id='+encodeURIComponent(query.get('session_id'))).then(data=>{
+   if(data.paid)$('app').innerHTML='<div class="ok"><h2>Reserva confirmada</h2><p>Pagament rebut correctament.</p><p><b>'+esc(data.reservation.name)+'</b> · '+esc(data.reservation.date)+' '+esc(data.reservation.time)+' · '+esc(data.reservation.pax)+' pax</p><p>Fiança pagada: <b>'+euro(data.reservation.depositAmount)+'</b></p></div>';
+   else $('app').innerHTML='<div class="err">Stripe encara no confirma el pagament. No repeteixis el cobrament.</div>';
+ }).catch(e=>$('app').innerHTML='<div class="err">'+esc(e.message)+'</div>');
+}else if(query.get('stripe')==='cancel'){
+ const reservationId=query.get('reservation_id')||'',manageToken=query.get('token')||'';
+ $('app').innerHTML='<div class="info"><h2>Pagament no completat</h2><p>La reserva encara no està confirmada.</p>'+(reservationId&&manageToken?'<button id="resume" class="btn">Reprendre pagament</button>':'')+'<div id="resumeResult"></div></div>';
+ if(reservationId&&manageToken)$('resume').onclick=async()=>{try{const d=await api('/api/reserves-public/stripe/resume',{method:'POST',body:JSON.stringify({reservationId,token:manageToken})});location.href=d.checkoutUrl}catch(e){$('resumeResult').className='err';$('resumeResult').textContent=e.message}};
+}else{
+ loadCenters();
+}
 })();
 </script>
 </body>
