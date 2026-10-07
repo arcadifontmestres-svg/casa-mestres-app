@@ -13,6 +13,36 @@ function createReservesPublicRouter(govern, miniappState) {
       .map(center => ({ id:center.id, code:center.code, name:center.name, company:center.company || '' }));
   }
 
+  function centerCriteria(center) {
+    const criteria = center?.operatingCriteria || {};
+    const openingHours = criteria.openingHours || {};
+    const reservations = criteria.reservations || {};
+    return {
+      openingHours,
+      reservations: {
+        maxPax: Math.max(1, Number(reservations.maxPax || 10)),
+        slotMinutes: Math.max(5, Number(reservations.slotMinutes || 10)),
+        oneReservationPerSlot: reservations.oneReservationPerSlot !== false,
+        groupPhone: String(reservations.groupPhone || ''),
+        cancellationPolicy: String(reservations.cancellationPolicy || '')
+      }
+    };
+  }
+
+  function dayKey(dateString) {
+    const parts = String(dateString || '').split('-').map(Number);
+    if (parts.length !== 3 || !parts.every(Number.isFinite)) return '';
+    const day = new Date(Date.UTC(parts[0], parts[1]-1, parts[2])).getUTCDay();
+    return ['sun','mon','tue','wed','thu','fri','sat'][day] || '';
+  }
+
+  function scheduleForDate(center, dateString) {
+    const criteria = centerCriteria(center);
+    const key = dayKey(dateString);
+    const day = criteria.openingHours?.[key] || {};
+    return { key, ...day };
+  }
+
   function emptyReservations(center) {
     return {
       config: {
