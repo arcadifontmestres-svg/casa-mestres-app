@@ -137,11 +137,12 @@ function createReservesPublicRouter(govern, miniappState) {
       const center=publicCenters().find(x=>x.id===centerId);
       if(!center)return res.status(404).json({error:'Centre no disponible per reserves online.'});
       const {reserves,tpv}=await centerState(center);
-      const rules=reserves.config?.bookingRules||{};
-      const slotMinutes=Math.max(5,Number(rules.slotMinutes||10));
+      const criteria=centerCriteria(center),rules=criteria.reservations,schedule=scheduleForDate(center,date);
+      if(schedule.open!==true)return res.status(400).json({error:'Aquest centre està tancat aquest dia.'});
+      const slotMinutes=rules.slotMinutes;
       const normalizeMinutes=value=>{const m=String(value||'').match(/^(\d{1,2}):(\d{2})$/);return m?Number(m[1])*60+Number(m[2]):null};
       const requestedMinutes=normalizeMinutes(time);
-      const windows=[[rules.lunchStart||'13:00',rules.lunchEnd||'15:30'],[rules.dinnerStart||'',rules.dinnerEnd||'']]
+      const windows=[[schedule.lunchStart||'',schedule.lunchEnd||''],[schedule.dinnerStart||'',schedule.dinnerEnd||'']]
         .map(([a,b])=>[normalizeMinutes(a),normalizeMinutes(b)]).filter(([a,b])=>a!=null&&b!=null&&b>=a);
       if(requestedMinutes==null || !windows.some(([a,b])=>requestedMinutes>=a&&requestedMinutes<=b) || requestedMinutes%slotMinutes!==0){
         return res.status(400).json({error:'Hora fora dels torns de reserva configurats.'});
