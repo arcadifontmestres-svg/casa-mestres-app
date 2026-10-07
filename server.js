@@ -1055,6 +1055,33 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { received: true });
     }
 
+    if (pathname === '/api/tpv-catalog' && req.method === 'GET') {
+      const context = requestContext(req);
+      if (!context.companyId || !context.centreId) return send(res, 400, { error: 'Falten empresa o centre.' });
+      const state = readContextData(readData(), context);
+      const dishes = (state.dishes || []).filter(item => item.active !== false).map(item => ({
+        id: item.id,
+        type: 'dish',
+        code: item.code || '',
+        name: item.name || '',
+        family: item.cat || item.category || 'PLATS',
+        price: Number(item.sale || item.price || 0),
+        onMenu: item.onMenu === true,
+        zones: Array.isArray(item.zones) ? item.zones : []
+      }));
+      const saleItems = (state.saleItems || []).filter(item => item.active !== false).map(item => ({
+        id: item.id,
+        type: 'sale',
+        code: item.code || '',
+        name: item.name || '',
+        family: item.family || 'ALTRES',
+        price: Number(item.sale || item.price || 0),
+        onMenu: item.onMenu === true,
+        zones: Array.isArray(item.zones) ? item.zones : []
+      }));
+      return send(res, 200, { companyId: context.companyId, centreId: context.centreId, dishes, saleItems });
+    }
+
     if (pathname === '/api/state' && req.method === 'GET') {
       if (!requireAdmin(req, res)) return;
       return send(res, 200, readContextData(readData(), requestContext(req)));
