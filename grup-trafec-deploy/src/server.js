@@ -14,6 +14,7 @@ const { createCrmContextRouter } = require('./api/crm-context');
 const { createCommercialContextRouter } = require('./api/comercial-context');
 const { createReservationContextRouter } = require('./api/reserves-context');
 const { createTpvCenterRouter } = require('./api/tpv-center');
+const { createReservesCenterRouter } = require('./api/reserves-center');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,6 +40,7 @@ app.use('/api/crm', createCrmContextRouter(crm, links, govern));
 app.use('/api/comercial', createCommercialContextRouter(commercial, links, govern));
 app.use('/api/reserves', createReservationContextRouter(reservations, links, govern));
 app.use('/api/tpv-center', createTpvCenterRouter(store, govern, miniappState));
+app.use('/api/reserves-center', createReservesCenterRouter(store, govern, links, miniappState));
 
 app.use((error, _req, res, _next) => {
   console.error(error);
