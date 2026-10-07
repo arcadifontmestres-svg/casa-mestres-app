@@ -101,8 +101,8 @@
       box.id = 'centerContextBox';
       box.className = 'contextBox';
       box.innerHTML = '<label>Centre de treball</label><select id="centerContextSelect"></select>';
-      const brand = document.querySelector('.side .brand');
-      brand.insertAdjacentElement('afterend', box);
+      const mount = document.getElementById('centerContextMount');
+      if (mount) mount.appendChild(box);
     }
     const select = document.getElementById('centerContextSelect');
     select.innerHTML = '<option value="">GRUP TRÀFEC · tots</option>' + centers
@@ -150,15 +150,14 @@
     view.innerHTML = `
       <div class="head"><div><h1>Gestió Grup Tràfec</h1><div class="muted">Porta de govern per utilitzar, connectar i configurar les eines del grup.</div></div></div>
       <div class="toolGrid">
-        ${toolCard('Front Office', 'Eines operatives de cara al servei.', 'home_front')}
-        ${toolCard('Back Office', 'Eines de gestió i seguiment.', 'home_back')}
-        ${toolCard('RRHH', 'Empleats i eines de persones.', 'home_rrhh')}
-        ${toolCard('Configuració', 'Crear centres, empleats i assignar eines o miniapps.', 'home_config')}
+        ${toolCard('FRONT', 'Accés a les eines Front Office autoritzades.', 'home_front')}
+        ${toolCard('BACK', 'Accés a les miniapps i funcions de Back Office.', 'home_back')}
+        ${toolCard('CONFIG', 'Centres, permisos, vincles i empleats.', 'home_config')}
+
       </div>`;
     setStatus('');
     document.querySelector('[data-tool="home_front"]').onclick = renderFrontOffice;
     document.querySelector('[data-tool="home_back"]').onclick = renderBackOffice;
-    document.querySelector('[data-tool="home_rrhh"]').onclick = () => refreshGovernState().then(renderRrhh).catch(showError);
     document.querySelector('[data-tool="home_config"]').onclick = () => refreshGovernState().then(renderConfig).catch(showError);
   }
 
@@ -176,15 +175,32 @@
 
   function renderBackOffice() {
     shellActive('back');
+    const center = selectedCenter();
     const cards = [
-      functionAllowed('crm') ? toolCard('CRM', 'Contactes i seguiment CRM existent.', 'crm') : '',
-      functionAllowed('commercial') ? toolCard('Comercial / Grups', 'Gestió comercial existent.', 'commercial') : ''
-    ].join('') + pendingCards('Back Office');
+      toolCard('RRHH / Empleats', 'Crear i gestionar empleats des de Direcció.', 'rrhh_admin'),
+      functionAllowed('front_office_tpv') ? toolCard('TPV', 'Obre la miniapp TPV independent.', 'mini_tpv') : '',
+      functionAllowed('reservations') ? toolCard('Reserves', 'Obre la miniapp Reserves independent.', 'mini_reserves') : '',
+      functionAllowed('fitxatges') ? toolCard('Fitxatges', 'Obre la miniapp Fitxatges independent.', 'mini_fitxatges') : '',
+      functionAllowed('gestio_cuina') ? toolCard('Cuina', 'Obre la miniapp Cuina independent.', 'mini_cuina') : '',
+      functionAllowed('control_normatiu') ? toolCard('APPCC / Control Normatiu', 'Obre la miniapp APPCC independent.', 'mini_appcc') : '',
+      functionAllowed('gestio_magatzem') ? toolCard('Magatzem', 'Obre la miniapp Magatzem independent.', 'mini_magatzem') : '',
+      functionAllowed('crm') ? toolCard('CRM', 'Contactes i seguiment CRM.', 'crm') : '',
+      functionAllowed('commercial') ? toolCard('Comercial / Grups', 'Gestió comercial.', 'commercial') : ''
+    ].join('');
     view.innerHTML = `
-      <div class="head"><div><h1>Back Office</h1><div class="muted">Eines de gestió connectades al sistema.</div></div></div>
-      <div class="toolGrid">${cards || '<div class="panel empty">Aquest centre no té eines de Back Office assignades.</div>'}</div>`;
-    setStatus('');
-    bindToolCards();
+      <div class="head"><div><h1>BACK</h1><div class="muted">Llista d’eines i miniapps. Direcció hi té accés, però no les incorpora.</div></div></div>
+      <div class="toolGrid">${cards || '<div class="panel empty">No hi ha eines disponibles.</div>'}</div>`;
+    setStatus(center ? center.name : 'Visió global');
+    document.querySelectorAll('[data-tool]').forEach(btn => {
+      btn.onclick = () => {
+        const t = btn.dataset.tool;
+        if (t === 'rrhh_admin') return refreshGovernState().then(renderRrhh).catch(showError);
+        const routes = {mini_tpv:'/tpv.html',mini_reserves:'/reserves-centre.html',mini_fitxatges:'/fitxatges-centre.html',mini_cuina:'/cuina.html',mini_appcc:'/appcc.html',mini_magatzem:'/magatzem.html'};
+        if (routes[t]) return window.location.href = routes[t];
+        if (t === 'crm') return loadCrm().catch(showError);
+        if (t === 'commercial') return loadCommercial().catch(showError);
+      };
+    });
   }
 
   function centerNames(ids) {
@@ -198,7 +214,7 @@
   }
 
   function renderRrhh() {
-    shellActive('rrhh');
+    shellActive('back');
     const rows = visibleEmployees();
     const fitxatges = functionAllowed('fitxatges') ? toolCard('App Fitxatges', 'Entrada, pausa, retorn i sortida del personal.', 'fitxatges') : '';
     const pending = pendingCards('RRHH');
@@ -209,9 +225,9 @@
         ${rows.map(item => `<tr><td><b>${esc(item.name)}</b></td><td>${esc(item.role || '—')}</td><td>${esc(centerNames(item.centerIds))}</td><td>${item.active === false ? 'Inactiu' : 'Actiu'}</td><td><button class="rowBtn" data-edit-employee="${esc(item.id)}">Editar</button></td></tr>`).join('') || '<tr><td colspan="5" class="empty">No hi ha empleats creats en aquest context.</td></tr>'}
       </tbody></table></div>`;
     bindToolCards();
-    document.getElementById('newEmployee').onclick = () => renderEmployeeForm(null, 'rrhh');
+    document.getElementById('newEmployee').onclick = () => renderEmployeeForm(null, 'back');
     document.querySelectorAll('[data-edit-employee]').forEach(btn => {
-      btn.onclick = () => renderEmployeeForm(employees.find(item => item.id === btn.dataset.editEmployee), 'rrhh');
+      btn.onclick = () => renderEmployeeForm(employees.find(item => item.id === btn.dataset.editEmployee), 'back');
     });
     setStatus(`${rows.length} empleats`);
   }
@@ -258,15 +274,10 @@
         <div><label>Empresa</label><input id="g_company" value="${esc(c.company || '')}"></div>
       </div>
       ${center ? `<div class="panel" style="margin:16px 0"><h3>Activació del centre</h3><div class="grid"><div><label>Codi d'activació</label><input value="${esc(c.activationCode || '')}" readonly></div><div><label>Estat</label><input value="${esc(c.activationStatus === 'VINCULAT' ? 'Vinculat' : 'No vinculat')}" readonly></div><div class="wide"><label>HTML / URL satèl·lit</label><input value="${esc(c.satellitePath || '/centre.html')}" readonly></div></div><div class="toolbar" style="margin-top:12px"><button type="button" class="btn secondary" id="regenActivation">Regenerar codi</button></div></div>` : ''}
-      ${center && permissions.front_office_tpv === true ? `<div class="panel" style="margin:16px 0"><h3>Front Office / TPV</h3><p class="muted">Configura quins plats i articles es publiquen al TPV d’aquest centre, famílies, preus, zones i ordre dels botons.</p><button type="button" class="btn" id="configureTpv">Configurar TPV</button></div>` : ''}
       <h3>Eines / miniapps del centre</h3>
       <div class="checkGrid">${catalog.map(item => `<label class="checkItem"><input type="checkbox" name="centerTool" value="${esc(item.key)}" ${permissions[item.key] === true ? 'checked' : ''}><span><b>${esc(item.label)}</b>${item.connected ? '' : '<span class="tag">pendent connexió</span>'}<br><span class="muted">${esc(item.area)}</span></span></label>`).join('')}</div>
       <div class="toolbar formActions"><label class="inlineCheck"><input id="g_active" type="checkbox" ${c.active === false ? '' : 'checked'}> Centre actiu</label><button class="btn" type="submit">Guardar centre</button></div></form>`;
     document.getElementById('backConfig').onclick = () => refreshGovernState().then(renderConfig).catch(showError);
-    const tpvButton = document.getElementById('configureTpv');
-    if (tpvButton && center) tpvButton.onclick = () => {
-      window.location.href = '/tpv-direccio.html?centerId=' + encodeURIComponent(center.id);
-    };
     const regen = document.getElementById('regenActivation');
     if (regen && center) regen.onclick = async () => {
       try {
@@ -303,11 +314,11 @@
   }
 
   function renderEmployeeForm(employee = null, returnTarget = 'config') {
-    shellActive(returnTarget === 'rrhh' ? 'rrhh' : 'config');
+    shellActive(returnTarget === 'back' ? 'back' : 'config');
     const item = employee || {};
     const assigned = new Set(item.centerIds || []);
     view.innerHTML = `
-      <div class="head"><div><h1>${employee ? 'Editar empleat' : 'Nou empleat'}</h1><div class="muted">No es crea cap persona per defecte: només guardem les dades que introdueixes.</div></div><button class="btn secondary" id="backEmployees">← ${returnTarget === 'rrhh' ? 'RRHH' : 'Configuració'}</button></div>
+      <div class="head"><div><h1>${employee ? 'Editar empleat' : 'Nou empleat'}</h1><div class="muted">No es crea cap persona per defecte: només guardem les dades que introdueixes.</div></div><button class="btn secondary" id="backEmployees">← ${returnTarget === 'back' ? 'BACK' : 'Configuració'}</button></div>
       <form class="panel" id="employeeForm"><div class="grid">
         <div><label>Nom *</label><input id="e_name" required value="${esc(item.name || '')}"></div>
         <div><label>Funció / rol</label><input id="e_role" value="${esc(item.role || '')}"></div>
@@ -317,7 +328,7 @@
       <h3>Centres assignats</h3>
       <div class="checkGrid">${centers.map(center => `<label class="checkItem"><input type="checkbox" name="employeeCenter" value="${esc(center.id)}" ${assigned.has(center.id) ? 'checked' : ''}><span>${esc(center.name)}</span></label>`).join('') || '<div class="empty compact">Encara no hi ha centres creats. L’empleat pot quedar sense centre.</div>'}</div>
       <div class="toolbar formActions"><label class="inlineCheck"><input id="e_active" type="checkbox" ${item.active === false ? '' : 'checked'}> Empleat actiu</label><button class="btn" type="submit">Guardar empleat</button></div></form>`;
-    const back = () => refreshGovernState().then(returnTarget === 'rrhh' ? renderRrhh : renderConfig).catch(showError);
+    const back = () => refreshGovernState().then(returnTarget === 'back' ? renderBackOffice : renderConfig).catch(showError);
     document.getElementById('backEmployees').onclick = back;
     document.getElementById('employeeForm').onsubmit = async event => {
       event.preventDefault();
@@ -335,7 +346,7 @@
         if (employee) await govApi(`/api/govern/employees/${encodeURIComponent(employee.id)}`, { method: 'PUT', body: JSON.stringify(payload) });
         else await govApi('/api/govern/employees', { method: 'POST', body: JSON.stringify(payload) });
         await refreshGovernState();
-        if (returnTarget === 'rrhh') renderRrhh(); else renderConfig();
+        if (returnTarget === 'back') renderBackOffice(); else renderConfig();
         setStatus('Empleat guardat');
       } catch (error) { showError(error); }
     };
@@ -344,15 +355,12 @@
   function reloadShell() {
     if (currentShell === 'front') return renderFrontOffice();
     if (currentShell === 'back') return renderBackOffice();
-    if (currentShell === 'rrhh') return renderRrhh();
     if (currentShell === 'config') return renderConfig();
     return renderHome();
   }
 
-  document.querySelector('[data-shell="home"]').onclick = renderHome;
   document.querySelector('[data-shell="front"]').onclick = renderFrontOffice;
   document.querySelector('[data-shell="back"]').onclick = renderBackOffice;
-  document.querySelector('[data-shell="rrhh"]').onclick = () => refreshGovernState().then(renderRrhh).catch(showError);
   document.querySelector('[data-shell="config"]').onclick = () => refreshGovernState().then(renderConfig).catch(showError);
 
   refreshGovernState().then(renderHome).catch(showError);
