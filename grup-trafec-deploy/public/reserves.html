@@ -57,14 +57,29 @@ async function loadCenter(centerId){
  }catch(e){holder.innerHTML='<div class="err">'+esc(e.message)+'</div>'}
 }
 
+function timeOptions(){
+ const rules=cfg.config?.bookingRules||{},step=Math.max(5,Number(rules.slotMinutes||10));
+ const windows=[[rules.lunchStart||'13:00',rules.lunchEnd||'15:30'],[rules.dinnerStart||'',rules.dinnerEnd||'']];
+ const out=[];
+ const toMin=v=>{const m=String(v||'').match(/^(\d{1,2}):(\d{2})$/);return m?Number(m[1])*60+Number(m[2]):null};
+ const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+ for(const [a,b] of windows){const s=toMin(a),e=toMin(b);if(s==null||e==null||e<s)continue;for(let m=s;m<=e;m+=step)out.push(fmt(m))}
+ return [...new Set(out)];
+}
+function offerAvailableOnDate(o,date){
+ if(!date)return true;
+ if(o.dateFrom&&date<o.dateFrom)return false;
+ if(o.dateTo&&date>o.dateTo)return false;
+ return true;
+}
 function renderForm(){
  const max=Math.max(1,Number(cfg.config?.maxPax||10));
- const zones=cfg.layout?.zones||[],offers=cfg.offers||[];
+ const zones=cfg.layout?.zones||[],offers=cfg.offers||[],times=timeOptions();
  const holder=$('centerForm');
  holder.innerHTML=`
   <div class="grid">
     <div><label>Data</label><input id="date" type="date" min="${today()}" required></div>
-    <div><label>Hora</label><select id="time"><option value="">Selecciona...</option><option>13:00</option><option>13:30</option><option>14:00</option><option>14:30</option><option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option><option>22:00</option></select></div>
+    <div><label>Hora</label><select id="time"><option value="">Selecciona...</option>${times.map(t=>'<option value="'+t+'">'+t+'</option>').join('')}</select></div>
     <div><label>Comensals</label><select id="pax">${Array.from({length:max},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join('')}</select></div>
     <div><label>Zona</label><select id="zone"><option value="">Selecciona...</option>${zones.map(z=>'<option value="'+esc(z.id)+'">'+esc(z.name)+'</option>').join('')}</select></div>
     <div><label>Taula</label><select id="table"><option value="">Assignació automàtica</option></select><div class="tableHint" id="tableHint"></div></div>
@@ -82,8 +97,8 @@ function renderForm(){
   <label><input id="marketing" type="checkbox" style="width:auto"> Accepto rebre comunicacions comercials. Opcional.</label>
   <button id="submit" class="btn">Confirmar reserva</button>
   <div id="result"></div>`;
- $('zone').onchange=updateTables;$('pax').onchange=()=>{updateTables();updateOffer()};$('date').onchange=updateTables;$('time').onchange=updateTables;$('offer').onchange=updateOffer;
- $('submit').onclick=submit;updateTables();updateOffer();
+ $('zone').onchange=updateTables;$('pax').onchange=()=>{updateTables();updateOffer()};$('date').onchange=()=>{updateTables();refreshOffers()};$('time').onchange=updateTables;$('offer').onchange=updateOffer;
+ $('submit').onclick=submit;updateTables();refreshOffers();
 }
 
 async function updateTables(){
@@ -103,6 +118,14 @@ async function updateTables(){
  if(!zoneId)$('tableHint').textContent='Selecciona una zona per veure les taules.';
  else if(!date||!time)$('tableHint').textContent='Selecciona data i hora per veure disponibilitat real.';
  else $('tableHint').textContent=tables.length?tables.length+' taules disponibles per '+pax+' pax.':'No hi ha cap taula lliure compatible; el centre farà l’assignació.';
+}
+function refreshOffers(){
+ const date=$('date')?.value||'',sel=$('offer');if(!sel)return;
+ const available=(cfg.offers||[]).filter(o=>offerAvailableOnDate(o,date));
+ const previous=sel.value;
+ sel.innerHTML='<option value="">Sense menú assignat</option>'+available.map(o=>'<option value="'+esc(o.id)+'">'+esc(o.name)+(o.special?' · ESPECIAL':'')+(o.price?' · '+euro(o.price):'')+'</option>').join('');
+ if(available.some(o=>o.id===previous))sel.value=previous;
+ updateOffer();
 }
 function updateOffer(){
  const o=(cfg.offers||[]).find(x=>x.id===$('offer')?.value),pax=Number($('pax')?.value||1);
