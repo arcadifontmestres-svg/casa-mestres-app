@@ -17,7 +17,7 @@ const { createTpvCenterRouter } = require('./api/tpv-center');
 const { createReservesCenterRouter } = require('./api/reserves-center');
 const { createFitxatgesCenterRouter } = require('./api/fitxatges-center');
 const { createMiniappsCenterRouter } = require('./api/miniapps-center');
-const { createReservesPublicRouter } = require('./api/reserves-public');
+const { createReservesPublicRouter, createReservesStripeWebhookHandler } = require('./api/reserves-public');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,6 +31,7 @@ const commercial = createCommercialService(store, crm, reservations);
 const govern = createGovernService(store);
 const links = createCenterLinks(store);
 
+app.post('/api/reserves-public/stripe/webhook', express.raw({ type: 'application/json', limit: '2mb' }), createReservesStripeWebhookHandler(miniappState));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(publicDir));
 
