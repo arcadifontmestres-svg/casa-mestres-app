@@ -39,7 +39,7 @@ function createTpvCenterRouter(store, govern) {
       const orders = (data.tpvOrders || []).filter(x => x.centerId === s.center.id);
       let catalog = { saleItems: [], dishes: [] };
       try {
-        const response = await fetch('https://grup-trafec-operatiu.onrender.com/api/state', {
+        const response = await fetch('https://grup-trafec-operatiu.onrender.com/api/tpv-catalog', {
           headers: {
             'X-Arcadi-Company-Id': 'company_grup_trafec',
             'X-Arcadi-Centre-Id': /sarriera/i.test(String(s.center.name || s.center.code || '')) ? 'restaurant_sarriera' : ''
