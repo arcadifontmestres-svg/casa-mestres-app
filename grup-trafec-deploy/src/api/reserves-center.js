@@ -27,6 +27,10 @@ function createReservesCenterRouter(store, govern, links, miniappState) {
     return {
       config: {
         centerId: center.id,
+        maxPax: 10,
+        groupPhone: '',
+        cancellationPolicy: '',
+        currency: 'EUR',
         stripe: { enabled: false, mode: 'disabled' },
         updatedAt: null
       },
@@ -140,6 +144,10 @@ function createReservesCenterRouter(store, govern, links, miniappState) {
         saved = {
           ...current,
           centerId: s.center.id,
+          maxPax: Math.max(1, Number(input.maxPax ?? current.maxPax ?? 10) || 10),
+          groupPhone: String(input.groupPhone ?? current.groupPhone ?? '').slice(0,80),
+          cancellationPolicy: String(input.cancellationPolicy ?? current.cancellationPolicy ?? '').slice(0,2000),
+          currency: String(input.currency ?? current.currency ?? 'EUR').toUpperCase().slice(0,3),
           stripe: {
             enabled: input.stripe?.enabled === true,
             mode: ['disabled','test','live'].includes(String(input.stripe?.mode)) ? String(input.stripe.mode) : String(current.stripe?.mode || 'disabled')
@@ -163,6 +171,8 @@ function createReservesCenterRouter(store, govern, links, miniappState) {
           name: String(x.name || '').slice(0,200),
           description: String(x.description || '').slice(0,1000),
           price: Math.max(0, Number(x.price) || 0),
+          depositType: ['fixed','percent'].includes(String(x.depositType)) ? String(x.depositType) : 'fixed',
+          depositValue: Math.max(0, Number(x.depositValue) || 0),
           active: x.active !== false,
           updatedAt: new Date().toISOString()
         }));
