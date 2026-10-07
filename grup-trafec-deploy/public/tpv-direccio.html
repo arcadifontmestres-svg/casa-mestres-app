@@ -14,7 +14,7 @@ input,select{width:100%;padding:9px;border:1px solid #ccd6db;border-radius:9px}.
 <header><div><b>DIRECCIÓ · CONFIGURACIÓ TPV</b><div id="centreName"></div></div><div id="status">CARREGANT</div></header>
 <main>
 <div class="panel"><div class="toolbar"><button class="btn secondary" onclick="history.back()">← Tornar</button><div><h1>Publicació al TPV</h1><div class="muted">Selecciona què apareix al TPV d’aquest centre i com es mostra.</div></div><button class="btn primary" style="margin-left:auto" id="saveBtn">Guardar publicació</button></div></div>
-<div class="panel"><div class="toolbar" style="margin-bottom:12px"><button class="btn secondary" onclick="TPVFilter.show('all')">Tot</button><button class="btn secondary" onclick="TPVFilter.show('dish')">Plats</button><button class="btn secondary" onclick="TPVFilter.show('sale')">Begudes / articles de venda</button><button class="btn secondary" onclick="TPVFilter.show('product')">Productes</button><span style="flex:1"></span><button class="btn secondary" onclick="TPVFilter.selectVisible(true)">Seleccionar tots</button><button class="btn secondary" onclick="TPVFilter.selectVisible(false)">Desmarcar tots</button></div><div id="content">Carregant catàleg...</div></div>
+<div class="panel"><div class="toolbar" style="margin-bottom:12px"><button class="btn secondary" onclick="TPVFilter.show('all')">Tot</button><button class="btn secondary" onclick="TPVFilter.show('dish')">Plats</button><button class="btn secondary" onclick="TPVFilter.show('sale')">Begudes / articles de venda</button><button class="btn secondary" onclick="TPVFilter.show('product')">Productes</button><span style="flex:1"></span><select id="bulkZone" style="width:auto;min-width:160px"><option value="">Zona...</option></select><button class="btn secondary" onclick="TPVFilter.zoneVisible(true)">Aplicar zona</button><button class="btn secondary" onclick="TPVFilter.zoneVisible(false)">Treure zona</button><button class="btn secondary" onclick="TPVFilter.selectVisible(true)">Seleccionar tots</button><button class="btn secondary" onclick="TPVFilter.selectVisible(false)">Desmarcar tots</button></div><div id="content">Carregant catàleg...</div></div>
 </main>
 <script>
 (()=>{
@@ -29,6 +29,10 @@ function render(){
  $('content').innerHTML='<table><thead><tr><th>Publicar</th><th>Tipus</th><th>Nom botó</th><th>Família</th><th>Preu</th><th>Zones</th><th>Ordre</th></tr></thead><tbody>'+
  state.items.map((x,i)=>{const c=x.config||{};return '<tr data-row="'+i+'" data-type="'+esc(x.sourceType)+'" style="'+(currentFilter==='all'||currentFilter===x.sourceType?'':'display:none')+'"><td><input class="check active" type="checkbox" '+(c.active?'checked':'')+'></td><td>'+(x.sourceType==='dish'?'Plat':x.sourceType==='product'?'Producte':'Beguda / article')+'</td><td><input class="label" value="'+esc(c.label||x.name||'')+'"></td><td><input class="family" value="'+esc(c.family||x.family||'')+'"></td><td><input class="price tiny" type="number" step="0.01" min="0" value="'+Number(c.price??x.price??0)+'"></td><td><div class="zoneChecks">'+(zones.length?zones.map(z=>'<label><input type="checkbox" class="check zone" value="'+esc(z.id)+'" '+((c.zoneIds||[]).includes(z.id)?'checked':'')+'> '+esc(z.name)+'</label>').join(''):'<span class="muted">Configura primer les zones al TPV</span>')+'</div></td><td><input class="sort tiny" type="number" value="'+Number(c.sort||0)+'"></td></tr>'}).join('')+
  '</tbody></table>';
+ const bulkZone=document.getElementById('bulkZone');
+ if(bulkZone){
+   bulkZone.innerHTML='<option value="">Zona...</option>'+(state.tpvConfig?.zones||[]).map(z=>'<option value="'+esc(z.id)+'">'+esc(z.name)+'</option>').join('');
+ }
  $('status').textContent='PREPARAT';
 }
 window.TPVFilter={
@@ -38,6 +42,15 @@ window.TPVFilter={
      if(tr.style.display==='none') return;
      const cb=tr.querySelector('.active');
      if(cb) cb.checked=value;
+   });
+ },
+ zoneVisible:add=>{
+   const zone=document.getElementById('bulkZone')?.value||'';
+   if(!zone) return alert('Selecciona una zona.');
+   document.querySelectorAll('tr[data-row]').forEach(tr=>{
+     if(tr.style.display==='none') return;
+     const cb=[...tr.querySelectorAll('.zone')].find(x=>x.value===zone);
+     if(cb) cb.checked=add;
    });
  }
 };
