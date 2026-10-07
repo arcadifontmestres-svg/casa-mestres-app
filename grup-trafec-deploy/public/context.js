@@ -258,10 +258,15 @@
         <div><label>Empresa</label><input id="g_company" value="${esc(c.company || '')}"></div>
       </div>
       ${center ? `<div class="panel" style="margin:16px 0"><h3>Activació del centre</h3><div class="grid"><div><label>Codi d'activació</label><input value="${esc(c.activationCode || '')}" readonly></div><div><label>Estat</label><input value="${esc(c.activationStatus === 'VINCULAT' ? 'Vinculat' : 'No vinculat')}" readonly></div><div class="wide"><label>HTML / URL satèl·lit</label><input value="${esc(c.satellitePath || '/centre.html')}" readonly></div></div><div class="toolbar" style="margin-top:12px"><button type="button" class="btn secondary" id="regenActivation">Regenerar codi</button></div></div>` : ''}
+      ${center && permissions.front_office_tpv === true ? `<div class="panel" style="margin:16px 0"><h3>Front Office / TPV</h3><p class="muted">Configura quins plats i articles es publiquen al TPV d’aquest centre, famílies, preus, zones i ordre dels botons.</p><button type="button" class="btn" id="configureTpv">Configurar TPV</button></div>` : ''}
       <h3>Eines / miniapps del centre</h3>
       <div class="checkGrid">${catalog.map(item => `<label class="checkItem"><input type="checkbox" name="centerTool" value="${esc(item.key)}" ${permissions[item.key] === true ? 'checked' : ''}><span><b>${esc(item.label)}</b>${item.connected ? '' : '<span class="tag">pendent connexió</span>'}<br><span class="muted">${esc(item.area)}</span></span></label>`).join('')}</div>
       <div class="toolbar formActions"><label class="inlineCheck"><input id="g_active" type="checkbox" ${c.active === false ? '' : 'checked'}> Centre actiu</label><button class="btn" type="submit">Guardar centre</button></div></form>`;
     document.getElementById('backConfig').onclick = () => refreshGovernState().then(renderConfig).catch(showError);
+    const tpvButton = document.getElementById('configureTpv');
+    if (tpvButton && center) tpvButton.onclick = () => {
+      window.location.href = '/tpv-direccio.html?centerId=' + encodeURIComponent(center.id);
+    };
     const regen = document.getElementById('regenActivation');
     if (regen && center) regen.onclick = async () => {
       try {
