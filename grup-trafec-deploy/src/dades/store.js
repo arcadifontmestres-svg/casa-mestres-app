@@ -14,7 +14,8 @@ const DEFAULT_DATA = Object.freeze({
   occupancyBlocks: [],
   centerDevices: [],
   tpvConfigs: [],
-  tpvOrders: []
+  tpvOrders: [],
+  tpvCatalogConfigs: []
 });
 
 function clone(value) {
@@ -34,6 +35,7 @@ function ensureShape(data) {
   if (!Array.isArray(out.centerDevices)) out.centerDevices = [];
   if (!Array.isArray(out.tpvConfigs)) out.tpvConfigs = [];
   if (!Array.isArray(out.tpvOrders)) out.tpvOrders = [];
+  if (!Array.isArray(out.tpvCatalogConfigs)) out.tpvCatalogConfigs = [];
   return out;
 }
 
