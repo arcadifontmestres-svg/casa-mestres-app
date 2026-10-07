@@ -53,7 +53,92 @@ function createTpvCenterRouter(store, govern) {
           };
         }
       } catch {}
+      const published = (data.tpvCatalogConfigs || []).filter(x => x.centerId === s.center.id && x.active === true);
+      const byKey = new Map(published.map(x => [x.sourceType + ':' + x.sourceId, x]));
+      const apply = item => {
+        const sourceType = item.type === 'dish' ? 'dish' : 'sale';
+        const cfg = byKey.get(sourceType + ':' + item.id);
+        if (!cfg) return null;
+        return {
+          ...item,
+          name: cfg.label || item.name,
+          family: cfg.family || item.family || 'ALTRES',
+          price: Number(cfg.price ?? item.price ?? 0),
+          zones: Array.isArray(cfg.zoneIds) ? cfg.zoneIds : [],
+          sort: Number(cfg.sort || 0),
+          onMenu: true
+        };
+      };
+      catalog = {
+        dishes: (catalog.dishes || []).map(apply).filter(Boolean).sort((a,b)=>(a.sort||0)-(b.sort||0)),
+        saleItems: (catalog.saleItems || []).map(apply).filter(Boolean).sort((a,b)=>(a.sort||0)-(b.sort||0))
+      };
       res.json({ center: s.center, config, orders, ...catalog });
+    } catch (error) { next(error); }
+  });
+
+  router.get('/admin/catalog', async (req, res, next) => {
+    try {
+      const centerId = String(req.query.centerId || '');
+      const center = govern.getCenter(centerId);
+      if (!center) return res.status(404).json({ error: 'Centre no trobat.' });
+      const data = store.read();
+      let source = { dishes: [], saleItems: [] };
+      try {
+        const response = await fetch('https://grup-trafec-operatiu.onrender.com/api/tpv-catalog', {
+          headers: {
+            'X-Arcadi-Company-Id': 'company_grup_trafec',
+            'X-Arcadi-Centre-Id': /sarriera/i.test(String(center.name || center.code || '')) ? 'restaurant_sarriera' : ''
+          }
+        });
+        if (response.ok) source = await response.json();
+      } catch {}
+      const saved = (data.tpvCatalogConfigs || []).filter(x => x.centerId === centerId);
+      const configByKey = new Map(saved.map(x => [x.sourceType + ':' + x.sourceId, x]));
+      const items = [
+        ...(source.dishes || []).map(item => ({ ...item, sourceType:'dish' })),
+        ...(source.saleItems || []).map(item => ({ ...item, sourceType:'sale' }))
+      ].map(item => ({
+        ...item,
+        config: configByKey.get(item.sourceType + ':' + item.id) || {
+          active: item.onMenu === true,
+          label: item.name || '',
+          family: item.family || '',
+          price: Number(item.price || 0),
+          zoneIds: Array.isArray(item.zones) ? item.zones : [],
+          sort: 0
+        }
+      }));
+      const tpvConfig = data.tpvConfigs.find(x => x.centerId === centerId) || defaultConfig(center);
+      res.json({ center, tpvConfig, items });
+    } catch (error) { next(error); }
+  });
+
+  router.put('/admin/catalog/:centerId', (req, res, next) => {
+    try {
+      const centerId = String(req.params.centerId || '');
+      if (!govern.getCenter(centerId)) return res.status(404).json({ error:'Centre no trobat.' });
+      const input = req.body || {};
+      const items = Array.isArray(input.items) ? input.items : [];
+      store.update(data => {
+        data.tpvCatalogConfigs = (data.tpvCatalogConfigs || []).filter(x => x.centerId !== centerId);
+        for (const item of items) {
+          if (!item.sourceId || !['dish','sale'].includes(item.sourceType)) continue;
+          data.tpvCatalogConfigs.push({
+            centerId,
+            sourceType: item.sourceType,
+            sourceId: String(item.sourceId),
+            active: item.active === true,
+            label: String(item.label || '').slice(0,200),
+            family: String(item.family || '').slice(0,120),
+            price: Math.max(0, Number(item.price) || 0),
+            zoneIds: Array.isArray(item.zoneIds) ? item.zoneIds.map(String).slice(0,50) : [],
+            sort: Number(item.sort || 0),
+            updatedAt: new Date().toISOString()
+          });
+        }
+      });
+      res.json({ ok:true });
     } catch (error) { next(error); }
   });
 
