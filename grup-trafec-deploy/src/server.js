@@ -33,6 +33,7 @@ const links = createCenterLinks(store);
 
 app.post('/api/reserves-public/stripe/webhook', express.raw({ type: 'application/json', limit: '2mb' }), createReservesStripeWebhookHandler(miniappState));
 app.use(express.json({ limit: '2mb' }));
+app.get('/reserves', (_req, res) => res.sendFile(path.join(publicDir, 'reserves.html')));
 app.use(express.static(publicDir));
 
 app.get('/api/health', async (_req, res) => {
