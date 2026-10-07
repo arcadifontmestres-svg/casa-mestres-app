@@ -12,7 +12,9 @@ const DEFAULT_DATA = Object.freeze({
   commercialProposals: [],
   reservations: [],
   occupancyBlocks: [],
-  centerDevices: []
+  centerDevices: [],
+  tpvConfigs: [],
+  tpvOrders: []
 });
 
 function clone(value) {
@@ -30,6 +32,8 @@ function ensureShape(data) {
   if (!Array.isArray(out.reservations)) out.reservations = [];
   if (!Array.isArray(out.occupancyBlocks)) out.occupancyBlocks = [];
   if (!Array.isArray(out.centerDevices)) out.centerDevices = [];
+  if (!Array.isArray(out.tpvConfigs)) out.tpvConfigs = [];
+  if (!Array.isArray(out.tpvOrders)) out.tpvOrders = [];
   return out;
 }
 
