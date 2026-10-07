@@ -66,7 +66,15 @@ function createReservesPublicRouter(govern, miniappState) {
           groupPhone:String(config.groupPhone||''),
           cancellationPolicy:String(config.cancellationPolicy||''),
           currency:String(config.currency||'EUR'),
-          stripeEnabled:config.stripe?.enabled===true && Boolean(process.env.STRIPE_SECRET_KEY)
+          stripeEnabled:config.stripe?.enabled===true && Boolean(process.env.STRIPE_SECRET_KEY),
+          bookingRules:{
+            lunchStart:String(config.bookingRules?.lunchStart||'13:00'),
+            lunchEnd:String(config.bookingRules?.lunchEnd||'15:30'),
+            dinnerStart:String(config.bookingRules?.dinnerStart||''),
+            dinnerEnd:String(config.bookingRules?.dinnerEnd||''),
+            slotMinutes:Math.max(5,Number(config.bookingRules?.slotMinutes||10)),
+            oneReservationPerSlot:config.bookingRules?.oneReservationPerSlot!==false
+          }
         },
         layout:{
           zones:(tpv.config?.zones||[]).map(z=>({
@@ -82,7 +90,10 @@ function createReservesPublicRouter(govern, miniappState) {
           description:x.description||'',
           price:Number(x.price||0),
           depositType:x.depositType||'fixed',
-          depositValue:Number(x.depositValue||0)
+          depositValue:Number(x.depositValue||0),
+          dateFrom:String(x.dateFrom||''),
+          dateTo:String(x.dateTo||''),
+          special:x.special===true
         }))
       });
     } catch(error){next(error)}
@@ -98,6 +109,19 @@ function createReservesPublicRouter(govern, miniappState) {
       const center=publicCenters().find(x=>x.id===centerId);
       if(!center)return res.status(404).json({error:'Centre no disponible per reserves online.'});
       const {reserves,tpv}=await centerState(center);
+      const rules=reserves.config?.bookingRules||{};
+      const slotMinutes=Math.max(5,Number(rules.slotMinutes||10));
+      const normalizeMinutes=value=>{const m=String(value||'').match(/^(\d{1,2}):(\d{2})$/);return m?Number(m[1])*60+Number(m[2]):null};
+      const requestedMinutes=normalizeMinutes(time);
+      const windows=[[rules.lunchStart||'13:00',rules.lunchEnd||'15:30'],[rules.dinnerStart||'',rules.dinnerEnd||'']]
+        .map(([a,b])=>[normalizeMinutes(a),normalizeMinutes(b)]).filter(([a,b])=>a!=null&&b!=null&&b>=a);
+      if(requestedMinutes==null || !windows.some(([a,b])=>requestedMinutes>=a&&requestedMinutes<=b) || requestedMinutes%slotMinutes!==0){
+        return res.status(400).json({error:'Hora fora dels torns de reserva configurats.'});
+      }
+      if(rules.oneReservationPerSlot!==false){
+        const slotTaken=(reserves.reservations||[]).some(r=>r.date===date&&r.time===time&&!['CANCEL_LADA','Cancel·lada','CANCELLED'].includes(String(r.status||'')));
+        if(slotTaken)return res.json({zones:[]});
+      }
       const blocked=new Set((reserves.reservations||[])
         .filter(r=>r.date===date && r.time===time && !['CANCEL_LADA','Cancel·lada','CANCELLED'].includes(String(r.status||'')))
         .map(r=>String(r.tableId||''))
@@ -132,8 +156,22 @@ function createReservesPublicRouter(govern, miniappState) {
 
       const {reserves}=await centerState(center);
       const config=reserves.config||emptyReservations(center).config;
+      const rules=config.bookingRules||{};
       const maxPax=Math.max(1,Number(config.maxPax||10));
+      const toMinutes=value=>{const m=String(value||'').match(/^(\d{1,2}):(\d{2})$/);return m?Number(m[1])*60+Number(m[2]):null};
+      const requestedMinutes=toMinutes(time);
+      const slotMinutes=Math.max(5,Number(rules.slotMinutes||10));
+      const windows=[[rules.lunchStart||'13:00',rules.lunchEnd||'15:30'],[rules.dinnerStart||'',rules.dinnerEnd||'']]
+        .map(([a,b])=>[toMinutes(a),toMinutes(b)]).filter(([a,b])=>a!=null&&b!=null&&b>=a);
+      if(requestedMinutes==null || !windows.some(([a,b])=>requestedMinutes>=a&&requestedMinutes<=b) || requestedMinutes%slotMinutes!==0){
+        return res.status(400).json({error:'Hora fora dels torns de reserva configurats.'});
+      }
       if(pax>maxPax)return res.status(400).json({error:'Per a més de '+maxPax+' persones cal contactar directament amb el restaurant.'});
+
+      if(rules.oneReservationPerSlot!==false){
+        const slotTaken=(reserves.reservations||[]).some(r=>r.date===date&&r.time===time&&!['CANCEL_LADA','Cancel·lada','CANCELLED'].includes(String(r.status||'')));
+        if(slotTaken)return res.status(409).json({error:'Aquest interval de reserva ja està ocupat. Tria una altra hora.'});
+      }
 
       const duplicate=(reserves.reservations||[]).find(r=>r.date===date && String(r.name||'').trim().toLowerCase()===name.toLowerCase() && !['CANCEL_LADA','Cancel·lada','CANCELLED'].includes(String(r.status||'')));
       if(duplicate)return res.status(409).json({error:'Ja existeix una reserva amb aquest nom per aquest dia.'});
