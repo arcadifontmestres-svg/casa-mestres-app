@@ -31,8 +31,9 @@ const links = createCenterLinks(store);
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(publicDir));
 
-app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, app: 'GRUP TRÀFEC', version: '0.8.0' });
+app.get('/api/health', async (_req, res) => {
+  const persistent = await miniappState.probe().catch(() => false);
+  res.json({ ok: true, app: 'DIRECCIÓ', version: '0.9.0', miniappsPersistent: persistent });
 });
 
 app.use('/api/govern', createGovernRouter(govern));
