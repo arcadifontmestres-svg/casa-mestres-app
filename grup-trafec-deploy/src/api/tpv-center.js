@@ -116,9 +116,9 @@ function createTpvCenterRouter(store, govern, miniappState) {
 
   router.get('/admin/catalog', async (req, res, next) => {
     try {
-      const centerId = String(req.query.centerId || '');
-      const center = govern.getCenter(centerId);
-      if (!center) return res.status(404).json({ error: 'Centre no trobat.' });
+      const s = session(req);
+      const centerId = s.center.id;
+      const center = s.center;
       const own = await tpvState(center);
       const source = await operationalCatalog(center);
       const saved = Array.isArray(own.catalogConfigs) ? own.catalogConfigs : [];
@@ -149,9 +149,10 @@ function createTpvCenterRouter(store, govern, miniappState) {
 
   router.put('/admin/catalog/:centerId', async (req, res, next) => {
     try {
-      const centerId = String(req.params.centerId || '');
-      const center = govern.getCenter(centerId);
-      if (!center) return res.status(404).json({ error:'Centre no trobat.' });
+      const s = session(req);
+      const centerId = s.center.id;
+      if (String(req.params.centerId || '') !== centerId) return res.status(403).json({ error:'Aquest dispositiu no pot configurar un altre centre.' });
+      const center = s.center;
       const input = req.body || {};
       const items = Array.isArray(input.items) ? input.items : [];
       await miniappState.update('tpv', centerId, () => legacyState(center), state => {
