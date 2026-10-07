@@ -8,7 +8,7 @@ main{padding:24px;max-width:1400px;margin:auto}.head{display:flex;justify-conten
 </style></head><body>
 <header><div><b>ARCADI GESTIÓ · RESERVES</b><div id="centreName"></div></div><span id="status" class="badge">VALIDANT</span></header>
 <main><div class="head"><div><h1>Reserves / Ocupació</h1><div class="muted">Miniapp autònoma del centre</div></div><button class="btn secondary" onclick="location.href='/centre.html'">← Centre</button></div>
-<div class="tabs panel"><button class="btn primary" onclick="R.view('reserves')">Reserves</button><button class="btn secondary" onclick="R.view('new')">+ Nova reserva</button><button class="btn secondary" onclick="R.view('config')">Back Office Reserves</button><button class="btn secondary" onclick="window.open('/reserves.html?centre='+encodeURIComponent(state?.center?.id||''),'_blank')">Obrir front públic</button></div>
+<div class="tabs panel"><button class="btn primary" onclick="R.view('reserves')">Reserves</button><button class="btn secondary" onclick="R.view('new')">+ Nova reserva</button><button class="btn secondary" onclick="window.open('/reserves.html?centre='+encodeURIComponent(state?.center?.id||''),'_blank')">Obrir front públic</button></div>
 <div id="content"><div class="panel">Carregant...</div></div></main>
 <script>
 (()=>{'use strict';
