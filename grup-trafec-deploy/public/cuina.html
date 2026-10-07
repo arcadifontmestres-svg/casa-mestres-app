@@ -1,44 +1,16 @@
-<!doctype html>
-<html lang="ca">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ARCADI · Cuina</title>
-<style>
-:root{font-family:Arial,sans-serif;color:#102b38;background:#eef3f5}*{box-sizing:border-box}body{margin:0}
-header{background:#0b2533;color:#fff;padding:18px 26px;display:flex;justify-content:space-between;align-items:center}
-header b{font-size:24px}.badge{background:#dff4ef;color:#126e59;padding:8px 12px;border-radius:999px;font-weight:800}
-main{padding:28px;max-width:1400px;margin:auto}.head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:24px}.head h1{font-size:38px;margin:0}.head p{margin:6px 0 0;color:#657987}
-.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}.card{background:#fff;border:1px solid #d8e1e5;border-radius:20px;padding:24px;min-height:180px;text-align:left}.card strong{display:block;font-size:32px;color:#19a4a7;margin-bottom:18px}.card b{display:block;font-size:22px}.card span{display:block;color:#6b7d87;margin-top:10px;line-height:1.35}
-button{cursor:pointer}.err{background:#fff3f3;color:#8b1e1e;border:1px solid #e9c7c7;padding:18px;border-radius:16px}
-@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.grid{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
+<!doctype html><html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ARCADI · Cuina</title><style>
+:root{font-family:Arial,sans-serif;color:#102b38;background:#eef3f5}*{box-sizing:border-box}body{margin:0;background:#eef3f5}header{background:#0b2533;color:#fff;padding:18px 26px;display:flex;justify-content:space-between;align-items:center}header b{font-size:24px}.badge{background:#dff4ef;color:#126e59;padding:8px 12px;border-radius:999px;font-weight:800}
+main{padding:24px;max-width:1300px;margin:auto}.head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px}.head h1{margin:0;font-size:36px}.muted{color:#6b7d87}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card,.panel{background:#fff;border:1px solid #d8e1e5;border-radius:18px;padding:18px}.card{cursor:pointer;text-align:left}.card strong{display:block;font-size:28px;color:#1ea4a7}.btn{border:0;border-radius:10px;padding:11px 15px;font-weight:800;cursor:pointer}.secondary{background:#e8eef1}.primary{background:#1ea4a7;color:#fff}table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid #e6ecef;text-align:left}.err{background:#fff0f0;color:#7d1d1d;padding:14px;border-radius:12px}
+@media(max-width:750px){.grid{grid-template-columns:1fr}}
+</style></head><body>
 <header><div><b>ARCADI GESTIÓ · CUINA</b><div id="centre"></div></div><span class="badge" id="status">VALIDANT</span></header>
-<main>
-<div class="head"><div><h1>Cuina</h1><p>App autònoma del centre. Només accés autoritzat per Direcció.</p></div></div>
-<div id="content"><div class="err">Comprovant permisos...</div></div>
-</main>
+<main><div class="head"><div><h1>Cuina</h1><div class="muted">Miniapp autònoma del centre</div></div><button class="btn secondary" onclick="location.href='/centre.html'">← Centre</button></div><div id="content"><div class="panel">Carregant...</div></div></main>
 <script>
-(()=>{
-'use strict';
-const TOKEN_KEY='arcadi_center_device_token_v1',token=localStorage.getItem(TOKEN_KEY)||'';
-const $=id=>document.getElementById(id);
-async function api(path){const r=await fetch(path,{headers:{'X-Center-Device-Token':token}}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Error '+r.status);return d}
-async function boot(){
- try{
-   const s=await api('/api/govern/center-module/gestio_cuina');
-   $('centre').textContent=s.center.name||s.center.code||'Centre';
-   $('status').textContent='AUTORITZAT';
-   $('content').innerHTML='<div class="grid">'+
-    '<button class="card" data-action="new"><strong>+</strong><b>Nou plat o base</b><span>Crear la fitxa mestra culinària.</span></button>'+
-    '<button class="card" data-action="recipes"><strong>0</strong><b>Receptari / Fitxes</b><span>Consultar plats i bases del centre.</span></button>'+
-    '<button class="card" data-action="production"><strong>0</strong><b>Produccions</b><span>Programar quantitats a produir.</span></button>'+
-    '<button class="card" data-action="needs"><strong>0</strong><b>Llista de necessitats</b><span>Mancances físiques de producte; encara no és compra.</span></button>'+
-   '</div>';
- }catch(e){$('status').textContent='BLOQUEJAT';$('content').innerHTML='<div class="err">'+e.message+'</div>'}
-}
-boot();
-})();
-</script>
-</body></html>
+(()=>{'use strict';const token=localStorage.getItem('arcadi_center_device_token_v1')||'', $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let data=null;
+async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json','X-Center-Device-Token':token,...(opt.headers||{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Error '+r.status);return d}
+async function boot(){try{data=await api('/api/miniapps-center/cuina/bootstrap');$('centre').textContent=data.center?.name||'';$('status').textContent=data.persistent?'AUTORITZAT · PERSISTENT':'AUTORITZAT';home()}catch(e){$('status').textContent='BLOQUEJAT';$('content').innerHTML='<div class="err">'+esc(e.message)+'</div>'}}
+function home(){const s=data.state||{};$('content').innerHTML='<div class="grid"><button class="card" onclick="C.list(\'recipes\')"><strong>'+((s.recipes||[]).length)+'</strong><b>Receptari / Fitxes</b><span>Plats i bases del centre.</span></button><button class="card" onclick="C.list(\'productions\')"><strong>'+((s.productions||[]).length)+'</strong><b>Produccions</b><span>Producció i mise en place.</span></button><button class="card" onclick="C.list(\'needs\')"><strong>'+((s.needs||[]).length)+'</strong><b>Llista de necessitats</b><span>Necessitats de producte.</span></button></div>'}
+function list(col){const title={recipes:'Receptari / Fitxes',productions:'Produccions',needs:'Llista de necessitats'}[col];const rows=data.state?.[col]||[];$('content').innerHTML='<div class="panel"><div class="head"><h2>'+title+'</h2><div><button class="btn secondary" onclick="C.home()">← Cuina</button> <button class="btn primary" onclick="C.add(\''+col+'\')">+ Nou registre</button></div></div><table><thead><tr><th>Nom</th><th>Data</th><th>Quantitat</th><th>Estat</th><th>Notes</th></tr></thead><tbody>'+rows.map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td>'+esc(x.date||'')+'</td><td>'+esc(x.quantity||'')+' '+esc(x.unit||'')+'</td><td>'+esc(x.status||'')+'</td><td>'+esc(x.notes||'')+'</td></tr>').join('')+'</tbody></table></div>'}
+async function add(col){const name=prompt('Nom');if(!name)return;const notes=prompt('Notes','')||'';await api('/api/miniapps-center/cuina/'+col,{method:'POST',body:JSON.stringify({name,notes,date:new Date().toISOString().slice(0,10)})});await boot();list(col)}
+window.C={home,list,add};boot()})();
+</script></body></html>
