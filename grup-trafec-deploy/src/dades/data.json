@@ -1,10 +1,41 @@
 {
-  "centers": [],
-  "centerPermissions": [],
+  "centers": [
+    {
+      "id": "center_sarriera_1930",
+      "code": "SARRIERA1930",
+      "name": "SARRIERA 1930",
+      "type": "Restaurant",
+      "company": "TRÀFEC SLU",
+      "active": true,
+      "activationCode": "815990",
+      "activationStatus": "NO_VINCULAT",
+      "satellitePath": "/centre.html",
+      "createdAt": "2026-10-07T19:35:00.000Z",
+      "updatedAt": "2026-10-07T19:35:00.000Z"
+    }
+  ],
+  "centerPermissions": [
+    {
+      "centerId": "center_sarriera_1930",
+      "functions": {
+        "reservations": true,
+        "crm": false,
+        "commercial": false,
+        "fitxatges": false,
+        "gestio_cuina": true,
+        "gestio_magatzem": false,
+        "control_normatiu": true,
+        "gestio_general": false,
+        "front_office_tpv": true
+      },
+      "updatedAt": "2026-10-07T19:35:00.000Z"
+    }
+  ],
   "employees": [],
   "recordAssignments": [],
   "crmContacts": [],
   "commercialProposals": [],
   "reservations": [],
-  "occupancyBlocks": []
+  "occupancyBlocks": [],
+  "centerDevices": []
 }
