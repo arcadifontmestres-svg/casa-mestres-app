@@ -89,21 +89,19 @@ function createReservesPublicRouter(govern, miniappState) {
       if(!center)return res.status(404).json({error:'Centre no disponible per reserves online.'});
       const {reserves,tpv}=await centerState(center);
       const config=reserves.config||{};
+      const criteria=centerCriteria(center);
       res.json({
         center,
         config:{
-          maxPax:Math.max(1,Number(config.maxPax||10)),
-          groupPhone:String(config.groupPhone||''),
-          cancellationPolicy:String(config.cancellationPolicy||''),
+          maxPax:criteria.reservations.maxPax,
+          groupPhone:criteria.reservations.groupPhone,
+          cancellationPolicy:criteria.reservations.cancellationPolicy,
           currency:String(config.currency||'EUR'),
           stripeEnabled:config.stripe?.enabled===true && Boolean(process.env.STRIPE_SECRET_KEY),
+          openingHours:criteria.openingHours,
           bookingRules:{
-            lunchStart:String(config.bookingRules?.lunchStart||'13:00'),
-            lunchEnd:String(config.bookingRules?.lunchEnd||'15:30'),
-            dinnerStart:String(config.bookingRules?.dinnerStart||''),
-            dinnerEnd:String(config.bookingRules?.dinnerEnd||''),
-            slotMinutes:Math.max(5,Number(config.bookingRules?.slotMinutes||10)),
-            oneReservationPerSlot:config.bookingRules?.oneReservationPerSlot!==false
+            slotMinutes:criteria.reservations.slotMinutes,
+            oneReservationPerSlot:criteria.reservations.oneReservationPerSlot
           }
         },
         layout:{
