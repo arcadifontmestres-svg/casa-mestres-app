@@ -14,7 +14,7 @@ input,select{width:100%;padding:9px;border:1px solid #ccd6db;border-radius:9px}.
 <header><div><b>DIRECCIÓ · CONFIGURACIÓ TPV</b><div id="centreName"></div></div><div id="status">CARREGANT</div></header>
 <main>
 <div class="panel"><div class="toolbar"><button class="btn secondary" onclick="history.back()">← Tornar</button><div><h1>Publicació al TPV</h1><div class="muted">Selecciona què apareix al TPV d’aquest centre i com es mostra.</div></div><button class="btn primary" style="margin-left:auto" id="saveBtn">Guardar publicació</button></div></div>
-<div class="panel"><div class="toolbar" style="margin-bottom:12px"><button class="btn secondary" onclick="TPVFilter.show('all')">Tot</button><button class="btn secondary" onclick="TPVFilter.show('dish')">Plats</button><button class="btn secondary" onclick="TPVFilter.show('sale')">Begudes / articles de venda</button><button class="btn secondary" onclick="TPVFilter.show('product')">Productes</button></div><div id="content">Carregant catàleg...</div></div>
+<div class="panel"><div class="toolbar" style="margin-bottom:12px"><button class="btn secondary" onclick="TPVFilter.show('all')">Tot</button><button class="btn secondary" onclick="TPVFilter.show('dish')">Plats</button><button class="btn secondary" onclick="TPVFilter.show('sale')">Begudes / articles de venda</button><button class="btn secondary" onclick="TPVFilter.show('product')">Productes</button><span style="flex:1"></span><button class="btn secondary" onclick="TPVFilter.selectVisible(true)">Seleccionar tots</button><button class="btn secondary" onclick="TPVFilter.selectVisible(false)">Desmarcar tots</button></div><div id="content">Carregant catàleg...</div></div>
 </main>
 <script>
 (()=>{
@@ -31,7 +31,16 @@ function render(){
  '</tbody></table>';
  $('status').textContent='PREPARAT';
 }
-window.TPVFilter={show:type=>{currentFilter=type;render()}};
+window.TPVFilter={
+ show:type=>{currentFilter=type;render()},
+ selectVisible:value=>{
+   document.querySelectorAll('tr[data-row]').forEach(tr=>{
+     if(tr.style.display==='none') return;
+     const cb=tr.querySelector('.active');
+     if(cb) cb.checked=value;
+   });
+ }
+};
 $('saveBtn').onclick=async()=>{
  try{
   $('status').textContent='GUARDANT...';
