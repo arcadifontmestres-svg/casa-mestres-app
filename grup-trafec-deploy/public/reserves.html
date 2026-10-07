@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARCADI · Reserves online</title>
+<style>
+:root{--ink:#102b38;--muted:#687a84;--accent:#1ea4a7;--bg:#eef3f5;--line:#d5e0e4}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif}
+.wrap{max-width:820px;margin:auto;padding:18px}.head{text-align:center;padding:18px 0 24px}.head h1{font-size:40px;margin:0}.head p{letter-spacing:3px;color:var(--muted);margin:8px 0 0}
+.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.wide{grid-column:1/-1}
+label{display:block;margin:10px 0 6px;font-weight:700;color:#53646d}
+input,select,textarea{width:100%;padding:14px;border:1px solid #c8d4d9;border-radius:13px;background:#fff;font:inherit;font-size:16px}
+textarea{min-height:90px}.btn{width:100%;border:0;border-radius:14px;padding:15px;background:var(--accent);color:#fff;font-size:18px;font-weight:800;margin-top:14px;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:not-allowed}.info{background:#f1f7f7;border-left:5px solid var(--accent);padding:13px;border-radius:12px;margin-top:14px}
+.muted{color:var(--muted);font-size:13px}.ok{background:#e7f5ee;border:1px solid #acd7c0;padding:14px;border-radius:12px}.err{background:#fff0f0;border:1px solid #dfb1b1;padding:14px;border-radius:12px;color:#7f2424}
+.tableHint{font-size:12px;color:var(--muted);margin-top:5px}
+@media(max-width:620px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.wrap{padding:10px}.head h1{font-size:32px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="head"><h1 id="brand">Reserves</h1><p>RESERVA ONLINE</p></header>
+<div id="app" class="card">Carregant centres...</div>
+</div>
+<script>
+(()=>{'use strict';
+let centers=[],cfg=null;
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const euro=v=>(Number(v)||0).toLocaleString('ca-ES',{style:'currency',currency:'EUR'});
+const today=()=>{const d=new Date(),o=d.getTimezoneOffset();return new Date(d.getTime()-o*60000).toISOString().slice(0,10)};
+async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json',...(opt.headers||{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Error '+r.status);return d}
+
+async function loadCenters(){
+ try{
+  const out=await api('/api/reserves-public/centers');centers=out.items||[];
+  if(!centers.length){$('app').innerHTML='<div class="err">No hi ha cap centre disponible per reserves online.</div>';return}
+  const q=new URLSearchParams(location.search),wanted=q.get('centre')||'';
+  const selected=centers.find(c=>c.id===wanted||c.code===wanted)||centers[0];
+  renderCenterSelector(selected.id);
+  await loadCenter(selected.id);
+ }catch(e){$('app').innerHTML='<div class="err">'+esc(e.message)+'</div>'}
+}
+
+function renderCenterSelector(centerId){
+ $('app').innerHTML='<h2>Selecciona centre</h2><label>Restaurant / centre</label><select id="center">'+centers.map(c=>'<option value="'+esc(c.id)+'" '+(c.id===centerId?'selected':'')+'>'+esc(c.name)+'</option>').join('')+'</select><div id="centerForm" style="margin-top:16px">Carregant...</div>';
+ $('center').onchange=()=>loadCenter($('center').value);
+}
+
+async function loadCenter(centerId){
+ const holder=$('centerForm');holder.innerHTML='Carregant configuració...';
+ try{
+  cfg=await api('/api/reserves-public/config?centerId='+encodeURIComponent(centerId));
+  $('brand').textContent=cfg.center?.name||'Reserves';
+  renderForm();
+ }catch(e){holder.innerHTML='<div class="err">'+esc(e.message)+'</div>'}
+}
+
+function renderForm(){
+ const max=Math.max(1,Number(cfg.config?.maxPax||10));
+ const zones=cfg.layout?.zones||[],offers=cfg.offers||[];
+ const holder=$('centerForm');
+ holder.innerHTML=`
+  <div class="grid">
+    <div><label>Data</label><input id="date" type="date" min="${today()}" required></div>
+    <div><label>Hora</label><select id="time"><option value="">Selecciona...</option><option>13:00</option><option>13:30</option><option>14:00</option><option>14:30</option><option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option><option>22:00</option></select></div>
+    <div><label>Comensals</label><select id="pax">${Array.from({length:max},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join('')}</select></div>
+    <div><label>Zona</label><select id="zone"><option value="">Selecciona...</option>${zones.map(z=>'<option value="'+esc(z.id)+'">'+esc(z.name)+'</option>').join('')}</select></div>
+    <div><label>Taula</label><select id="table"><option value="">Assignació automàtica</option></select><div class="tableHint" id="tableHint"></div></div>
+    <div><label>Menú / oferta</label><select id="offer"><option value="">Sense menú assignat</option>${offers.map(o=>'<option value="'+esc(o.id)+'">'+esc(o.name)+(o.price?' · '+euro(o.price):'')+'</option>').join('')}</select></div>
+  </div>
+  <div id="offerInfo" class="info">${offers.length?'Selecciona una oferta si correspon.':'Aquest centre encara no té menús o promocions publicats.'}</div>
+  <div class="info">Per a més de <b>${max} persones</b>, contacta directament amb el centre${cfg.config?.groupPhone?': <b>'+esc(cfg.config.groupPhone)+'</b>':'.'}</div>
+  <hr>
+  <label>Nom i cognoms</label><input id="name" autocomplete="name">
+  <label>Telèfon / WhatsApp</label><input id="phone" inputmode="tel" autocomplete="tel">
+  <label>Email</label><input id="email" type="email" autocomplete="email">
+  <label>Observacions</label><textarea id="notes"></textarea>
+  <label><input id="terms" type="checkbox" style="width:auto"> Accepto les condicions de reserva i cancel·lació.</label>
+  <p class="muted">${esc(cfg.config?.cancellationPolicy||'')}</p>
+  <label><input id="marketing" type="checkbox" style="width:auto"> Accepto rebre comunicacions comercials. Opcional.</label>
+  <button id="submit" class="btn">Confirmar reserva</button>
+  <div id="result"></div>`;
+ $('zone').onchange=updateTables;$('pax').onchange=updateTables;$('offer').onchange=updateOffer;
+ $('submit').onclick=submit;updateTables();updateOffer();
+}
+
+function updateTables(){
+ const zoneId=$('zone')?.value||'',pax=Number($('pax')?.value||1),sel=$('table');if(!sel)return;
+ const zone=(cfg.layout?.zones||[]).find(z=>z.id===zoneId);
+ const tables=(zone?.tables||[]).filter(t=>Number(t.max||999)>=pax);
+ sel.innerHTML='<option value="">Assignació automàtica</option>'+tables.map(t=>'<option value="'+esc(t.id)+'">'+esc(t.name)+' · '+Number(t.min||1)+'–'+Number(t.max||1)+' pax</option>').join('');
+ $('tableHint').textContent=zoneId?(tables.length?tables.length+' taules compatibles amb '+pax+' pax.':'No hi ha cap taula compatible; el centre farà l’assignació.'):'Selecciona una zona per veure les taules.';
+}
+function updateOffer(){
+ const o=(cfg.offers||[]).find(x=>x.id===$('offer')?.value);
+ $('offerInfo').innerHTML=o?'<b>'+esc(o.name)+'</b>'+(o.price?' · '+euro(o.price):'')+(o.description?'<br>'+esc(o.description):''):'Sense oferta seleccionada.';
+}
+async function submit(){
+ const out=$('result'),btn=$('submit');out.className='';out.textContent='';
+ const required=['date','time','name','phone','email'];
+ if(required.some(id=>!$(id).value.trim())){out.className='err';out.textContent='Completa data, hora, nom, telèfon i email.';return}
+ if(!$('terms').checked){out.className='err';out.textContent='Cal acceptar les condicions.';return}
+ btn.disabled=true;btn.textContent='Guardant reserva...';
+ try{
+  const data=await api('/api/reserves-public/reservations',{method:'POST',body:JSON.stringify({
+    centerId:cfg.center.id,date:$('date').value,time:$('time').value,pax:Number($('pax').value),
+    zoneId:$('zone').value,tableId:$('table').value,offerId:$('offer').value,
+    name:$('name').value,phone:$('phone').value,email:$('email').value,notes:$('notes').value,
+    termsAccepted:$('terms').checked,marketing:$('marketing').checked
+  })});
+  if(data.checkoutUrl){out.className='ok';out.innerHTML='<b>Reserva creada.</b><br>Obrint el pagament segur...';location.href=data.checkoutUrl;return}
+  out.className='ok';out.innerHTML='<b>Reserva registrada.</b><br>Codi: <b>'+esc(data.reservation.code)+'</b><br>'+esc(data.message||'');
+  btn.textContent='Reserva registrada';
+ }catch(e){out.className='err';out.textContent=e.message;btn.disabled=false;btn.textContent='Confirmar reserva'}
+}
+loadCenters();
+})();
+</script>
+</body>
+</html>
