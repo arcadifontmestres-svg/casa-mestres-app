@@ -3,6 +3,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const { stripeRequest, createCheckoutSession, verifyStripeSignature } = require('../funcions/reserves-stripe');
+const { sendReservationConfirmation } = require('../funcions/reserves-notifications');
 
 function createReservesPublicRouter(govern, miniappState) {
   const router = express.Router();
@@ -260,11 +261,20 @@ function createReservesPublicRouter(govern, miniappState) {
         state.reservations.push(reservation);
       });
 
+      if(!checkoutUrl && reservation.status==='CONFIRMADA'){
+        reservation.notifications=await sendReservationConfirmation(center,reservation);
+        await miniappState.update('reserves',center.id,()=>emptyReservations(center),state=>{
+          const found=(state.reservations||[]).find(r=>r.id===reservation.id);
+          if(found){found.notifications=reservation.notifications;found.updatedAt=new Date().toISOString()}
+        });
+      }
+
       res.status(201).json({
         ok:true,
         reservation,
         checkoutUrl,
-        message:checkoutUrl?'Reserva creada. Continua amb el pagament segur.':'Reserva confirmada.'
+        message:checkoutUrl?'Reserva creada. Continua amb el pagament segur.':'Reserva confirmada.',
+        notifications:reservation.notifications||null
       });
     } catch(error){next(error)}
   });
@@ -296,7 +306,14 @@ function createReservesPublicRouter(govern, miniappState) {
         saved={...found};
       });
       if(!saved)return res.status(404).json({error:'Reserva no trobada.'});
-      res.json({ok:true,paid:session.payment_status==='paid',reservation:saved});
+      if(session.payment_status==='paid' && saved.notifications?.email?.status!=='ENVIAT' && saved.notifications?.whatsapp?.status!=='ENVIAT'){
+        saved.notifications=await sendReservationConfirmation(center,saved);
+        await miniappState.update('reserves',center.id,()=>emptyReservations(center),state=>{
+          const found=(state.reservations||[]).find(r=>r.id===saved.id);
+          if(found){found.notifications=saved.notifications;found.updatedAt=new Date().toISOString()}
+        });
+      }
+      res.json({ok:true,paid:session.payment_status==='paid',reservation:saved,notifications:saved.notifications||null});
     } catch(error){next(error)}
   });
 
