@@ -23,15 +23,21 @@ function postForm(hostname, path, headers, form) {
   });
 }
 
-async function gmailAccessToken() {
+async function gmailAccessToken(miniappState, centerId) {
   const clientId=String(process.env.GOOGLE_CLIENT_ID||'').trim();
   const clientSecret=String(process.env.GOOGLE_CLIENT_SECRET||'').trim();
-  const refreshToken=String(process.env.RESERVES_GMAIL_REFRESH_TOKEN||'').trim();
-  if(!clientId||!clientSecret||!refreshToken)return '';
+  if(!clientId||!clientSecret||!miniappState||!centerId)return {token:'',email:''};
+  const state=await miniappState.read('reserves-mail',centerId,()=>({gmail:null}));
+  const gmail=state.gmail||{};
+  if(!gmail.refreshToken)return {token:'',email:gmail.email||''};
+  if(gmail.accessToken && Number(gmail.expiresAt||0) > Date.now()+60000) return {token:gmail.accessToken,email:gmail.email||''};
   const out=await postForm('oauth2.googleapis.com','/token',{},{
-    client_id:clientId,client_secret:clientSecret,refresh_token:refreshToken,grant_type:'refresh_token'
+    client_id:clientId,client_secret:clientSecret,refresh_token:gmail.refreshToken,grant_type:'refresh_token'
   });
-  return String(out.access_token||'');
+  const token=String(out.access_token||'');
+  if(!token)return {token:'',email:gmail.email||''};
+  await miniappState.write('reserves-mail',centerId,{gmail:{...gmail,accessToken:token,refreshToken:out.refresh_token||gmail.refreshToken,expiresAt:Date.now()+Number(out.expires_in||3600)*1000}});
+  return {token,email:gmail.email||''};
 }
 
 function validEmail(value){return /^[^\s<>@,;]+@[^\s<>@,;]+\.[^\s<>@,;]+$/.test(String(value||''))}
@@ -71,11 +77,12 @@ function mimeMessage(from,to,subject,text,html){
   ].join('\r\n');
 }
 
-async function sendEmail(center,reservation){
-  const from=String(process.env.RESERVES_FROM_EMAIL||'').trim();
-  if(!from||!validEmail(from)||!validEmail(reservation.email))return {status:'NO_CONFIGURAT'};
-  const token=await gmailAccessToken();
-  if(!token)return {status:'NO_CONFIGURAT'};
+async function sendEmail(miniappState,center,reservation){
+  if(!validEmail(reservation.email))return {status:'NO_CONFIGURAT'};
+  const auth=await gmailAccessToken(miniappState,center.id);
+  const from=String(auth.email||process.env.RESERVES_FROM_EMAIL||'').trim();
+  const token=auth.token;
+  if(!from||!validEmail(from)||!token)return {status:'NO_CONFIGURAT'};
   const raw=Buffer.from(mimeMessage(from,reservation.email,'Reserva confirmada · '+String(center.name||''),messageText(center,reservation),messageHtml(center,reservation))).toString('base64url');
   const response=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{
     method:'POST',
@@ -112,10 +119,10 @@ async function sendWhatsApp(center,reservation){
   return {status:'ENVIAT',id:String(out.sid||'')};
 }
 
-async function sendReservationConfirmation(center,reservation){
+async function sendReservationConfirmation(miniappState,center,reservation){
   const now=new Date().toISOString();
   const result={email:{status:'NO_CONFIGURAT',at:now},whatsapp:{status:'NO_CONFIGURAT',at:now}};
-  try{result.email={...(await sendEmail(center,reservation)),at:now}}catch(error){result.email={status:'ERROR',error:String(error.message||error),at:now}}
+  try{result.email={...(await sendEmail(miniappState,center,reservation)),at:now}}catch(error){result.email={status:'ERROR',error:String(error.message||error),at:now}}
   try{result.whatsapp={...(await sendWhatsApp(center,reservation)),at:now}}catch(error){result.whatsapp={status:'ERROR',error:String(error.message||error),at:now}}
   return result;
 }
