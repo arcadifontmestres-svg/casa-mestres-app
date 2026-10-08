@@ -31,6 +31,13 @@
     return data;
   }
 
+  async function openDirectionTpv(path) {
+    const access = await govApi('/api/govern/tpv-direction-token', { method: 'POST', body: '{}' });
+    const url = new URL(path, window.location.origin);
+    url.searchParams.set('direction_token', access.token);
+    window.location.href = url.pathname + url.search;
+  }
+
   async function openMiniapp(path) {
     let center = selectedCenter();
     const activeCenters = centers.filter(item => item.active !== false);
@@ -215,8 +222,7 @@
     document.querySelectorAll('[data-tool]').forEach(btn => btn.onclick = () => {
       if (btn.dataset.tool === 'public_reserves') return window.open('/reserves','_blank');
       if (btn.dataset.tool === 'front_tpv') {
-        window.location.href = '/tpv.html?standalone=1';
-        return;
+        return openDirectionTpv('/tpv.html').catch(showError);
       }
       const url=routes[btn.dataset.tool];
       if(url) openMiniapp(url).catch(showError);
@@ -245,7 +251,8 @@
       btn.onclick = () => {
         const t = btn.dataset.tool;
         if (t === 'rrhh_admin') return refreshGovernState().then(renderRrhh).catch(showError);
-        const routes = {mini_tpv:'/tpv-back.html',mini_reserves:'/reserves-centre.html',mini_fitxatges:'/fitxatges-centre.html',mini_cuina:'/cuina.html',mini_appcc:'/appcc.html',mini_magatzem:'/magatzem.html'};
+        if (t === 'mini_tpv') return openDirectionTpv('/tpv-back.html').catch(showError);
+        const routes = {mini_reserves:'/reserves-centre.html',mini_fitxatges:'/fitxatges-centre.html',mini_cuina:'/cuina.html',mini_appcc:'/appcc.html',mini_magatzem:'/magatzem.html'};
         if (routes[t]) return openMiniapp(routes[t]).catch(showError);
         if (t === 'crm') return loadCrm().catch(showError);
         if (t === 'commercial') return loadCommercial().catch(showError);
