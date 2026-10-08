@@ -33,12 +33,18 @@ function createTpvCenterRouter(store, govern, miniappState) {
         address: '',
         phone: '',
         logo: '',
-        receiptFooter: ''
+        receiptFooter: '',
+        vatRate: 10
       },
       printer: {
         paperWidth: '80',
         printerName: '',
         autoPrint: false
+      },
+      kitchenPrinter: {
+        paperWidth: '80',
+        printerName: '',
+        autoPrint: true
       },
       updatedAt: null
     };
@@ -210,12 +216,18 @@ function createTpvCenterRouter(store, govern, miniappState) {
             address: String(input.business?.address ?? previous.business?.address ?? '').slice(0,240),
             phone: String(input.business?.phone ?? previous.business?.phone ?? '').slice(0,80),
             logo: String(input.business?.logo ?? previous.business?.logo ?? '').slice(0,1500000),
-            receiptFooter: String(input.business?.receiptFooter ?? previous.business?.receiptFooter ?? '').slice(0,500)
+            receiptFooter: String(input.business?.receiptFooter ?? previous.business?.receiptFooter ?? '').slice(0,500),
+            vatRate: Math.max(0, Math.min(30, Number(input.business?.vatRate ?? previous.business?.vatRate ?? 10) || 10))
           },
           printer: {
             paperWidth: ['58','80'].includes(String(input.printer?.paperWidth)) ? String(input.printer.paperWidth) : String(previous.printer?.paperWidth || '80'),
             printerName: String(input.printer?.printerName ?? previous.printer?.printerName ?? '').slice(0,160),
             autoPrint: input.printer?.autoPrint === true
+          },
+          kitchenPrinter: {
+            paperWidth: ['58','80'].includes(String(input.kitchenPrinter?.paperWidth)) ? String(input.kitchenPrinter.paperWidth) : String(previous.kitchenPrinter?.paperWidth || '80'),
+            printerName: String(input.kitchenPrinter?.printerName ?? previous.kitchenPrinter?.printerName ?? '').slice(0,160),
+            autoPrint: input.kitchenPrinter?.autoPrint !== false
           },
           updatedAt: new Date().toISOString()
         };
@@ -243,6 +255,8 @@ function createTpvCenterRouter(store, govern, miniappState) {
           pax: Math.max(1, Number(input.pax) || 1),
           status: 'open',
           lines: [],
+          kitchenPrintCount: 0,
+          kitchenSentAt: null,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
@@ -266,7 +280,10 @@ function createTpvCenterRouter(store, govern, miniappState) {
         }
         const input = req.body || {};
         if (input.pax != null) order.pax = Math.max(1, Number(input.pax) || 1);
-        if (input.status != null) order.status = String(input.status);
+        if (input.status != null) {
+          order.status = String(input.status);
+          if (order.status === 'sent') order.kitchenSentAt = new Date().toISOString();
+        }
         if (Array.isArray(input.lines)) order.lines = input.lines.slice(0,500).map(line => ({
           key: String(line.key || ''),
           type: String(line.type || ''),
@@ -284,15 +301,67 @@ function createTpvCenterRouter(store, govern, miniappState) {
     } catch (error) { next(error); }
   });
 
+  router.post('/orders/:id/kitchen', async (req, res, next) => {
+    try {
+      const s = session(req);
+      let payload;
+      await miniappState.update('tpv', s.center.id, () => legacyState(s.center), state => {
+        state.orders = state.orders || [];
+        const order = state.orders.find(x => x.id === req.params.id && x.centerId === s.center.id);
+        if (!order) {
+          const error = new Error('Comanda no trobada.');
+          error.status = 404;
+          throw error;
+        }
+        order.kitchenPrintCount = Number(order.kitchenPrintCount || 0) + 1;
+        order.kitchenSentAt = new Date().toISOString();
+        order.status = 'sent';
+        order.updatedAt = order.kitchenSentAt;
+        payload = {
+          orderId: order.id,
+          tableName: order.tableName,
+          pax: order.pax,
+          zone: order.zone,
+          lines: order.lines || [],
+          sentAt: order.kitchenSentAt,
+          printNumber: order.kitchenPrintCount
+        };
+      });
+      res.json(payload);
+    } catch (error) { next(error); }
+  });
+
   router.get('/backoffice', async (req, res, next) => {
     try {
       const s = session(req);
       const own = await tpvState(s.center);
+      const from = String(req.query.from || '').slice(0,10);
+      const to = String(req.query.to || '').slice(0,10);
+      const day = value => String(value || '').slice(0,10);
+      const tickets = (own.tickets || []).filter(t => (!from || day(t.createdAt) >= from) && (!to || day(t.createdAt) <= to));
+      const byPayment = {};
+      const byDay = {};
+      let total = 0;
+      for (const t of tickets) {
+        const amount = Number(t.total || 0);
+        total += amount;
+        const method = t.paymentMethod || 'ALTRES';
+        byPayment[method] = (byPayment[method] || 0) + amount;
+        const d = day(t.createdAt);
+        byDay[d] = (byDay[d] || 0) + amount;
+      }
       res.json({
         config: own.config || defaultConfig(s.center),
-        tickets: own.tickets || [],
+        tickets,
         cashSessions: own.cashSessions || [],
-        openCash: (own.cashSessions || []).find(x => !x.closedAt) || null
+        openCash: (own.cashSessions || []).find(x => !x.closedAt) || null,
+        summary: {
+          total,
+          ticketCount: tickets.length,
+          averageTicket: tickets.length ? total / tickets.length : 0,
+          byPayment,
+          byDay
+        }
       });
     } catch (error) { next(error); }
   });
@@ -338,6 +407,9 @@ function createTpvCenterRouter(store, govern, miniappState) {
         current.closedAt = new Date().toISOString();
         current.totals = totals;
         current.ticketCount = tickets.length;
+        current.cashSales = Number(totals.EFECTIU || 0);
+        current.expectedCash = Number(current.openingAmount || 0) + current.cashSales;
+        current.cashDifference = current.closingAmount - current.expectedCash;
         closed = { ...current };
       });
       res.json(closed);
@@ -364,10 +436,18 @@ function createTpvCenterRouter(store, govern, miniappState) {
           return;
         }
         const openCash = state.cashSessions.find(x => !x.closedAt) || null;
+        if (!openCash) {
+          const error = new Error('Cal obrir caixa abans de cobrar.');
+          error.status = 409;
+          throw error;
+        }
         state.counters.ticket = Number(state.counters.ticket || 0) + 1;
         const year = new Date().getFullYear();
         const number = String(state.counters.ticket).padStart(6, '0');
         const total = (order.lines || []).reduce((sum,l)=>sum+(Number(l.qty)||0)*(Number(l.price)||0),0);
+        const vatRate = Math.max(0, Number(state.config?.business?.vatRate || 10));
+        const baseAmount = total / (1 + vatRate / 100);
+        const vatAmount = total - baseAmount;
         const ticket = {
           id: 'ticket_' + crypto.randomUUID(),
           centerId: s.center.id,
@@ -377,6 +457,10 @@ function createTpvCenterRouter(store, govern, miniappState) {
           pax: order.pax,
           lines: order.lines || [],
           total,
+          baseAmount,
+          vatRate,
+          vatAmount,
+          business: { ...(state.config?.business || {}) },
           paymentMethod: String(req.body?.paymentMethod || 'EFECTIU').toUpperCase(),
           cashSessionId: openCash?.id || null,
           createdAt: new Date().toISOString()
