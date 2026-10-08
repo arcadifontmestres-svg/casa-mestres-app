@@ -52,11 +52,14 @@ function items(){
 }
 function render(){
  $('centreName').textContent=state.center?.name||'Centre';$('status').textContent=state.persistent?'AUTORITZAT · PERSISTENT':'AUTORITZAT';
- if(!(state.config?.zones||[]).length)return config();
+ if(!(state.config?.zones||[]).length){
+   $('content').innerHTML='<div class="panel"><h2>TPV pendent de configurar</h2><p class="muted">El FRONT només és operatiu. Zones, taules, catàleg, impressores i dades fiscals es configuren a TPV BACK.</p><button class="btn primary" onclick="TPV.back()">OBRIR TPV BACK</button></div>';
+   return;
+ }
  if(!zoneId)zoneId=state.config.zones[0].id;
  const zone=state.config.zones.find(z=>z.id===zoneId)||state.config.zones[0],open=(state.orders||[]).filter(o=>o.status!=='closed').length;
  $('content').innerHTML='<div class="panel"><div class="tabs">'+state.config.zones.map(z=>'<button class="tab '+(z.id===zone.id?'active':'')+'" onclick="TPV.zone(\''+esc(z.id)+'\')">'+esc(z.name)+'</button>').join('')+
- '<button class="btn secondary" onclick="location.href=\'/tpv-back.html\'">TPV BACK</button><span style="margin-left:auto"><b>'+open+'</b> serveis oberts</span></div></div>'+
+ '<button class="btn secondary" onclick="TPV.back()">TPV BACK</button><span style="margin-left:auto"><b>'+open+'</b> serveis oberts</span></div></div>'+
  '<div class="tables">'+(zone.tables||[]).map(t=>{const o=activeOrder(zone.id,t.id);return'<button class="table '+(o?'occupied ':'')+(o?.status==='bill'?'bill':'')+'" onclick="TPV.open(\''+esc(zone.id)+'\',\''+esc(t.id)+'\')"><strong>'+esc(t.name)+'</strong><span style="display:block;margin-bottom:6px">'+t.min+'–'+t.max+' pax</span><b style="display:block;margin-bottom:4px">'+(o?(o.status==='bill'?'COMPTE':o.status==='sent'?'ENVIADA':'OBERTA'):'LLIURE')+'</b>'+(o?'<small style="display:block">'+o.pax+' pax · '+money(orderTotal(o))+'</small>':'')+'</button>'}).join('')+'</div>';
 }
 function config(){draftZones=JSON.parse(JSON.stringify(state.config?.zones||[]));drawConfig()}
@@ -211,6 +214,7 @@ async function boot(){
  }
 }
 window.TPV={
+ back:()=>{const q=standalone?'?standalone=1':'';location.href='/tpv-back.html'+q},
  zone:id=>{zoneId=id;render()},config,home:()=>render(),backoffice,cash:()=>backoffice(),sales:()=>backoffice(),
  addZone:()=>{draftZones.push({id:uid('zone'),name:'',tables:[]});drawConfig()},dz:i=>{draftZones.splice(i,1);drawConfig()},rz:(i,v)=>draftZones[i].name=v,
  addTable:i=>{draftZones[i].tables=draftZones[i].tables||[];draftZones[i].tables.push({id:uid('table'),name:'',min:1,max:2});drawConfig()},dt:(zi,ti)=>{draftZones[zi].tables.splice(ti,1);drawConfig()},
