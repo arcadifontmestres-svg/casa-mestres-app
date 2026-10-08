@@ -26,7 +26,7 @@ function createMiniappState({ legacyStore } = {}) {
 
   async function read(app, centerId, fallbackFactory = () => ({})) {
     const k = key(app, centerId);
-    const redis = await connection().catch(() => null);
+    const redis = await connection();
     if (redis) {
       const raw = await redis.get(k);
       if (raw) return JSON.parse(raw);
@@ -42,7 +42,7 @@ function createMiniappState({ legacyStore } = {}) {
     const k = key(app, centerId);
     const clean = JSON.parse(JSON.stringify(value || {}));
     memory.set(k, clean);
-    const redis = await connection().catch(() => null);
+    const redis = await connection();
     if (redis) await redis.set(k, JSON.stringify(clean));
     return JSON.parse(JSON.stringify(clean));
   }
