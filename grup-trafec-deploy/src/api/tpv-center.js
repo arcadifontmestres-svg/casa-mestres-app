@@ -37,6 +37,7 @@ function createTpvCenterRouter(store, govern, miniappState) {
         vatRate: 10
       },
       printer: {
+        profile: 'generic_escpos_80',
         mode: 'browser',
         paperWidth: '80',
         printerName: '',
@@ -46,6 +47,7 @@ function createTpvCenterRouter(store, govern, miniappState) {
         bridgeUrl: ''
       },
       kitchenPrinter: {
+        profile: 'generic_escpos_80',
         mode: 'browser',
         paperWidth: '80',
         printerName: '',
