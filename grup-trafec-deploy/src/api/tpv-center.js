@@ -46,6 +46,13 @@ function createTpvCenterRouter(store, govern, miniappState) {
         printerName: '',
         autoPrint: true
       },
+      peripherals: {
+        cashDrawer: { enabled:false, connection:'printer', device:'' },
+        paymentTerminal: { enabled:false, connection:'network', device:'', provider:'' },
+        automaticCash: { enabled:false, connection:'network', device:'', provider:'' },
+        barcodeScanner: { enabled:false, connection:'usb', device:'', mode:'keyboard' },
+        extraDevices: []
+      },
       updatedAt: null
     };
   }
@@ -195,6 +202,7 @@ function createTpvCenterRouter(store, govern, miniappState) {
       const input = req.body && typeof req.body === 'object' ? req.body : {};
       let saved;
       await miniappState.update('tpv', s.center.id, () => legacyState(s.center), state => {
+        const previous = state.config || defaultConfig(s.center);
         const zones = Array.isArray(input.zones) ? input.zones.map(zone => ({
           id: String(zone.id || '').trim().slice(0,80),
           name: String(zone.name || '').trim().slice(0,120),
@@ -204,8 +212,7 @@ function createTpvCenterRouter(store, govern, miniappState) {
             min: Math.max(1, Number(table.min) || 1),
             max: Math.max(1, Number(table.max) || Number(table.min) || 1)
           })).filter(x => x.id && x.name) : []
-        })).filter(x => x.id && x.name) : [];
-        const previous = state.config || defaultConfig(s.center);
+        })).filter(x => x.id && x.name) : (previous.zones || []);
         saved = {
           centerId: s.center.id,
           zones,
@@ -227,7 +234,42 @@ function createTpvCenterRouter(store, govern, miniappState) {
           kitchenPrinter: {
             paperWidth: ['58','80'].includes(String(input.kitchenPrinter?.paperWidth)) ? String(input.kitchenPrinter.paperWidth) : String(previous.kitchenPrinter?.paperWidth || '80'),
             printerName: String(input.kitchenPrinter?.printerName ?? previous.kitchenPrinter?.printerName ?? '').slice(0,160),
-            autoPrint: input.kitchenPrinter?.autoPrint !== false
+            autoPrint: input.kitchenPrinter?.autoPrint == null ? previous.kitchenPrinter?.autoPrint !== false : input.kitchenPrinter.autoPrint !== false
+          },
+          peripherals: {
+            cashDrawer: {
+              enabled: input.peripherals?.cashDrawer?.enabled == null ? previous.peripherals?.cashDrawer?.enabled === true : input.peripherals.cashDrawer.enabled === true,
+              connection: String(input.peripherals?.cashDrawer?.connection ?? previous.peripherals?.cashDrawer?.connection ?? 'printer').slice(0,40),
+              device: String(input.peripherals?.cashDrawer?.device ?? previous.peripherals?.cashDrawer?.device ?? '').slice(0,160)
+            },
+            paymentTerminal: {
+              enabled: input.peripherals?.paymentTerminal?.enabled == null ? previous.peripherals?.paymentTerminal?.enabled === true : input.peripherals.paymentTerminal.enabled === true,
+              connection: String(input.peripherals?.paymentTerminal?.connection ?? previous.peripherals?.paymentTerminal?.connection ?? 'network').slice(0,40),
+              device: String(input.peripherals?.paymentTerminal?.device ?? previous.peripherals?.paymentTerminal?.device ?? '').slice(0,160),
+              provider: String(input.peripherals?.paymentTerminal?.provider ?? previous.peripherals?.paymentTerminal?.provider ?? '').slice(0,120)
+            },
+            automaticCash: {
+              enabled: input.peripherals?.automaticCash?.enabled == null ? previous.peripherals?.automaticCash?.enabled === true : input.peripherals.automaticCash.enabled === true,
+              connection: String(input.peripherals?.automaticCash?.connection ?? previous.peripherals?.automaticCash?.connection ?? 'network').slice(0,40),
+              device: String(input.peripherals?.automaticCash?.device ?? previous.peripherals?.automaticCash?.device ?? '').slice(0,160),
+              provider: String(input.peripherals?.automaticCash?.provider ?? previous.peripherals?.automaticCash?.provider ?? '').slice(0,120)
+            },
+            barcodeScanner: {
+              enabled: input.peripherals?.barcodeScanner?.enabled == null ? previous.peripherals?.barcodeScanner?.enabled === true : input.peripherals.barcodeScanner.enabled === true,
+              connection: String(input.peripherals?.barcodeScanner?.connection ?? previous.peripherals?.barcodeScanner?.connection ?? 'usb').slice(0,40),
+              device: String(input.peripherals?.barcodeScanner?.device ?? previous.peripherals?.barcodeScanner?.device ?? '').slice(0,160),
+              mode: String(input.peripherals?.barcodeScanner?.mode ?? previous.peripherals?.barcodeScanner?.mode ?? 'keyboard').slice(0,40)
+            },
+            extraDevices: Array.isArray(input.peripherals?.extraDevices)
+              ? input.peripherals.extraDevices.slice(0,30).map(x => ({
+                  id: String(x.id || crypto.randomUUID()).slice(0,80),
+                  name: String(x.name || '').slice(0,120),
+                  type: String(x.type || '').slice(0,80),
+                  connection: String(x.connection || '').slice(0,40),
+                  device: String(x.device || '').slice(0,160),
+                  enabled: x.enabled !== false
+                }))
+              : (previous.peripherals?.extraDevices || [])
           },
           updatedAt: new Date().toISOString()
         };
