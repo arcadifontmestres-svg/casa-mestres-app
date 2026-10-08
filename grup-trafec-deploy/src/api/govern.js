@@ -55,6 +55,11 @@ function createGovernRouter(govern) {
     catch (error) { next(error); }
   });
 
+  router.post('/tpv-direction-token', (_req, res, next) => {
+    try { res.json(govern.issueDirectionTpvAccessToken()); }
+    catch (error) { next(error); }
+  });
+
   router.post('/centres/:id/access-token', (req, res, next) => {
     try { res.json(govern.issueDirectionAccessToken(req.params.id)); }
     catch (error) { next(error); }
