@@ -110,6 +110,7 @@ function createTpvCenterRouter(store, govern, miniappState) {
       sort: Number(cfg.sort || 0),
       image: String(cfg.image || item.image || ''),
       buttonColor: String(cfg.buttonColor || ''),
+      kitchenPrint: cfg.kitchenPrint == null ? cfg.sourceType === 'dish' : cfg.kitchenPrint === true,
       onMenu: true
     };
   }
@@ -160,7 +161,8 @@ function createTpvCenterRouter(store, govern, miniappState) {
           zoneIds: Array.isArray(item.zones) ? item.zones : [],
           sort: 0,
           image: item.image || '',
-          buttonColor: ''
+          buttonColor: '',
+          kitchenPrint: item.sourceType === 'dish'
         }
       }));
       res.json({
@@ -196,6 +198,7 @@ function createTpvCenterRouter(store, govern, miniappState) {
             sort: Number(item.sort || 0),
             image: String(item.image || '').slice(0,1500000),
             buttonColor: String(item.buttonColor || '').slice(0,32),
+            kitchenPrint: item.kitchenPrint == null ? item.sourceType === 'dish' : item.kitchenPrint === true,
             updatedAt: new Date().toISOString()
           });
         }
@@ -375,12 +378,18 @@ function createTpvCenterRouter(store, govern, miniappState) {
         order.kitchenSentAt = new Date().toISOString();
         order.status = 'sent';
         order.updatedAt = order.kitchenSentAt;
+        const cfgByKey = new Map((state.catalogConfigs || []).map(x => [x.sourceType + ':' + x.sourceId, x]));
+        const kitchenLines = (order.lines || []).filter(line => {
+          const cfg = cfgByKey.get(String(line.type || '') + ':' + String(line.itemId || ''));
+          return cfg ? (cfg.kitchenPrint == null ? cfg.sourceType === 'dish' : cfg.kitchenPrint === true) : String(line.type || '') === 'dish';
+        });
         payload = {
           orderId: order.id,
           tableName: order.tableName,
           pax: order.pax,
           zone: order.zone,
-          lines: order.lines || [],
+          lines: kitchenLines,
+          skippedLines: (order.lines || []).length - kitchenLines.length,
           sentAt: order.kitchenSentAt,
           printNumber: order.kitchenPrintCount
         };
