@@ -176,8 +176,12 @@ function renderBlockForm(){
 function renderHome(){view.innerHTML=`<div class="head"><div><h1>GRUP TRÀFEC</h1><div class="muted">Gestió central del grup.</div></div></div><div class="panel"><b>Nucli nou actiu.</b><p>Les funcions es construeixen aquí una sola vegada. CRM, Comercial/Grups i Reserves/Ocupació ja comparteixen la mateixa font de dades.</p></div>`;setStatus('')}
 function showError(error){setStatus('Error');alert(error.message||error)}
 
-document.querySelector('[data-view="home"]').onclick=()=>{setActive('home');renderHome()};
-document.querySelector('[data-view="crm"]').onclick=()=>{setActive('crm');loadCrm().catch(showError)};
-document.querySelector('[data-view="commercial"]').onclick=()=>{setActive('commercial');loadCommercial().catch(showError)};
-document.querySelector('[data-view="reservations"]').onclick=()=>{setActive('reservations');loadReservations().catch(showError)};
-renderHome();
+const oldHome=document.querySelector('[data-view="home"]');
+const oldCrm=document.querySelector('[data-view="crm"]');
+const oldCommercial=document.querySelector('[data-view="commercial"]');
+const oldReservations=document.querySelector('[data-view="reservations"]');
+if(oldHome)oldHome.onclick=()=>{setActive('home');renderHome()};
+if(oldCrm)oldCrm.onclick=()=>{setActive('crm');loadCrm().catch(showError)};
+if(oldCommercial)oldCommercial.onclick=()=>{setActive('commercial');loadCommercial().catch(showError)};
+if(oldReservations)oldReservations.onclick=()=>{setActive('reservations');loadReservations().catch(showError)};
+if(oldHome||oldCrm||oldCommercial||oldReservations)renderHome();
