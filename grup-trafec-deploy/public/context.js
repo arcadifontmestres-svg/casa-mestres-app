@@ -241,7 +241,7 @@
       btn.onclick = () => {
         const t = btn.dataset.tool;
         if (t === 'rrhh_admin') return refreshGovernState().then(renderRrhh).catch(showError);
-        const routes = {mini_tpv:'/tpv.html',mini_reserves:'/reserves-centre.html',mini_fitxatges:'/fitxatges-centre.html',mini_cuina:'/cuina.html',mini_appcc:'/appcc.html',mini_magatzem:'/magatzem.html'};
+        const routes = {mini_tpv:'/tpv-back.html',mini_reserves:'/reserves-centre.html',mini_fitxatges:'/fitxatges-centre.html',mini_cuina:'/cuina.html',mini_appcc:'/appcc.html',mini_magatzem:'/magatzem.html'};
         if (routes[t]) return openMiniapp(routes[t]).catch(showError);
         if (t === 'crm') return loadCrm().catch(showError);
         if (t === 'commercial') return loadCommercial().catch(showError);
