@@ -100,11 +100,26 @@ function kitchenReceipt(data){
 }
 async function sendKitchen(){
  if(!(order.lines||[]).length)return alert('La comanda és buida.');
- const d=await api('/api/tpv-center/orders/'+encodeURIComponent(order.id)+'/kitchen',{method:'POST',body:'{}'});
- order.status='sent';order.kitchenSentAt=d.sentAt;order.kitchenPrintCount=d.printNumber;
- const i=state.orders.findIndex(x=>x.id===order.id);if(i>=0)state.orders[i]=order;
- if(state.config?.kitchenPrinter?.autoPrint!==false)kitchenReceipt(d);
- renderOrder();
+ let printWin=null;
+ if(state.config?.kitchenPrinter?.autoPrint!==false){
+   printWin=window.open('','_blank','width=440,height=760');
+   if(!printWin) alert('El navegador ha bloquejat la finestra d’impressió de cuina.');
+ }
+ try{
+   const d=await api('/api/tpv-center/orders/'+encodeURIComponent(order.id)+'/kitchen',{method:'POST',body:'{}'});
+   order.status='sent';order.kitchenSentAt=d.sentAt;order.kitchenPrintCount=d.printNumber;
+   const i=state.orders.findIndex(x=>x.id===order.id);if(i>=0)state.orders[i]=order;
+   if(printWin){
+     const p=state.config?.kitchenPrinter||{},w=String(p.paperWidth||'80')==='58'?'58mm':'80mm';
+     const rows=(d.lines||[]).map(l=>'<div style="padding:8px 0;border-bottom:1px dashed #000"><b style="font-size:20px">'+esc(l.qty)+' × '+esc(l.name)+'</b>'+(l.notes?'<div style="font-size:18px;font-weight:bold">*** '+esc(l.notes)+' ***</div>':'')+'</div>').join('');
+     const h='<!doctype html><html><head><meta charset="utf-8"><style>@page{size:'+w+' auto;margin:4mm}body{font-family:Arial,sans-serif;width:'+w+';margin:0;color:#000}h1,h2,p{margin:4px 0}.head{text-align:center;border-bottom:2px solid #000;padding-bottom:8px}.big{font-size:28px;font-weight:bold}</style></head><body><div class="head"><div class="big">CUINA</div><h1>TAULA '+esc(d.tableName||'')+'</h1><h2>'+esc(d.pax||'')+' PAX</h2><p>'+esc(new Date(d.sentAt||Date.now()).toLocaleTimeString('ca-ES',{hour:'2-digit',minute:'2-digit'}))+' · enviament '+esc(d.printNumber||1)+'</p></div>'+rows+'<script>window.onload=()=>window.print()<\/script></body></html>';
+     printWin.document.write(h);printWin.document.close();
+   }
+   renderOrder();
+ }catch(e){
+   if(printWin)printWin.close();
+   alert(e.message||'Error enviant a cuina.');
+ }
 }
 async function backoffice(from='',to=''){
  const q=new URLSearchParams();if(from)q.set('from',from);if(to)q.set('to',to);
