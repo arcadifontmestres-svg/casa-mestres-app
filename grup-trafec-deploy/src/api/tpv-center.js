@@ -89,7 +89,7 @@ function createTpvCenterRouter(store, govern, miniappState) {
       const response = await fetch('https://grup-trafec-operatiu.onrender.com/api/tpv-catalog', {
         headers: {
           'X-Arcadi-Company-Id': 'company_grup_trafec',
-          'X-Arcadi-Centre-Id': /sarriera/i.test(String(center.name || center.code || '')) ? 'restaurant_sarriera' : ''
+          'X-Arcadi-Centre-Id': center.id === 'direction_tpv' ? 'direction_tpv' : (/sarriera/i.test(String(center.name || center.code || '')) ? 'restaurant_sarriera' : String(center.id || ''))
         }
       });
       if (response.ok) source = await response.json();
@@ -137,6 +137,75 @@ function createTpvCenterRouter(store, govern, miniappState) {
         products: map(source.products, 'product'),
         persistent: miniappState.hasPersistentBackend()
       });
+    } catch (error) { next(error); }
+  });
+
+  function requireDirectionTpv(s) {
+    if (s.scope !== 'direction_tpv' && s.center?.id !== 'direction_tpv') {
+      const error = new Error('Aquesta operació només està disponible des de TPV BACK de Direcció.');
+      error.status = 403;
+      throw error;
+    }
+  }
+
+  router.get('/direction/targets', async (req, res, next) => {
+    try {
+      const s = session(req);
+      requireDirectionTpv(s);
+      const items = govern.listCenters({ includeInactive:false })
+        .filter(center => govern.getPermissions(center.id).functions.front_office_tpv === true)
+        .map(center => ({ id:center.id, code:center.code, name:center.name, company:center.company || '' }));
+      res.json({ items });
+    } catch (error) { next(error); }
+  });
+
+  router.post('/direction/apply-config', async (req, res, next) => {
+    try {
+      const s = session(req);
+      requireDirectionTpv(s);
+      const ids = [...new Set((Array.isArray(req.body?.centerIds) ? req.body.centerIds : []).map(String))];
+      const directionState = await tpvState(s.center);
+      const sourceConfig = directionState.config || defaultConfig(s.center);
+      const applied = [];
+      for (const id of ids) {
+        const center = govern.getCenter(id);
+        if (!center || center.active === false) continue;
+        if (govern.getPermissions(id).functions.front_office_tpv !== true) continue;
+        await miniappState.update('tpv', id, () => legacyState(center), state => {
+          state.config = JSON.parse(JSON.stringify({
+            ...sourceConfig,
+            centerId: id,
+            updatedAt: new Date().toISOString()
+          }));
+        });
+        applied.push(id);
+      }
+      res.json({ ok:true, applied });
+    } catch (error) { next(error); }
+  });
+
+  router.post('/direction/apply-catalog', async (req, res, next) => {
+    try {
+      const s = session(req);
+      requireDirectionTpv(s);
+      const ids = [...new Set((Array.isArray(req.body?.centerIds) ? req.body.centerIds : []).map(String))];
+      const directionState = await tpvState(s.center);
+      const source = Array.isArray(directionState.catalogConfigs) ? directionState.catalogConfigs : [];
+      const applied = [];
+      for (const id of ids) {
+        const center = govern.getCenter(id);
+        if (!center || center.active === false) continue;
+        if (govern.getPermissions(id).functions.front_office_tpv !== true) continue;
+        await miniappState.update('tpv', id, () => legacyState(center), state => {
+          state.catalogConfigs = source.map(item => ({
+            ...JSON.parse(JSON.stringify(item)),
+            centerId: id,
+            updatedAt: new Date().toISOString()
+          }));
+        });
+        applied.push(id);
+      }
+      res.json({ ok:true, applied });
     } catch (error) { next(error); }
   });
 
