@@ -47,7 +47,7 @@ function render(){
  if(!zoneId)zoneId=state.config.zones[0].id;
  const zone=state.config.zones.find(z=>z.id===zoneId)||state.config.zones[0],open=(state.orders||[]).filter(o=>o.status!=='closed').length;
  $('content').innerHTML='<div class="panel"><div class="tabs">'+state.config.zones.map(z=>'<button class="tab '+(z.id===zone.id?'active':'')+'" onclick="TPV.zone(\''+esc(z.id)+'\')">'+esc(z.name)+'</button>').join('')+
- '<button class="btn secondary" onclick="TPV.cash()">CAIXA</button><button class="btn secondary" onclick="TPV.sales()">VENDES</button><button class="btn secondary" onclick="TPV.config()">CONFIG TPV</button><span style="margin-left:auto"><b>'+open+'</b> serveis oberts</span></div></div>'+
+ '<button class="btn secondary" onclick="location.href=\'/tpv-back.html\'">TPV BACK</button><span style="margin-left:auto"><b>'+open+'</b> serveis oberts</span></div></div>'+
  '<div class="tables">'+(zone.tables||[]).map(t=>{const o=activeOrder(zone.id,t.id);return'<button class="table '+(o?'occupied ':'')+(o?.status==='bill'?'bill':'')+'" onclick="TPV.open(\''+esc(zone.id)+'\',\''+esc(t.id)+'\')"><strong>'+esc(t.name)+'</strong><span>'+t.min+'–'+t.max+' pax</span><b>'+(o?(o.status==='bill'?'COMPTE':o.status==='sent'?'ENVIADA':'OBERTA'):'LLIURE')+'</b>'+(o?'<small>'+o.pax+' pax · '+money(orderTotal(o))+'</small>':'')+'</button>'}).join('')+'</div>';
 }
 function config(){draftZones=JSON.parse(JSON.stringify(state.config?.zones||[]));drawConfig()}
