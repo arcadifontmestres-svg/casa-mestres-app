@@ -214,6 +214,10 @@
     const routes = {front_tpv:'/tpv.html',front_reserves:'/reserves-centre.html',front_fitxatges:'/fitxatges-centre.html'};
     document.querySelectorAll('[data-tool]').forEach(btn => btn.onclick = () => {
       if (btn.dataset.tool === 'public_reserves') return window.open('/reserves','_blank');
+      if (btn.dataset.tool === 'front_tpv') {
+        window.location.href = '/tpv.html?standalone=1';
+        return;
+      }
       const url=routes[btn.dataset.tool];
       if(url) openMiniapp(url).catch(showError);
     });
