@@ -17,7 +17,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 <header><div><b>ARCADI GESTIÓ · TPV BACK</b><div id="centreName"></div></div><div id="status">VALIDANT</div></header>
 <main>
 <div class="panel toolbar tabs">
- <button class="btn secondary" onclick="location.href='/tpv.html'">← TPV FRONT</button>
+ <button class="btn secondary" id="backToFront">← TPV FRONT</button>
  <button class="btn secondary" data-tab="config" onclick="B.tab('config')">CONFIGURACIÓ</button>
  <button class="btn secondary" data-tab="catalog" onclick="B.tab('catalog')">CATÀLEG / BOTONS</button>
  <button class="btn secondary" data-tab="cash" onclick="B.tab('cash')">CAIXA</button>
@@ -27,7 +27,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 </main>
 <script>
 (()=>{'use strict';
-const TOKEN_KEY='arcadi_center_device_token_v1',SESSION_KEY='arcadi_direction_center_token_v1',params=new URLSearchParams(location.search),incoming=params.get('direction_token')||'',token=incoming||localStorage.getItem(TOKEN_KEY)||sessionStorage.getItem(SESSION_KEY)||'';if(incoming){sessionStorage.setItem(SESSION_KEY,incoming);history.replaceState({},'',location.pathname)}
+const TOKEN_KEY='arcadi_center_device_token_v1',SESSION_KEY='arcadi_direction_center_token_v1',STANDALONE_KEY='arcadi_tpv_standalone_token_v1',params=new URLSearchParams(location.search),standalone=params.get('standalone')==='1',incoming=params.get('direction_token')||'',token=incoming||(standalone?(sessionStorage.getItem(STANDALONE_KEY)||''):(localStorage.getItem(TOKEN_KEY)||sessionStorage.getItem(SESSION_KEY)||''));if(incoming){sessionStorage.setItem(SESSION_KEY,incoming);history.replaceState({},'',location.pathname)}
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=v=>(Number(v)||0).toLocaleString('ca-ES',{style:'currency',currency:'EUR'});
 const PRINTER_PROFILES={
@@ -150,6 +150,7 @@ window.B={tab:setTab,saveConfig,saveCatalog,previewClient,previewKitchen,detectU
  selectAllZones:checked=>{document.querySelectorAll('[data-catalog] .zoneCheck').forEach(x=>x.checked=checked);document.querySelectorAll('[data-catalog] .zoneAll').forEach(x=>x.checked=checked);document.querySelectorAll('#selectAllZones').forEach(x=>x.checked=checked)},
  rowAllZones:el=>{const tr=el.closest('[data-catalog]');if(tr)tr.querySelectorAll('.zoneCheck').forEach(x=>x.checked=el.checked)},
  addZone:()=>{draftZones.push({id:uid('zone'),name:'Nova zona',tables:[]});drawZones()},delZone:i=>{draftZones.splice(i,1);drawZones()},zoneName:(i,v)=>draftZones[i].name=v,addTable:i=>{draftZones[i].tables=draftZones[i].tables||[];draftZones[i].tables.push({id:uid('table'),name:'Nova taula',min:1,max:2});drawZones()},delTable:(i,j)=>{draftZones[i].tables.splice(j,1);drawZones()},tableName:(i,j,v)=>draftZones[i].tables[j].name=v,tableMin:(i,j,v)=>draftZones[i].tables[j].min=Math.max(1,Number(v)||1),tableMax:(i,j,v)=>draftZones[i].tables[j].max=Math.max(1,Number(v)||1),addDevice:()=>{extraDevices.push({id:uid('dev'),name:'',type:'',connection:'',device:'',enabled:true});drawExtras()},delDevice:i=>{extraDevices.splice(i,1);drawExtras()},ex:(i,k,v)=>extraDevices[i][k]=v,openCash:async()=>{const a=Number(prompt('Fons inicial','0')||0);await api('/api/tpv-center/cash/open',{method:'POST',body:JSON.stringify({openingAmount:a})});renderCash()},closeCash:async()=>{const a=Number(prompt('Import comptat','0')||0);const d=await api('/api/tpv-center/cash/close',{method:'POST',body:JSON.stringify({closingAmount:a})});alert('Diferència: '+money(d.cashDifference||0));renderCash()},filterSales:()=>renderSales($('from').value,$('to').value)};
+$('backToFront').onclick=()=>{location.href='/tpv.html'+(standalone?'?standalone=1':'')};
 (async()=>{try{boot=await api('/api/tpv-center/bootstrap');$('centreName').textContent=boot.center?.name||'';$('status').textContent=boot.persistent?'PERSISTENT':'ACTIU';setTab('config')}catch(e){$('status').textContent='ERROR';$('content').innerHTML='<div>'+esc(e.message)+'</div>'}})();
 })();
 </script></body></html>
