@@ -303,6 +303,7 @@ function createGovernService(store) {
       const permissions = { ...emptyFunctions(), ...(currentPermissions || signed.permissions || {}) };
       return {
         center,
+        scope: signed.scope || 'center',
         permissions,
         catalog: FUNCTION_CATALOG.filter(item => permissions[item.key] === true)
       };
