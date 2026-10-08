@@ -29,7 +29,9 @@ input,textarea,select{width:100%;padding:12px;border:1px solid #cbd5da;border-ra
 </main>
 <script>
 (()=>{'use strict';
-const TOKEN_KEY='arcadi_center_device_token_v1',SESSION_KEY='arcadi_direction_center_token_v1',params=new URLSearchParams(location.search),incoming=params.get('direction_token')||'',token=incoming||localStorage.getItem(TOKEN_KEY)||sessionStorage.getItem(SESSION_KEY)||'';if(incoming)sessionStorage.setItem(SESSION_KEY,incoming);
+const TOKEN_KEY='arcadi_center_device_token_v1',SESSION_KEY='arcadi_direction_center_token_v1',STANDALONE_KEY='arcadi_tpv_standalone_token_v1',params=new URLSearchParams(location.search),standalone=params.get('standalone')==='1',incoming=params.get('direction_token')||'';
+let token=incoming||(standalone?(sessionStorage.getItem(STANDALONE_KEY)||''):(localStorage.getItem(TOKEN_KEY)||sessionStorage.getItem(SESSION_KEY)||''));
+if(incoming)sessionStorage.setItem(SESSION_KEY,incoming);
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=v=>(Number(v)||0).toLocaleString('ca-ES',{style:'currency',currency:'EUR'});
 const PRINTER_PROFILES={
@@ -188,7 +190,26 @@ async function backoffice(from='',to=''){
  window.__tpvTickets=(d.tickets||[]).slice().reverse();
 }
 
-async function boot(){try{state=await api('/api/tpv-center/bootstrap');render()}catch(e){$('status').textContent='BLOQUEJAT';$('content').innerHTML='<div class="err">'+esc(e.message)+'</div>'}}
+function standaloneLogin(){
+ $('centreName').textContent='TPV AUTÒNOM';
+ $('status').textContent='SENSE CENTRE';
+ $('content').innerHTML='<div class="panel" style="max-width:620px;margin:auto"><h2>Vincular TPV a un centre</h2><p class="muted">Aquesta és la miniapp TPV autònoma. No hi ha cap centre seleccionat automàticament.</p><label>Codi del centre</label><input id="standaloneCenterCode" autocomplete="off" placeholder="Codi del centre"><label style="display:block;margin-top:12px">Codi d’activació</label><input id="standaloneActivationCode" inputmode="numeric" maxlength="6" placeholder="000000"><button class="btn primary" id="standaloneActivate" style="margin-top:14px">VINCULAR CENTRE</button><div id="standaloneMsg" class="muted" style="margin-top:10px"></div></div>';
+ $('standaloneActivate').onclick=async()=>{
+   const msg=$('standaloneMsg');msg.textContent='Validant...';
+   try{
+     const out=await fetch('/api/govern/activate-center',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({centerCode:$('standaloneCenterCode').value.trim(),activationCode:$('standaloneActivationCode').value.trim(),label:'TPV autònom'})}).then(async r=>{const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Error '+r.status);return d});
+     token=out.token;sessionStorage.setItem(STANDALONE_KEY,token);await boot();
+   }catch(e){msg.textContent=e.message||'No s’ha pogut vincular el centre.'}
+ };
+}
+async function boot(){
+ if(standalone&&!token){standaloneLogin();return}
+ try{state=await api('/api/tpv-center/bootstrap');render()}
+ catch(e){
+   if(standalone){sessionStorage.removeItem(STANDALONE_KEY);token='';standaloneLogin();const m=$('standaloneMsg');if(m)m.textContent=e.message||'Cal vincular el centre.';return}
+   $('status').textContent='BLOQUEJAT';$('content').innerHTML='<div class="err">'+esc(e.message)+'</div>'
+ }
+}
 window.TPV={
  zone:id=>{zoneId=id;render()},config,home:()=>render(),backoffice,cash:()=>backoffice(),sales:()=>backoffice(),
  addZone:()=>{draftZones.push({id:uid('zone'),name:'',tables:[]});drawConfig()},dz:i=>{draftZones.splice(i,1);drawConfig()},rz:(i,v)=>draftZones[i].name=v,
