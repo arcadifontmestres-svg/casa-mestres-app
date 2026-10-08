@@ -324,6 +324,27 @@ function createGovernService(store) {
     };
   }
 
+  function issueDirectionTpvAccessToken() {
+    const now = new Date();
+    return {
+      token: signPayload({
+        v: 1,
+        scope: 'direction_tpv',
+        center: {
+          id: 'direction_tpv',
+          code: 'DIRECCIO_TPV',
+          name: 'DIRECCIÓ TPV',
+          type: 'Direcció',
+          company: 'GRUP TRÀFEC'
+        },
+        permissions: { ...emptyFunctions(), front_office_tpv: true },
+        issuedAt: now.toISOString(),
+        expiresAt: new Date(now.getTime() + 8 * 60 * 60 * 1000).toISOString()
+      }),
+      expiresAt: new Date(now.getTime() + 8 * 60 * 60 * 1000).toISOString()
+    };
+  }
+
   function issueDirectionAccessToken(centerId) {
     const center = getCenter(centerId);
     if (!center || center.active === false) {
@@ -427,6 +448,7 @@ function createGovernService(store) {
     activateCenterDevice,
     centerByDeviceToken,
     issueDirectionAccessToken,
+    issueDirectionTpvAccessToken,
     getPermissions,
     setPermissions,
     listEmployees,
