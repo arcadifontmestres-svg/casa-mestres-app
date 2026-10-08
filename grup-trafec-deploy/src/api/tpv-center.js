@@ -37,14 +37,22 @@ function createTpvCenterRouter(store, govern, miniappState) {
         vatRate: 10
       },
       printer: {
+        mode: 'browser',
         paperWidth: '80',
         printerName: '',
-        autoPrint: false
+        autoPrint: false,
+        usbVendorId: '',
+        usbProductId: '',
+        bridgeUrl: ''
       },
       kitchenPrinter: {
+        mode: 'browser',
         paperWidth: '80',
         printerName: '',
-        autoPrint: true
+        autoPrint: true,
+        usbVendorId: '',
+        usbProductId: '',
+        bridgeUrl: ''
       },
       peripherals: {
         cashDrawer: { enabled:false, connection:'printer', device:'' },
@@ -227,14 +235,22 @@ function createTpvCenterRouter(store, govern, miniappState) {
             vatRate: Math.max(0, Math.min(30, Number(input.business?.vatRate ?? previous.business?.vatRate ?? 10) || 10))
           },
           printer: {
+            mode: ['browser','webusb','bridge'].includes(String(input.printer?.mode)) ? String(input.printer.mode) : String(previous.printer?.mode || 'browser'),
             paperWidth: ['58','80'].includes(String(input.printer?.paperWidth)) ? String(input.printer.paperWidth) : String(previous.printer?.paperWidth || '80'),
             printerName: String(input.printer?.printerName ?? previous.printer?.printerName ?? '').slice(0,160),
-            autoPrint: input.printer?.autoPrint === true
+            autoPrint: input.printer?.autoPrint == null ? previous.printer?.autoPrint === true : input.printer.autoPrint === true,
+            usbVendorId: String(input.printer?.usbVendorId ?? previous.printer?.usbVendorId ?? '').slice(0,32),
+            usbProductId: String(input.printer?.usbProductId ?? previous.printer?.usbProductId ?? '').slice(0,32),
+            bridgeUrl: String(input.printer?.bridgeUrl ?? previous.printer?.bridgeUrl ?? '').slice(0,240)
           },
           kitchenPrinter: {
+            mode: ['browser','webusb','bridge'].includes(String(input.kitchenPrinter?.mode)) ? String(input.kitchenPrinter.mode) : String(previous.kitchenPrinter?.mode || 'browser'),
             paperWidth: ['58','80'].includes(String(input.kitchenPrinter?.paperWidth)) ? String(input.kitchenPrinter.paperWidth) : String(previous.kitchenPrinter?.paperWidth || '80'),
             printerName: String(input.kitchenPrinter?.printerName ?? previous.kitchenPrinter?.printerName ?? '').slice(0,160),
-            autoPrint: input.kitchenPrinter?.autoPrint == null ? previous.kitchenPrinter?.autoPrint !== false : input.kitchenPrinter.autoPrint !== false
+            autoPrint: input.kitchenPrinter?.autoPrint == null ? previous.kitchenPrinter?.autoPrint !== false : input.kitchenPrinter.autoPrint !== false,
+            usbVendorId: String(input.kitchenPrinter?.usbVendorId ?? previous.kitchenPrinter?.usbVendorId ?? '').slice(0,32),
+            usbProductId: String(input.kitchenPrinter?.usbProductId ?? previous.kitchenPrinter?.usbProductId ?? '').slice(0,32),
+            bridgeUrl: String(input.kitchenPrinter?.bridgeUrl ?? previous.kitchenPrinter?.bridgeUrl ?? '').slice(0,240)
           },
           peripherals: {
             cashDrawer: {
