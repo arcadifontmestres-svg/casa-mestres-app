@@ -234,7 +234,8 @@
     const center = selectedCenter();
     const cards = [
       toolCard('RRHH / Empleats', 'Crear i gestionar empleats des de Direcció.', 'rrhh_admin'),
-      functionAllowed('front_office_tpv') ? toolCard('TPV', 'Obre la miniapp TPV independent.', 'mini_tpv') : '',
+      functionAllowed('front_office_tpv') ? toolCard('TPV · Configuració', 'Configura taules, impressió, catàleg i caixa del TPV.', 'mini_tpv') : '',
+      functionAllowed('front_office_tpv') ? toolCard('LLISTES / RESUM TPV', 'Vendes, tiquets, totals i resum del TPV.', 'mini_tpv_summary') : '',
       functionAllowed('reservations') ? toolCard('Reserves', 'Obre la miniapp Reserves independent.', 'mini_reserves') : '',
       functionAllowed('fitxatges') ? toolCard('Fitxatges', 'Obre la miniapp Fitxatges independent.', 'mini_fitxatges') : '',
       functionAllowed('gestio_cuina') ? toolCard('Cuina', 'Obre la miniapp Cuina independent.', 'mini_cuina') : '',
@@ -251,7 +252,8 @@
       btn.onclick = () => {
         const t = btn.dataset.tool;
         if (t === 'rrhh_admin') return refreshGovernState().then(renderRrhh).catch(showError);
-        if (t === 'mini_tpv') return openDirectionTpv('/tpv-back.html').catch(showError);
+        if (t === 'mini_tpv') return openDirectionTpv('/tpv-back.html?tab=config').catch(showError);
+        if (t === 'mini_tpv_summary') return openDirectionTpv('/tpv-back.html?tab=sales').catch(showError);
         const routes = {mini_reserves:'/reserves-centre.html',mini_fitxatges:'/fitxatges-centre.html',mini_cuina:'/cuina.html',mini_appcc:'/appcc.html',mini_magatzem:'/magatzem.html'};
         if (routes[t]) return openMiniapp(routes[t]).catch(showError);
         if (t === 'crm') return loadCrm().catch(showError);
