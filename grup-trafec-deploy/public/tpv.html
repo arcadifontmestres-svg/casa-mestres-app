@@ -95,7 +95,7 @@ function printWindow(html){
 function ticketDocument(ticket,{provisional=false}={}){
  const b=ticket.business||state.config?.business||{};
  const p=state.config?.printer||{};
- const w=String(p.paperWidth||'80')==='58'?'58mm':'80mm';
+ const is58=String(p.paperWidth||'80')==='58',w=is58?'58mm':'80mm';
  const vatRate=Number(ticket.vatRate??b.vatRate??10);
  const total=Number(ticket.total||0);
  const base=Number(ticket.baseAmount??(total/(1+vatRate/100)));
@@ -109,9 +109,9 @@ function ticketDocument(ticket,{provisional=false}={}){
  const payment=provisional?'':'<tr><td>Pagament</td><td class="amt">'+esc(ticket.paymentMethod||'')+'</td></tr>';
  return '<!doctype html><html><head><meta charset="utf-8"><title>'+title+'</title><style>'+
  '@page{size:'+w+' auto;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;width:'+w+';background:#fff;color:#000}'+
- 'body{font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.25;padding:3mm}'+
- '.brand{text-align:center;font-size:20px;font-weight:800;letter-spacing:.4px;margin:0 0 2px}.logo{display:block;max-width:52mm;max-height:18mm;margin:0 auto 2mm}.center{text-align:center}.small{font-size:10px}.doc{font-size:14px;font-weight:800;text-align:center;margin:7px 0 2px}.ticketNo{text-align:center;font-weight:700;margin-bottom:5px}'+
- '.rule{border:0;border-top:1px solid #000;margin:5px 0}table{width:100%;border-collapse:collapse}td{padding:3px 0;vertical-align:top}.desc{padding-right:5px}.amt{text-align:right;white-space:nowrap}.obs{font-weight:700;font-size:10px;margin-top:1px}.totals td{padding:2px 0}.grand td{font-size:15px;font-weight:800;border-top:1px solid #000;padding-top:5px}.footer{text-align:center;font-size:10px;margin-top:7px;white-space:pre-wrap}'+
+ 'body{font-family:Arial,Helvetica,sans-serif;font-size:'+(is58?'11px':'13px')+';line-height:1.28;padding:'+(is58?'2mm':'1.5mm')+'}'+
+ '.brand{text-align:center;font-size:'+(is58?'19px':'24px')+';font-weight:800;letter-spacing:.5px;margin:0 0 3px}.logo{display:block;max-width:'+(is58?'44mm':'62mm')+';max-height:'+(is58?'16mm':'22mm')+';margin:0 auto 2mm}.center{text-align:center}.small{font-size:'+(is58?'9.5px':'11.5px')+'}.doc{font-size:'+(is58?'14px':'17px')+';font-weight:800;text-align:center;margin:7px 0 3px}.ticketNo{text-align:center;font-size:'+(is58?'10px':'12px')+';font-weight:700;margin-bottom:5px}'+
+ '.rule{border:0;border-top:1.4px solid #000;margin:6px 0}table{width:100%;border-collapse:collapse;table-layout:fixed}td{padding:'+(is58?'3px':'4px')+' 0;vertical-align:top}.desc{padding-right:6px;width:76%}.amt{text-align:right;white-space:nowrap;width:24%;font-weight:600}.obs{font-weight:800;font-size:'+(is58?'10px':'12px')+';margin-top:2px}.totals td{padding:3px 0}.grand td{font-size:'+(is58?'16px':'20px')+';font-weight:900;border-top:1.5px solid #000;padding-top:6px}.footer{text-align:center;font-size:'+(is58?'10px':'11.5px')+';margin-top:8px;white-space:pre-wrap}'+
  '</style></head><body>'+
  (b.logo?'<img class="logo" src="'+b.logo+'">':'')+
  '<div class="brand">'+esc(b.name||state.center?.name||'SARRIERA 1930')+'</div>'+
