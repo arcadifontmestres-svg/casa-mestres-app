@@ -30,7 +30,7 @@ input,textarea,select{width:100%;padding:12px;border:1px solid #cbd5da;border-ra
 <script>
 (()=>{'use strict';
 const TOKEN_KEY='arcadi_center_device_token_v1',SESSION_KEY='arcadi_direction_center_token_v1',STANDALONE_KEY='arcadi_tpv_standalone_token_v1',params=new URLSearchParams(location.search),standalone=params.get('standalone')==='1',incoming=params.get('direction_token')||'';
-let token=incoming||(standalone?(sessionStorage.getItem(STANDALONE_KEY)||''):(sessionStorage.getItem(SESSION_KEY)||localStorage.getItem(TOKEN_KEY)||''));
+let token=incoming||(standalone?(sessionStorage.getItem(STANDALONE_KEY)||''):(localStorage.getItem(TOKEN_KEY)||sessionStorage.getItem(SESSION_KEY)||''));
 if(incoming)sessionStorage.setItem(SESSION_KEY,incoming);
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=v=>(Number(v)||0).toLocaleString('ca-ES',{style:'currency',currency:'EUR'});
