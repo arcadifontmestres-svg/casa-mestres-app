@@ -166,6 +166,9 @@ function createTpvCenterRouter(store, govern, miniappState) {
       const ids = [...new Set((Array.isArray(req.body?.centerIds) ? req.body.centerIds : []).map(String))];
       const directionState = await tpvState(s.center);
       const sourceConfig = directionState.config || defaultConfig(s.center);
+      if (!Array.isArray(sourceConfig.zones) || sourceConfig.zones.length === 0) {
+        return res.status(409).json({ error:'Publicació bloquejada: Direcció no té zones configurades. No es pot substituir la configuració dels centres per una de buida.' });
+      }
       const applied = [];
       for (const id of ids) {
         const center = govern.getCenter(id);
