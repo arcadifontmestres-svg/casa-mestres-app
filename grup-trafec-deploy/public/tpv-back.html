@@ -28,7 +28,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 </main>
 <script>
 (()=>{'use strict';
-const TOKEN_KEY='arcadi_center_device_token_v1',SESSION_KEY='arcadi_direction_center_token_v1',STANDALONE_KEY='arcadi_tpv_standalone_token_v1',params=new URLSearchParams(location.search),standalone=params.get('standalone')==='1',initialTab=['config','catalog','cash','sales'].includes(params.get('tab'))?params.get('tab'):'config',incoming=params.get('direction_token')||'',token=incoming||(standalone?(sessionStorage.getItem(STANDALONE_KEY)||''):(localStorage.getItem(TOKEN_KEY)||sessionStorage.getItem(SESSION_KEY)||''));if(incoming){sessionStorage.setItem(SESSION_KEY,incoming);history.replaceState({},'',location.pathname+'?tab='+encodeURIComponent(initialTab))}
+const TOKEN_KEY='arcadi_center_device_token_v1',SESSION_KEY='arcadi_direction_center_token_v1',STANDALONE_KEY='arcadi_tpv_standalone_token_v1',params=new URLSearchParams(location.search),standalone=params.get('standalone')==='1',initialTab=['config','catalog','cash','sales'].includes(params.get('tab'))?params.get('tab'):'config',incoming=params.get('direction_token')||'',token=incoming||(standalone?(sessionStorage.getItem(STANDALONE_KEY)||''):(sessionStorage.getItem(SESSION_KEY)||localStorage.getItem(TOKEN_KEY)||''));if(incoming){sessionStorage.setItem(SESSION_KEY,incoming);history.replaceState({},'',location.pathname+'?tab='+encodeURIComponent(initialTab))}
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=v=>(Number(v)||0).toLocaleString('ca-ES',{style:'currency',currency:'EUR'});
 const PRINTER_PROFILES={
