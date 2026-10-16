@@ -126,6 +126,22 @@ function createMiniappsCenterRouter(govern, miniappState) {
         state[collection][index] = saved;
         state.updatedAt = now;
       });
+      if (app === 'cuina' && collection === 'productions') {
+        await miniappState.update('appcc', s.center.id, () => definitions.appcc.empty(s.center), state => {
+          if (!Array.isArray(state.productions)) state.productions = [];
+          const idx = state.productions.findIndex(record => record.sourceApp === 'cuina' && record.sourceId === saved.id);
+          const linked = {
+            ...(idx >= 0 ? state.productions[idx] : { id: 'productions_' + crypto.randomUUID(), createdAt: saved.createdAt }),
+            centerId: s.center.id, sourceApp: 'cuina', sourceId: saved.id,
+            name: saved.name, date: saved.date, status: saved.status,
+            quantity: saved.quantity, unit: saved.unit, notes: saved.notes,
+            lot: saved.lot, temperature: saved.temperature, updatedAt: saved.updatedAt
+          };
+          if (idx >= 0) state.productions[idx] = linked;
+          else state.productions.push(linked);
+          state.updatedAt = new Date().toISOString();
+        });
+      }
       res.json(saved);
     } catch (error) { next(error); }
   });
