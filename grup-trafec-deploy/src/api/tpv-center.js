@@ -125,7 +125,7 @@ function createTpvCenterRouter(store, govern, miniappState) {
       const published = Array.isArray(own.catalogConfigs) ? own.catalogConfigs.filter(x => x.active === true) : [];
       const byKey = new Map(published.map(x => [x.sourceType + ':' + x.sourceId, x]));
       const map = (items, sourceType) => (items || [])
-        .map(item => applyPublication(item, byKey.get(sourceType + ':' + item.id)))
+        .map(item => { const key=sourceType + ':' + item.id; const saved=byKey.get(key); const hasDecision=(own.catalogConfigs||[]).some(x=>x.sourceType + ':' + x.sourceId===key); return applyPublication(item, hasDecision ? saved : (item.onMenu===true ? {active:true,sourceType,price:item.price,zoneIds:item.zones||[]} : null)); })
         .filter(Boolean)
         .sort((a,b)=>(a.sort||0)-(b.sort||0));
       res.json({
