@@ -26,4 +26,4 @@ async function sessionFor(key){
  const out=await api('/api/govern/center-module/'+encodeURIComponent(key));
  return out;
 }
-function backButton(){location.href='/centre.html'}
+function backButton(){location.href=(incoming||sessionStorage.getItem(DIRECTION_KEY))?'/':'/centre.html'}
