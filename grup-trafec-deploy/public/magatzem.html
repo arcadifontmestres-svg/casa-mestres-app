@@ -20,7 +20,7 @@ button{cursor:pointer;border:0}.back{background:#e8eef1;color:#0b2533;padding:12
   const items=out.state.products||[];
   const canEdit=out.scope==='direction';
   let stock=null; if(out.scope!=='direction'){try{stock=await api('/api/magatzem-center/stock')}catch(e){stock={error:e.message}}}
-  $('content').innerHTML='<div class="panel"><h2>Catàleg mestre · '+items.length+' productes</h2><p class="muted">Aquest catàleg és independent de cada centre. Els registres antics no s\'han importat ni substituït.</p>'+
+  $('content').innerHTML='<div class="panel"><h2>Catàleg mestre · '+items.length+' productes</h2><p class="muted">Aquest catàleg és independent de cada centre. Consulta de dades originals i locals, sense substituir registres.</p>'+
    (canEdit?'<button class="back" id="addProduct">+ Afegir producte</button>':'')+
    '<table><thead><tr><th>Producte</th><th>Família</th><th>Unitat</th><th>Cost</th></tr></thead><tbody>'+
    items.map(x=>'<tr><td>'+esc(x.name)+'</td><td>'+esc(x.family)+'</td><td>'+esc(x.unit)+'</td><td>'+esc(x.cost)+'</td></tr>').join('')+
