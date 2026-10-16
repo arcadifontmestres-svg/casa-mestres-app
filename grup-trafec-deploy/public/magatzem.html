@@ -19,11 +19,23 @@ button{cursor:pointer;border:0}.back{background:#e8eef1;color:#0b2533;padding:12
   const out=await api('/api/magatzem-center/bootstrap');
   const items=out.state.products||[];
   const canEdit=out.scope==='direction';
+  let stock=null; if(out.scope!=='direction'){try{stock=await api('/api/magatzem-center/stock')}catch(e){stock={error:e.message}}}
   $('content').innerHTML='<div class="panel"><h2>Catàleg mestre · '+items.length+' productes</h2><p class="muted">Aquest catàleg és independent de cada centre. Els registres antics no s\'han importat ni substituït.</p>'+
    (canEdit?'<button class="back" id="addProduct">+ Afegir producte</button>':'')+
    '<table><thead><tr><th>Producte</th><th>Família</th><th>Unitat</th><th>Cost</th></tr></thead><tbody>'+
    items.map(x=>'<tr><td>'+esc(x.name)+'</td><td>'+esc(x.family)+'</td><td>'+esc(x.unit)+'</td><td>'+esc(x.cost)+'</td></tr>').join('')+
-   '</tbody></table></div>';
+   '</tbody></table></div>'+(stock&&!stock.error?'<div class="panel"><h2>Existències del centre</h2><p>Moviments: '+stock.movements.length+'</p><button class="back" id="newReception">+ Recepció de mercaderia</button><table><thead><tr><th>Producte</th><th>Quantitat</th></tr></thead><tbody>'+items.map(x=>'<tr><td>'+esc(x.name)+'</td><td>'+esc(stock.quantities[x.id]||0)+' '+esc(x.unit)+'</td></tr>').join('')+'</tbody></table></div>':stock?.error?'<div class="err">'+esc(stock.error)+'</div>':'');
+  if(stock&&!stock.error)$('newReception').onclick=async()=>{
+   const productId=prompt('Identificador del producte (consulteu el catàleg)','');if(!productId)return;
+   const product=items.find(x=>x.id===productId);if(!product){alert('Producte no trobat');return}
+   const quantity=Number(prompt('Quantitat rebuda','1'));if(!(quantity>0))return;
+   const supplier=prompt('Proveïdor','');if(!supplier)return;
+   const lot=prompt('Lot','');if(!lot)return;
+   const expiry=prompt('Caducitat (AAAA-MM-DD)','');if(!expiry)return;
+   const payload={productId,quantity,supplier,lot,expiry,requestId:crypto.randomUUID()};
+   try{await api('/api/magatzem-center/receptions',{method:'POST',body:JSON.stringify(payload)});await load()}
+   catch(e){alert(e.message+' — No torneu a registrar la recepció sense comprovar el moviment.')}
+  };
   if(canEdit)$('addProduct').onclick=async()=>{
    const name=prompt('Nom del producte');if(!name?.trim())return;
    const unit=prompt('Unitat (kg, l, unitat...)','kg')||'kg';
