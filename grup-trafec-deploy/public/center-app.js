@@ -1,6 +1,10 @@
 'use strict';
 const TOKEN_KEY='arcadi_center_device_token_v1';
-const token=localStorage.getItem(TOKEN_KEY)||'';
+const DIRECTION_KEY='arcadi_direction_center_token_v1';
+const params=new URLSearchParams(location.search);
+const incoming=params.get('direction_token')||'';
+if(incoming){sessionStorage.setItem(DIRECTION_KEY,incoming);params.delete('direction_token');const query=params.toString();history.replaceState({},'',location.pathname+(query?'?'+query:'')+location.hash);}
+const token=incoming||sessionStorage.getItem(DIRECTION_KEY)||localStorage.getItem(TOKEN_KEY)||'';
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function api(path,opt={}){
