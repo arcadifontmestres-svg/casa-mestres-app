@@ -39,38 +39,8 @@
   }
 
   async function openMiniapp(path) {
-    let center = selectedCenter();
-    const activeCenters = centers.filter(item => item.active !== false);
-
-    if (!center && activeCenters.length === 1) center = activeCenters[0];
-
-    if (!center && activeCenters.length > 1) {
-      const chooser = document.createElement('div');
-      chooser.id = 'miniappCenterChooser';
-      chooser.style.cssText = 'position:fixed;inset:0;background:#0008;display:grid;place-items:center;z-index:9999;padding:20px';
-      chooser.innerHTML = '<div style="background:#fff;border-radius:16px;padding:20px;width:min(520px,95vw);max-height:80vh;overflow:auto"><h2 style="margin-top:0">Selecciona centre</h2><p class="muted">Direcció té accés a la miniapp. Tria quin centre vols gestionar.</p><div id="miniappCenterList" style="display:grid;gap:10px"></div><button type="button" class="btn secondary" id="miniappCenterCancel" style="margin-top:14px">Cancel·lar</button></div>';
-      document.body.appendChild(chooser);
-
-      center = await new Promise(resolve => {
-        const list = chooser.querySelector('#miniappCenterList');
-        list.innerHTML = activeCenters.map(item =>
-          '<button type="button" class="btn" data-miniapp-center="' + esc(item.id) + '">' + esc(item.name) + '</button>'
-        ).join('');
-        list.querySelectorAll('[data-miniapp-center]').forEach(btn => {
-          btn.onclick = () => resolve(activeCenters.find(item => item.id === btn.dataset.miniappCenter) || null);
-        });
-        chooser.querySelector('#miniappCenterCancel').onclick = () => resolve(null);
-      });
-      chooser.remove();
-      if (!center) return;
-    }
-
-    if (!center) {
-      showError(new Error('No hi ha cap centre actiu creat.'));
-      return;
-    }
-
-    const access = await govApi('/api/govern/centres/' + encodeURIComponent(center.id) + '/access-token', { method: 'POST', body: '{}' });
+    // Les miniapps de Direcció treballen en context global. No es tria centre.
+    const access = await govApi('/api/govern/direction-access-token', { method: 'POST', body: '{}' });
     const url = new URL(path, window.location.origin);
     url.searchParams.set('direction_token', access.token);
     window.location.href = url.pathname + url.search;
