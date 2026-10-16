@@ -300,7 +300,9 @@ function createGovernService(store) {
       const currentPermissions = current
         ? (data.centerPermissions.find(item => item.centerId === current.id)?.functions || null)
         : null;
-      const permissions = { ...emptyFunctions(), ...(currentPermissions || signed.permissions || {}) };
+      const permissions = signed.scope === 'direction'
+        ? Object.fromEntries(FUNCTION_KEYS.map(key => [key, true]))
+        : { ...emptyFunctions(), ...(currentPermissions || signed.permissions || {}) };
       return {
         center,
         scope: signed.scope || 'center',
