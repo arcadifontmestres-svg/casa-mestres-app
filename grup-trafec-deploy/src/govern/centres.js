@@ -327,6 +327,20 @@ function createGovernService(store) {
     };
   }
 
+  function issueDirectionGlobalAccessToken() {
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 30 * 60 * 1000).toISOString();
+    return {
+      token: signPayload({
+        v: 1, scope: 'direction',
+        center: { id: 'direction_global', code: 'DIRECCIO', name: 'GRUP TRÀFEC · DIRECCIÓ', type: 'Direcció', company: 'GRUP TRÀFEC' },
+        permissions: Object.fromEntries(FUNCTION_KEYS.map(key => [key, true])),
+        issuedAt: now.toISOString(), expiresAt
+      }),
+      expiresAt
+    };
+  }
+
   function issueDirectionTpvAccessToken() {
     const now = new Date();
     return {
@@ -451,6 +465,7 @@ function createGovernService(store) {
     activateCenterDevice,
     centerByDeviceToken,
     issueDirectionAccessToken,
+    issueDirectionGlobalAccessToken,
     issueDirectionTpvAccessToken,
     getPermissions,
     setPermissions,
