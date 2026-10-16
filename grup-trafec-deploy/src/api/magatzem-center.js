@@ -59,7 +59,10 @@ function createMagatzemRouter(govern,miniappState){
   await miniappState.update('magatzem-stock',s.center.id,stockEmpty,state=>{
    if(!Array.isArray(state.movements))state.movements=[];
    movement=state.movements.find(x=>x.requestId===requestId);
-   if(movement)return;
+   if(movement){
+    if(movement.productId!==productId||movement.delta!==quantity||movement.lot!==lot||movement.supplier!==supplier||movement.expiry!==expiry){const e=new Error('Identificador de recepció ja utilitzat amb dades diferents');e.status=409;throw e;}
+    return;
+   }
    const now=new Date().toISOString();
    movement={id:'movement_'+crypto.randomUUID(),requestId,centerId:s.center.id,productId,productName:product.name,delta:quantity,unit:product.unit,type:'reception',lot,supplier,expiry,createdAt:now};
    state.movements.push(movement);state.updatedAt=now;
