@@ -82,6 +82,26 @@ function createMiniappsCenterRouter(govern, miniappState) {
         state[collection].push(item);
         state.updatedAt = now;
       });
+      // Vincle Cuina → APPCC: una producció genera un registre traçable.
+      // Clau d'origen estable per evitar duplicats en reintents.
+      if (app === 'cuina' && collection === 'productions') {
+        await miniappState.update('appcc', s.center.id, () => definitions.appcc.empty(s.center), state => {
+          if (!Array.isArray(state.productions)) state.productions = [];
+          const sourceId = item.id;
+          if (!state.productions.some(record => record.sourceApp === 'cuina' && record.sourceId === sourceId)) {
+            state.productions.push({
+              id: 'productions_' + crypto.randomUUID(),
+              centerId: s.center.id,
+              sourceApp: 'cuina', sourceId,
+              name: item.name, date: item.date, status: item.status,
+              quantity: item.quantity, unit: item.unit, notes: item.notes,
+              lot: item.lot, temperature: item.temperature,
+              createdAt: item.createdAt, updatedAt: item.updatedAt
+            });
+            state.updatedAt = new Date().toISOString();
+          }
+        });
+      }
       res.status(201).json(item);
     } catch (error) { next(error); }
   });
