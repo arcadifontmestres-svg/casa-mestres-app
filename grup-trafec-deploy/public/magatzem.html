@@ -10,8 +10,27 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;bor
 button{cursor:pointer;border:0}.back{background:#e8eef1;color:#0b2533;padding:12px 16px;border-radius:12px;font-weight:800}.muted{color:#6b7d87}
 @media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.grid{grid-template-columns:1fr}.head{align-items:flex-start;flex-direction:column}}
 </style></head>
-<body><header><div><b>ARCADI GESTIÓ · MAGATZEM</b><div id="centreName"></div></div><span class="badge" id="status">VALIDANT</span></header>
-<main><div class="head"><div><h1>Magatzem</h1><p>App autònoma del centre. Accés controlat per Direcció.</p></div><button class="back" onclick="backButton()">← Centre</button></div>
-<div id="content"><div class="grid"><div class="card"><strong>01</strong><b>Productes</b><span>Catàleg, unitats, famílies i costos.</span></div><div class="card"><strong>02</strong><b>Inventari</b><span>Stock actual, mínims i màxims.</span></div><div class="card"><strong>03</strong><b>Necessitats</b><span>Mancances generades per l’operativa.</span></div><div class="card"><strong>04</strong><b>Recepció</b><span>Entrada de mercaderia i traçabilitat.</span></div></div></div></main><script src="/center-app.js"></script><script>
-(async()=>{try{const s=await sessionFor('gestio_magatzem');shellTitle('Magatzem',s.center);}catch(e){blocked(e)}})();
+<body><header><div><b>GRUP TRÀFEC · MAGATZEM</b><div id="centreName"></div></div><span class="badge" id="status">VALIDANT</span></header>
+<main><div class="head"><div><h1>Magatzem</h1><p>Catàleg mestre de productes compartit. Accés de lectura des dels centres.</p></div><button class="back" onclick="backButton()">← Tornar</button></div>
+<div id="content"><div class="panel">Carregant catàleg...</div></div></main><script src="/center-app.js"></script><script>
+(async()=>{try{
+ const s=await sessionFor('gestio_magatzem');shellTitle('Magatzem',s.center);
+ async function load(){
+  const out=await api('/api/magatzem-center/bootstrap');
+  const items=out.state.products||[];
+  const canEdit=out.scope==='direction';
+  $('content').innerHTML='<div class="panel"><h2>Catàleg mestre · '+items.length+' productes</h2><p class="muted">Aquest catàleg és independent de cada centre. Els registres antics no s\'han importat ni substituït.</p>'+
+   (canEdit?'<button class="back" id="addProduct">+ Afegir producte</button>':'')+
+   '<table><thead><tr><th>Producte</th><th>Família</th><th>Unitat</th><th>Cost</th></tr></thead><tbody>'+
+   items.map(x=>'<tr><td>'+esc(x.name)+'</td><td>'+esc(x.family)+'</td><td>'+esc(x.unit)+'</td><td>'+esc(x.cost)+'</td></tr>').join('')+
+   '</tbody></table></div>';
+  if(canEdit)$('addProduct').onclick=async()=>{
+   const name=prompt('Nom del producte');if(!name?.trim())return;
+   const unit=prompt('Unitat (kg, l, unitat...)','kg')||'kg';
+   const family=prompt('Família','')||'';
+   try{await api('/api/magatzem-center/products',{method:'POST',body:JSON.stringify({name,unit,family})});await load()}catch(e){alert(e.message)}
+  };
+ }
+ await load();
+}catch(e){blocked(e)}})();
 </script></body></html>
