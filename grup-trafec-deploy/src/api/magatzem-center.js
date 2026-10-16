@@ -27,10 +27,13 @@ function createMagatzemRouter(govern,miniappState){
   const counts=Object.fromEntries(['dishes','saleItems','products'].map(k=>[k,Array.isArray(data[k])?data[k].length:0]));
   res.json({source:'grup-trafec-operatiu',mode:'read-only',counts,items:data});
  }catch(e){next(e)}});
+ async function sourceCatalog(){const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),8000);try{const response=await fetch('https://grup-trafec-operatiu.onrender.com/api/tpv-catalog',{headers:{'X-Arcadi-Company-Id':'company_grup_trafec','X-Arcadi-Centre-Id':'restaurant_sarriera'},signal:controller.signal});if(!response.ok)return [];const data=await response.json();return Array.isArray(data.products)?data.products:[]}catch{return []}finally{clearTimeout(timeout)}}
+ function mergedProducts(local,source){const byId=new Map();for(const p of source){if(p&&p.id)byId.set(String(p.id),{...p,cost:Number(p.cost??p.price??0)})}for(const p of local){if(p&&p.id)byId.set(String(p.id),p)}return [...byId.values()]}
  router.get('/bootstrap',async(req,res,next)=>{try{
   const s=session(req);
   const catalog=await miniappState.read('magatzem','direction_global',empty);
-  res.json({center:s.center,scope:s.scope||'center',state:catalog,persistent:miniappState.hasPersistentBackend()});
+  const source=await sourceCatalog();
+  res.json({center:s.center,scope:s.scope||'center',state:{...catalog,products:mergedProducts(catalog.products||[],source)},sourceCount:source.length,persistent:miniappState.hasPersistentBackend()});
  }catch(e){next(e)}});
  router.post('/products',async(req,res,next)=>{try{
   const s=session(req);
@@ -70,7 +73,7 @@ function createMagatzemRouter(govern,miniappState){
   if(!productId||!Number.isFinite(quantity)||quantity<=0||!lot||!supplier||!expiry||!requestId)
    return res.status(400).json({error:'Cal producte, quantitat positiva, proveïdor, lot, caducitat i identificador de recepció'});
   const catalog=await miniappState.read('magatzem','direction_global',empty);
-  const product=(catalog.products||[]).find(x=>x.id===productId);
+  const product=mergedProducts(catalog.products||[],await sourceCatalog()).find(x=>String(x.id)===productId);
   if(!product)return res.status(404).json({error:'Producte mestre no trobat'});
   let movement;
   await miniappState.update('magatzem-stock',s.center.id,stockEmpty,state=>{
