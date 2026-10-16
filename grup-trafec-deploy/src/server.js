@@ -17,6 +17,7 @@ const { createTpvCenterRouter } = require('./api/tpv-center');
 const { createReservesCenterRouter } = require('./api/reserves-center');
 const { createFitxatgesCenterRouter } = require('./api/fitxatges-center');
 const { createMiniappsCenterRouter } = require('./api/miniapps-center');
+const { createMagatzemRouter } = require('./api/magatzem-center');
 const { createReservesPublicRouter, createReservesStripeWebhookHandler } = require('./api/reserves-public');
 const { createReservesGmailRouter } = require('./api/reserves-gmail');
 
@@ -50,6 +51,7 @@ app.use('/api/tpv-center', createTpvCenterRouter(store, govern, miniappState));
 app.use('/api/reserves-center', createReservesCenterRouter(store, govern, links, miniappState));
 app.use('/api/fitxatges-center', createFitxatgesCenterRouter(govern, miniappState));
 app.use('/api/miniapps-center', createMiniappsCenterRouter(govern, miniappState));
+app.use('/api/magatzem-center', createMagatzemRouter(govern, miniappState));
 app.use('/api/reserves-public', createReservesPublicRouter(govern, miniappState));
 app.use('/api/reserves-gmail', createReservesGmailRouter(govern, miniappState));
 
