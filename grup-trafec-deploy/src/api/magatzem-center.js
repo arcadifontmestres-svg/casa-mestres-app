@@ -10,6 +10,23 @@ function createMagatzemRouter(govern,miniappState){
   return s;
  }
  const empty=()=>({products:[],updatedAt:null});
+ router.get('/legacy-reference',async(req,res,next)=>{try{
+  const s=session(req);
+  if(s.scope!=='direction')return res.status(403).json({error:'Consulta exclusiva de Direcció'});
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),8000);
+  let response;
+  try{
+   response=await fetch('https://grup-trafec-operatiu.onrender.com/api/tpv-catalog',{
+    headers:{'X-Arcadi-Company-Id':'company_grup_trafec','X-Arcadi-Centre-Id':'restaurant_sarriera'},
+    signal:controller.signal
+   });
+  }finally{clearTimeout(timeout);}
+  if(!response.ok)return res.status(502).json({error:'No es pot consultar el catàleg original'});
+  const data=await response.json();
+  const counts=Object.fromEntries(['dishes','saleItems','products'].map(k=>[k,Array.isArray(data[k])?data[k].length:0]));
+  res.json({source:'grup-trafec-operatiu',mode:'read-only',counts,items:data});
+ }catch(e){next(e)}});
  router.get('/bootstrap',async(req,res,next)=>{try{
   const s=session(req);
   const catalog=await miniappState.read('magatzem','direction_global',empty);
