@@ -7,6 +7,7 @@ function createMiniappState({ legacyStore } = {}) {
   let client = null;
   let connecting = null;
   const memory = new Map();
+  const pendingUpdates = new Map();
 
   async function connection() {
     if (!url) return null;
@@ -48,10 +49,22 @@ function createMiniappState({ legacyStore } = {}) {
   }
 
   async function update(app, centerId, fallbackFactory, mutator) {
-    const current = await read(app, centerId, fallbackFactory);
-    const result = await mutator(current);
-    await write(app, centerId, current);
-    return result;
+    // Serialitza les modificacions per clau dins d'aquesta instància.
+    // Evita perdre altes simultànies per lectura-modificació-escriptura.
+    const k = key(app, centerId);
+    const previous = pendingUpdates.get(k) || Promise.resolve();
+    const operation = previous.catch(() => {}).then(async () => {
+      const current = await read(app, centerId, fallbackFactory);
+      const result = await mutator(current);
+      await write(app, centerId, current);
+      return result;
+    });
+    const settled = operation.then(() => {}, () => {});
+    pendingUpdates.set(k, settled);
+    settled.finally(() => {
+      if (pendingUpdates.get(k) === settled) pendingUpdates.delete(k);
+    });
+    return operation;
   }
 
   async function probe() {
