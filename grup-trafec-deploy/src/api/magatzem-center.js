@@ -31,6 +31,47 @@ function createMagatzemRouter(govern,miniappState){
   });
   res.status(201).json(item);
  }catch(e){next(e)}});
+
+ const stockEmpty=()=>({movements:[],updatedAt:null});
+ router.get('/stock',async(req,res,next)=>{try{
+  const s=session(req);
+  if(s.center.id==='direction_global')return res.status(400).json({error:'Seleccioneu un centre real per consultar existències'});
+  const state=await miniappState.read('magatzem-stock',s.center.id,stockEmpty);
+  const quantities={};
+  for(const m of state.movements||[])quantities[m.productId]=(quantities[m.productId]||0)+Number(m.delta||0);
+  res.json({center:s.center,quantities,movements:state.movements||[]});
+ }catch(e){next(e)}});
+ router.post('/receptions',async(req,res,next)=>{try{
+  const s=session(req);
+  if(s.center.id==='direction_global')return res.status(400).json({error:'La recepció necessita un centre real'});
+  const productId=String(req.body?.productId||'');
+  const quantity=Number(req.body?.quantity);
+  const lot=String(req.body?.lot||'').trim().slice(0,120);
+  const supplier=String(req.body?.supplier||'').trim().slice(0,200);
+  const expiry=String(req.body?.expiry||'').slice(0,30);
+  const requestId=String(req.body?.requestId||'').trim().slice(0,120);
+  if(!productId||!Number.isFinite(quantity)||quantity<=0||!lot||!supplier||!expiry||!requestId)
+   return res.status(400).json({error:'Cal producte, quantitat positiva, proveïdor, lot, caducitat i identificador de recepció'});
+  const catalog=await miniappState.read('magatzem','direction_global',empty);
+  const product=(catalog.products||[]).find(x=>x.id===productId);
+  if(!product)return res.status(404).json({error:'Producte mestre no trobat'});
+  let movement;
+  await miniappState.update('magatzem-stock',s.center.id,stockEmpty,state=>{
+   if(!Array.isArray(state.movements))state.movements=[];
+   movement=state.movements.find(x=>x.requestId===requestId);
+   if(movement)return;
+   const now=new Date().toISOString();
+   movement={id:'movement_'+crypto.randomUUID(),requestId,centerId:s.center.id,productId,productName:product.name,delta:quantity,unit:product.unit,type:'reception',lot,supplier,expiry,createdAt:now};
+   state.movements.push(movement);state.updatedAt=now;
+  });
+  await miniappState.update('appcc',s.center.id,()=>({centerId:s.center.id,receptions:[],productions:[],cleaning:[],incidents:[]}),state=>{
+   if(!Array.isArray(state.receptions))state.receptions=[];
+   if(state.receptions.some(x=>x.sourceId===movement.id&&x.sourceApp==='magatzem'))return;
+   state.receptions.push({id:'receptions_'+crypto.randomUUID(),centerId:s.center.id,sourceApp:'magatzem',sourceId:movement.id,name:product.name,quantity,unit:product.unit,lot,supplier,expiry,date:movement.createdAt.slice(0,10),createdAt:movement.createdAt,updatedAt:new Date().toISOString()});
+   state.updatedAt=new Date().toISOString();
+  });
+  res.status(201).json(movement);
+ }catch(e){next(e)}});
  return router;
 }
 module.exports={createMagatzemRouter};
