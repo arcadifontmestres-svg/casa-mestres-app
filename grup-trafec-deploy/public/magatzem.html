@@ -26,8 +26,12 @@ button{cursor:pointer;border:0}.back{background:#e8eef1;color:#0b2533;padding:12
    items.map(x=>'<tr><td>'+esc(x.name)+'</td><td>'+esc(x.family)+'</td><td>'+esc(x.unit)+'</td><td>'+esc(x.cost)+'</td></tr>').join('')+
    '</tbody></table></div>'+(stock&&!stock.error?'<div class="panel"><h2>Existències del centre</h2><p>Moviments: '+stock.movements.length+'</p><button class="back" id="newReception">+ Recepció de mercaderia</button><table><thead><tr><th>Producte</th><th>Quantitat</th></tr></thead><tbody>'+items.map(x=>'<tr><td>'+esc(x.name)+'</td><td>'+esc(stock.quantities[x.id]||0)+' '+esc(x.unit)+'</td></tr>').join('')+'</tbody></table></div>':stock?.error?'<div class="err">'+esc(stock.error)+'</div>':'');
   if(stock&&!stock.error)$('newReception').onclick=async()=>{
-   const productId=prompt('Identificador del producte (consulteu el catàleg)','');if(!productId)return;
-   const product=items.find(x=>x.id===productId);if(!product){alert('Producte no trobat');return}
+   const search=prompt('Cerca un producte pel nom','');if(!search?.trim())return;
+   const matches=items.filter(x=>String(x.name||'').toLocaleLowerCase('ca').includes(search.trim().toLocaleLowerCase('ca'))).slice(0,20);
+   if(!matches.length){alert('Cap producte trobat');return}
+   const selected=prompt('Tria el número del producte:\\n'+matches.map((x,i)=>(i+1)+'. '+x.name).join('\\n'),'1');if(selected===null)return;
+   const product=matches[Number(selected)-1];if(!product){alert('Selecció no vàlida');return}
+   const productId=product.id;
    const quantity=Number(prompt('Quantitat rebuda','1'));if(!(quantity>0))return;
    const supplier=prompt('Proveïdor','');if(!supplier)return;
    const lot=prompt('Lot','');if(!lot)return;
