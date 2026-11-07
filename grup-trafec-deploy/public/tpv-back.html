@@ -12,6 +12,43 @@ input,textarea,select{width:100%;padding:11px;border:1px solid #cbd5da;border-ra
 .statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat{border:1px solid #d8e1e5;border-radius:14px;padding:14px;background:#fff}
 table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px solid #edf1f3;text-align:left;vertical-align:middle}.check{width:auto}.thumb{width:58px;height:42px;object-fit:cover;border-radius:8px;border:1px solid #ddd}.device{border:1px solid #d8e1e5;border-radius:14px;padding:14px;margin:10px 0}.logoPreview{max-width:180px;max-height:90px;object-fit:contain;border:1px solid #d8e1e5;border-radius:10px;padding:6px;background:#fff}.logoStatus{font-weight:800;margin-top:6px}.previewWrap{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}.receiptPreview{background:#fff;border:1px solid #bbb;box-shadow:0 4px 18px #0002;padding:14px;font-family:Arial,sans-serif;color:#000}.receiptPreview.w80{width:302px}.receiptPreview.w58{width:220px}.receiptPreview img{display:block;max-width:70%;max-height:70px;margin:0 auto 8px}.receiptPreview h3,.receiptPreview p{margin:4px 0;text-align:center}.receiptPreview table{width:100%;font-size:12px}.receiptPreview .tot{border-top:1px dashed #000;font-size:16px;font-weight:800}.kitchenPreview{font-size:15px}.kitchenPreview .line{border-bottom:1px dashed #000;padding:7px 0}.kitchenPreview .obs{font-weight:800;font-size:16px}
 @media(max-width:850px){.grid2,.grid3,.statgrid{grid-template-columns:1fr}.tableLine{grid-template-columns:1fr 1fr}.tableLine button{grid-column:1/-1}}
+/* CATÀLEG TPV · EINES */
+.catalogTools{
+  position:sticky;
+  top:0;
+  z-index:5;
+  display:grid;
+  gap:12px;
+  margin:14px 0;
+  padding:14px;
+  background:#f7fafb;
+  border:1px solid #d8e1e5;
+  border-radius:14px
+}
+
+.catalogFilters{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr;
+  gap:10px
+}
+
+.catalogActions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center
+}
+
+.catalogCount{
+  margin-left:auto;
+  color:#6b7d87;
+  font-weight:800
+}
+
+@media(max-width:900px){
+  .catalogFilters{grid-template-columns:1fr}
+  .catalogCount{width:100%;margin-left:0}
+}S
 </style></head>
 <body>
 <header><div><b>ARCADI GESTIÓ · TPV BACK</b><div id="centreName"></div></div><div id="status">VALIDANT</div></header>
@@ -39,7 +76,13 @@ const PRINTER_PROFILES={
  citizen_cts:{label:'Citizen CT-S',paper:'80',name:'Citizen CT-S',mode:'browser'}
 };
 let boot=null,admin=null,tab='config',draftZones=[],extraDevices=[],directionTargets=[],selectedTargetIds=new Set();
-async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json','X-Center-Device-Token':token,...(opt.headers||{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Error '+r.status);return d}
+
+let catalogSearch='';
+let catalogType='all';
+let catalogFamily='all';
+let catalogLayoutUnlocked=false;
+let draggedCatalogRow=null;
+      async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json','X-Center-Device-Token':token,...(opt.headers||{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Error '+r.status);return d}
 function uid(p){return p+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7)}
 async function loadDirectionTargets(){
  if(boot?.center?.id!=='direction_tpv')return;
@@ -158,9 +201,112 @@ async function saveConfig(){
 async function loadCatalog(){
  $('content').innerHTML='Carregant catàleg...';admin=await api('/api/tpv-center/admin/catalog');renderCatalog();
 }
+      function catalogTypeLabel(type){
+  return ({
+    dish:'Plats',
+    sale:'Articles de venda',
+    product:'Productes de magatzem'
+  })[type] || type || 'Altres';
+}
+
+function catalogFamilies(){
+  if(!admin?.items)return [];
+
+  return [...new Set(
+    admin.items
+      .map(item=>String(
+        item.config?.family ||
+        item.family ||
+        'SENSE FAMÍLIA'
+      ).trim())
+      .filter(Boolean)
+  )].sort((a,b)=>a.localeCompare(b,'ca'));
+}
+      function normalizeCatalogText(value){
+  return String(value||'')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase()
+    .trim();
+}
+     function catalogRowMatches(tr){
+  const index=Number(tr.dataset.catalog);
+  const source=admin?.items?.[index];
+
+  if(!source)return false;
+
+  const family=
+    tr.querySelector('.family')?.value.trim() ||
+    source.config?.family ||
+    source.family ||
+    'SENSE FAMÍLIA';
+
+  const label=
+    tr.querySelector('.label')?.value.trim() ||
+    source.config?.label ||
+    source.name ||
+    '';
+
+  const text=normalizeCatalogText(
+    [label,source.name,family,source.sourceType].join(' ')
+  );
+
+  if(
+    catalogSearch &&
+    !text.includes(normalizeCatalogText(catalogSearch))
+  )return false;
+
+  if(
+    catalogType!=='all' &&
+    source.sourceType!==catalogType
+  )return false;
+
+  if(
+    catalogFamily!=='all' &&
+    family!==catalogFamily
+  )return false;
+
+  return true;
+}
+function applyCatalogFilters(){
+  document.querySelectorAll('[data-catalog]').forEach(tr=>{
+    const visible=catalogRowMatches(tr);
+    tr.style.display=visible?'':'none';
+  });
+}
+      function selectVisibleCatalog(checked){
+  document.querySelectorAll('[data-catalog]').forEach(tr=>{
+    if(tr.style.display==='none')return;
+
+    const active=tr.querySelector('.active');
+    if(active)active.checked=checked;
+  });
+}
+      
 function renderCatalog(){
  const zones=admin.tpvConfig?.zones||[];
- $('content').innerHTML='<div class="toolbar"><h2 style="margin-right:auto">Catàleg / botons TPV</h2><button class="btn primary" onclick="B.saveCatalog()">Guardar catàleg</button></div>'+
+ const families=catalogFamilies();
+const filterBar=
+  '<div class="catalogTools">'+
+    '<div class="catalogFilters">'+
+      '<input id="catalogSearch" placeholder="Buscar producte...">'+
+      '<select id="catalogType">'+
+        '<option value="all">Tots els tipus</option>'+
+        '<option value="dish">Plats</option>'+
+        '<option value="sale">Articles de venda</option>'+
+        '<option value="product">Productes de magatzem</option>'+
+      '</select>'+
+      '<select id="catalogFamily">'+
+        '<option value="all">Totes les famílies</option>'+
+        families.map(f=>'<option value="'+esc(f)+'">'+esc(f)+'</option>').join('')+
+      '</select>'+
+    '</div>'+
+    '<div class="catalogActions">'+
+      '<button class="btn secondary" onclick="B.selectVisible(true)">Seleccionar visibles</button>'+
+      '<button class="btn secondary" onclick="B.selectVisible(false)">Desseleccionar visibles</button>'+
+    '</div>'+
+  '</div>';
+ $('content').innerHTML=filterBar+'<div class="toolbar"><h2 style="margin-right:auto">Catàleg / botons TPV</h2><button class="btn primary" onclick="B.saveCatalog()">Guardar catàleg</button></div>'+
  '<div class="toolbar" style="margin:10px 0"><label style="margin:0"><input id="selectAllPublish" class="check" type="checkbox" onchange="B.selectAllPublish(this.checked)"> Seleccionar tot per publicar</label><label style="margin:0"><input id="selectAllZones" class="check" type="checkbox" onchange="B.selectAllZones(this.checked)"> Seleccionar totes les zones</label></div>'+
  '<div class="muted">Publica plats, begudes i articles. Pots posar foto, color, família, preu i zones.</div><div style="overflow:auto"><table><thead><tr><th><label style="margin:0"><input class="check" type="checkbox" onchange="B.selectAllPublish(this.checked)"> Publicar</label></th><th>Cuina</th><th>Tipus</th><th>Nom</th><th>Família</th><th>Preu</th><th>Foto/color</th><th><label style="margin:0"><input class="check" type="checkbox" onchange="B.selectAllZones(this.checked)"> Zones</label></th><th>Ordre</th></tr></thead><tbody>'+admin.items.map((x,i)=>{const c=x.config||{};return '<tr data-catalog="'+i+'"><td><input class="check active" type="checkbox" '+(c.active?'checked':'')+'></td><td><input class="check kitchenPrint" type="checkbox" '+((c.kitchenPrint == null ? x.sourceType==='dish' : c.kitchenPrint)?'checked':'')+'></td><td>'+esc(x.sourceType)+'</td><td><input class="label" value="'+esc(c.label||x.name||'')+'"></td><td><input class="family" value="'+esc(c.family||x.family||'')+'"></td><td><input class="price" type="number" step="0.01" value="'+Number(c.price??x.price??0)+'"></td><td><img class="thumb preview" src="'+esc(c.image||x.image||'')+'"><input class="imgval" type="hidden" value="'+esc(c.image||x.image||'')+'"><input class="imgfile" type="file" accept="image/*"><input class="color" type="color" value="'+esc(c.buttonColor||'#ffffff')+'"></td><td><label style="white-space:nowrap;font-weight:800"><input class="check zoneAll" type="checkbox" onchange="B.rowAllZones(this)"> Totes</label><br>'+zones.map(z=>'<label style="white-space:nowrap"><input class="check zoneCheck" type="checkbox" value="'+esc(z.id)+'" '+((c.zoneIds||[]).includes(z.id)?'checked':'')+'> '+esc(z.name)+'</label>').join('<br>')+'</td><td><input class="sort" type="number" value="'+Number(c.sort||0)+'"></td></tr>'}).join('')+'</tbody></table></div>';
  document.querySelectorAll('[data-catalog]').forEach(tr=>{
@@ -170,7 +316,22 @@ function renderCatalog(){
    if(all)all.checked=zonesInRow.length>0&&zonesInRow.every(x=>x.checked);
    zonesInRow.forEach(ch=>ch.onchange=()=>{if(all)all.checked=zonesInRow.length>0&&zonesInRow.every(x=>x.checked)});
  });
-}
+      $('catalogSearch').oninput=e=>{
+  catalogSearch=e.target.value;
+  applyCatalogFilters();
+};
+
+$('catalogType').onchange=e=>{
+  catalogType=e.target.value;
+  applyCatalogFilters();
+};
+
+$('catalogFamily').onchange=e=>{
+  catalogFamily=e.target.value;
+  applyCatalogFilters();
+};
+ applyCatalogFilters();
+ }
 async function saveCatalog(){
  const items=[...document.querySelectorAll('[data-catalog]')].map(tr=>{const src=admin.items[Number(tr.dataset.catalog)];return{sourceType:src.sourceType,sourceId:src.id,active:tr.querySelector('.active').checked,kitchenPrint:tr.querySelector('.kitchenPrint').checked,label:tr.querySelector('.label').value.trim(),family:tr.querySelector('.family').value.trim(),price:Number(tr.querySelector('.price').value)||0,zoneIds:[...tr.querySelectorAll('.zoneCheck:checked')].map(x=>x.value),sort:Number(tr.querySelector('.sort').value)||0,image:tr.querySelector('.imgval').value||'',buttonColor:tr.querySelector('.color').value||''}});
  await api('/api/tpv-center/admin/catalog/'+encodeURIComponent(boot.center.id),{method:'PUT',body:JSON.stringify({items})});
@@ -179,7 +340,7 @@ async function saveCatalog(){
 }
 async function renderCash(){const d=await api('/api/tpv-center/backoffice');const o=d.openCash;$('content').innerHTML='<h2>Caixa</h2><div class="statgrid"><div class="stat"><b>Estat</b><div>'+(o?'OBERTA':'TANCADA')+'</div></div><div class="stat"><b>Fons inicial</b><div>'+money(o?.openingAmount||0)+'</div></div><div class="stat"><b>Venda sessió</b><div>'+money((d.summary||{}).total||0)+'</div></div><div class="stat"><b>Tiquets</b><div>'+Number((d.summary||{}).ticketCount||0)+'</div></div></div><div class="toolbar" style="margin-top:14px"><button class="btn primary" onclick="B.openCash()">OBRIR CAIXA</button><button class="btn bad" onclick="B.closeCash()">TANCAR CAIXA</button></div>'}
 async function renderSales(from='',to=''){const q=new URLSearchParams();if(from)q.set('from',from);if(to)q.set('to',to);const d=await api('/api/tpv-center/backoffice'+(q.toString()?'?'+q:''));const s=d.summary||{};$('content').innerHTML='<h2>Vendes / tiquets</h2><div class="grid2"><div><label>Des de</label><input id="from" type="date" value="'+esc(from)+'"></div><div><label>Fins</label><input id="to" type="date" value="'+esc(to)+'"></div></div><button class="btn secondary" style="margin-top:10px" onclick="B.filterSales()">Filtrar</button><div class="statgrid" style="margin-top:14px"><div class="stat"><b>Total</b><div>'+money(s.total||0)+'</div></div><div class="stat"><b>Tiquets</b><div>'+Number(s.ticketCount||0)+'</div></div><div class="stat"><b>Tiquet mitjà</b><div>'+money(s.averageTicket||0)+'</div></div><div class="stat"><b>Efectiu</b><div>'+money(s.byPayment?.EFECTIU||0)+'</div></div></div><div style="overflow:auto;margin-top:16px"><table><thead><tr><th>Data</th><th>Tiquet</th><th>Taula</th><th>Pax</th><th>Pagament</th><th>Total</th></tr></thead><tbody>'+((d.tickets||[]).slice().reverse().map(t=>'<tr><td>'+esc(new Date(t.createdAt).toLocaleString('ca-ES'))+'</td><td><b>'+esc(t.number)+'</b></td><td>'+esc(t.tableName||'')+'</td><td>'+esc(t.pax||'')+'</td><td>'+esc(t.paymentMethod||'')+'</td><td>'+money(t.total)+'</td></tr>').join('')||'<tr><td colspan="6">Sense tiquets.</td></tr>')+'</tbody></table></div>'}
-window.B={tab:setTab,saveConfig,saveCatalog,previewClient,previewKitchen,detectUsb,applyPrinterProfile:(target,id)=>{const p=PRINTER_PROFILES[id];if(!p)return;if(target==='kitchen'){$('kprinter').value=p.name;$('kpaper').value=p.paper;$('kpmode').value=p.mode}else{$('printer').value=p.name;$('paper').value=p.paper;$('pmode').value=p.mode}},
+window.B={tab:setTab,saveConfig,saveCatalog,selectVisible:selectVisibleCatalog,SpreviewClient,previewKitchen,detectUsb,applyPrinterProfile:(target,id)=>{const p=PRINTER_PROFILES[id];if(!p)return;if(target==='kitchen'){$('kprinter').value=p.name;$('kpaper').value=p.paper;$('kpmode').value=p.mode}else{$('printer').value=p.name;$('paper').value=p.paper;$('pmode').value=p.mode}},
  selectAllPublish:checked=>{document.querySelectorAll('[data-catalog] .active').forEach(x=>x.checked=checked);document.querySelectorAll('#selectAllPublish').forEach(x=>x.checked=checked)},
  selectAllZones:checked=>{document.querySelectorAll('[data-catalog] .zoneCheck').forEach(x=>x.checked=checked);document.querySelectorAll('[data-catalog] .zoneAll').forEach(x=>x.checked=checked);document.querySelectorAll('#selectAllZones').forEach(x=>x.checked=checked)},
  rowAllZones:el=>{const tr=el.closest('[data-catalog]');if(tr)tr.querySelectorAll('.zoneCheck').forEach(x=>x.checked=el.checked)},
