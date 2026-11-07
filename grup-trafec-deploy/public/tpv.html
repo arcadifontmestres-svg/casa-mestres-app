@@ -20,7 +20,82 @@ input,textarea,select{width:100%;padding:12px;border:1px solid #cbd5da;border-ra
 .prodGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.prod{border:1px solid #d8e1e5;border-radius:12px;background:#fff;padding:10px;text-align:left;min-height:118px;display:flex;flex-direction:column;justify-content:flex-end;background-size:cover;background-position:center;overflow:hidden}.prod .prodText{background:#fffffff0;border-radius:9px;padding:8px}.prod b{display:block}.familyBar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .pax{display:flex;align-items:center;gap:8px}.pax input{width:90px}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat{background:#fff;border:1px solid #d8e1e5;border-radius:14px;padding:14px}
 @media(max-width:800px){.orderGrid,.grid2,.summary{grid-template-columns:1fr}.tableLine{grid-template-columns:1fr 1fr}.tableLine button{grid-column:1/-1}}
-</style></head>
+
+/* ===== TPV FRONT · PANTALLA COMPLETA ===== */
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+main {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 14px;
+}
+
+.modalBack {
+  position: fixed;
+  inset: 0;
+  display: block;
+  padding: 0;
+  background: #eef3f5;
+}
+
+.modal {
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 14px;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.orderGrid {
+  display: grid;
+  grid-template-columns: minmax(330px, 30%) 1fr;
+  gap: 14px;
+  height: calc(100dvh - 105px);
+}
+
+.ticket {
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.prodGrid {
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  max-height: calc(100dvh - 210px);
+  overflow-y: auto;
+}
+
+.familyBar {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+@media (max-width: 900px) {
+  .modal {
+    overflow-y: auto;
+  }
+
+  .orderGrid {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .prodGrid {
+    max-height: none;
+  }
+}
+
+</style>
+</head>
 <body>
 <header><div><b>ARCADI GESTIÓ · FRONT OFFICE / TPV</b><div id="centreName"></div></div><span id="status" class="badge">VALIDANT</span></header>
 <main>
