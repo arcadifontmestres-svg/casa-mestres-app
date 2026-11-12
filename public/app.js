@@ -213,24 +213,55 @@ function activeOrder(zone,tableId){return (data.tpvConfig?.orders||[]).find(o=>o
 function orderTotal(o){return (o?.lines||[]).reduce((s,l)=>s+n(l.qty)*n(l.price),0)}
 function orderStatusLabel(o){return o.status==='bill'?'COMPTE':o.status==='sent'?'ENVIADA':'OBERTA'}
 function cartaDishIds(){const ids=new Set();for(const doc of (data.documents||[])){if(norm(doc.type)==='carta'){for(const id of (doc.items||[]))ids.add(id)}}return ids}
-function tpvItems(o){
- const zone=o.zone,carta=cartaDishIds();
- const dishes=(data.dishes||[]).filter(x=>(x.onMenu||carta.has(x.id))&&((x.zones||[]).includes(zone)||(!(x.zones||[]).length&&zone==='sala'))).map(x=>({id:x.id,name:x.name,family:x.cat||'PLATS',type:'dish',price:n(x.sale)}));
- const drinks=(data.saleItems||[]).filter(x=>x.active!==false&&x.onMenu&&(x.zones||[]).includes(zone)).map(x=>({...x,price:itemPrice(x,zone)}));
- return [...dishes,...drinks]
-}
-function tpvFamilies(items){
- const present=[...new Set(items.map(x=>x.family||'Altres'))];
- const preferred=data.tpvConfig?.familyOrder||[];
- return [...preferred.filter(x=>present.includes(x)),...present.filter(x=>!preferred.includes(x))]
-}
+function tpvItems(o){return layoutItems().map(x=>({...x,price: x.sourceType==='sale'&&x.priceOverride!==true?itemPrice((data.saleItems||[]).find(s=>s.id===x.itemId)||{},o.zone):x.price}))}
+function tpvFamilies(items){return (tpvLayout?.published?.categories||[]).map(c=>c.id)}
 function pageInfo(items,page,size){const pages=Math.max(1,Math.ceil(items.length/size));const p=Math.min(Math.max(0,page),pages-1);return {page:p,pages,start:p*size,items:items.slice(p*size,p*size+size)}}
 function tpvProductPageSize(){return innerWidth<=720?8:innerWidth<=1000?12:15}
 function tpvFamilyPageSize(){return innerWidth<=720?8:12}
 function safeJs(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 
+let tpvLayout=null,tpvLayoutKey='',tpvLayoutLoading=false,tpvBack=false,tpvEditCategory='',tpvDrag=null;
+function layoutKey(){const c=contextValues();return c.companyId+':'+c.centreId}
+async function loadTPVLayout(){
+ const key=layoutKey();if(tpvLayoutLoading)return;tpvLayoutLoading=true;
+ try{const result=await api('/api/tpv-layout');if(key===layoutKey()){tpvLayout=result;tpvLayoutKey=key;if(active==='tpv')renderTPV()}}
+ catch(e){if(active==='tpv')$('view').innerHTML=`<div class="errBox">${esc(e.message)}</div>`}finally{tpvLayoutLoading=false;if(key!==layoutKey()&&active==='tpv')loadTPVLayout()}
+}
+function layoutSources(){return [...(data.products||[]).map(x=>({...x,type:'product'})),...(data.dishes||[]).map(x=>({...x,type:'dish'})),...(data.saleItems||[]).map(x=>({...x,type:'sale'}))].filter(x=>x.active!==false&&x.code)}
+function layoutItems(){
+ if(tpvLayoutKey!==layoutKey()||!tpvLayout?.published)return [];
+ const l=tpvLayout.published,src=layoutSources();return l.buttons.flatMap(b=>{const x=src.find(x=>x.type===b.type&&x.id===b.itemId&&x.code===b.code);return x?[{...x,id:b.id,type:'layout',sourceType:x.type,itemId:x.id,name:b.name,family:b.categoryId,color:b.color,size:b.size,priceOverride:b.price!=null,price:b.price??n(x.type==='product'?(x.sale??x.pvp):x.sale??x.price)}]:[]});
+}
+function layoutStyle(x){const color=/^#[0-9a-f]{6}$/i.test(x?.color)?x.color:'#164e63';const rgb=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16));const ink=rgb[0]*.299+rgb[1]*.587+rgb[2]*.114>150?'#111827':'#ffffff';return `background:${color};color:${ink};grid-column:span ${x?.size===2?2:1}`}
+window.openTPVBack=()=>{tpvBack=!tpvBack;renderTPV()};
+function renderTPVBack(){
+ const d=tpvLayout.draft,categories=d.categories;
+ if(!categories.some(c=>c.id===tpvEditCategory))tpvEditCategory=categories[0]?.id||'';
+ const rows=(kind,items)=>items.map(x=>`<div class="tpvEditRow" draggable="true" data-layout-kind="${kind}" data-layout-id="${esc(x.id)}"><span aria-hidden="true">⠿</span><button class="btn" style="${layoutStyle(x)}" onclick="editTPVTile('${kind}','${x.id}')">${esc(x.name)}</button><button class="btn secondary" aria-label="Moure amunt" onclick="moveTPVTile('${kind}','${x.id}',-1)">↑</button><button class="btn secondary" aria-label="Moure avall" onclick="moveTPVTile('${kind}','${x.id}',1)">↓</button><button class="btn bad" onclick="deleteTPVTile('${kind}','${x.id}')">Eliminar</button></div>`).join('');
+ $('view').innerHTML=`<div class="panel"><div class="toolbar"><button class="btn secondary" onclick="openTPVBack()">← FRONT</button><button class="btn" onclick="saveTPVLayout(false)">Guardar esborrany</button><button class="btn gold" onclick="saveTPVLayout(true)">Guardar i publicar al centre</button></div><p>TPV BACK · ${esc(contextValues().centreId)} · revisió ${tpvLayout.revision}</p><p>Arrossega per ordenar. També pots utilitzar les fletxes. Només la distribució publicada apareix al FRONT.</p><div id="tpvLayoutStatus" role="status"></div></div><div class="grid"><div class="panel"><h3>Categories de venda</h3><button class="btn" onclick="editTPVTile('categories','')">+ Categoria</button>${rows('categories',categories)}<label>Categoria dels botons</label><select id="tpvEditCategory">${categories.map(c=>`<option value="${c.id}" ${c.id===tpvEditCategory?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div><div class="panel"><h3>Botons</h3><button class="btn" onclick="editTPVTile('buttons','')" ${tpvEditCategory?'':'disabled'}>+ Botó</button>${rows('buttons',d.buttons.filter(b=>b.categoryId===tpvEditCategory))||'<p>Encara no hi ha botons.</p>'}</div></div>`;
+ $('tpvEditCategory').onchange=e=>{tpvEditCategory=e.target.value;renderTPVBack()};
+ document.querySelectorAll('[data-layout-id]').forEach(el=>{
+ el.ondragstart=e=>{tpvDrag={kind:el.dataset.layoutKind,id:el.dataset.layoutId};e.dataTransfer.setData('text/plain',tpvDrag.id)};
+ el.ondragover=e=>e.preventDefault();el.ondrop=e=>{e.preventDefault();if(tpvDrag?.kind!==el.dataset.layoutKind)return;const arr=d[tpvDrag.kind],a=arr.findIndex(x=>x.id===tpvDrag.id),b=arr.findIndex(x=>x.id===el.dataset.layoutId);if(a<0||b<0)return;arr.splice(b,0,arr.splice(a,1)[0]);tpvDrag=null;renderTPVBack()};
+ });
+}
+window.moveTPVTile=(kind,id,delta)=>{const a=tpvLayout.draft[kind],visible=kind==='buttons'?a.filter(x=>x.categoryId===tpvEditCategory):a;const i=visible.findIndex(x=>x.id===id),other=visible[i+delta];if(!other)return;const from=a.findIndex(x=>x.id===id),to=a.indexOf(other);[a[from],a[to]]=[a[to],a[from]];renderTPVBack()};
+window.deleteTPVTile=(kind,id)=>{if(kind==='categories'&&tpvLayout.draft.buttons.some(b=>b.categoryId===id))return alert('Elimina primer els botons de la categoria.');if(!confirm('Eliminar de la distribució?'))return;tpvLayout.draft[kind]=tpvLayout.draft[kind].filter(x=>x.id!==id);renderTPVBack()};
+window.editTPVTile=(kind,id)=>{
+ const x=tpvLayout.draft[kind].find(x=>x.id===id)||{name:'',color:'#164e63',size:1};const sources=layoutSources();
+ openModal(kind==='categories'?'Categoria de venda':'Botó de venda',`${field('Nom visible','tl_name',x.name)}<div class="grid">${field('Color','tl_color',x.color,'color')}<div><label>Mida</label><select id="tl_size"><option value="1">Normal</option><option value="2" ${x.size===2?'selected':''}>Doble</option></select></div></div>${kind==='buttons'?`<label>Categoria de venda</label><select id="tl_category">${tpvLayout.draft.categories.map(c=>`<option value="${c.id}" ${c.id===(x.categoryId||tpvEditCategory)?'selected':''}>${esc(c.name)}</option>`).join('')}</select><label>Article per codi · Magatzem / Cuina / Venda</label><input id="tl_search" placeholder="Escriu el codi o nom"><select id="tl_source" size="6">${sources.map((s,i)=>`<option value="${i}" ${s.type===x.type&&s.id===x.itemId?'selected':''}>${esc(s.code)} · ${esc(s.name)} · ${s.type==='product'?'Magatzem':s.type==='dish'?'Cuina':'Venda'}</option>`).join('')}</select>${field('PVP del botó (opcional; Magatzem: indica el preu de venda)','tl_price',x.price??'','number','min="0" step="0.01"')}<p>No es modifica el catàleg ni s’utilitza el cost de compra com a PVP.</p>`:''}<button class="btn" id="tl_apply">Aplicar a l’esborrany</button>`);
+ if($('tl_search'))$('tl_search').oninput=e=>{for(const o of $('tl_source').options)o.hidden=!norm(o.text).includes(norm(e.target.value))};
+ $('tl_apply').onclick=()=>{const name=$('tl_name').value.trim();if(!name)return alert('Cal indicar el nom');const row={...x,id:id||uid('tile'),name,color:$('tl_color').value,size:Number($('tl_size').value)};
+ if(kind==='buttons'){const src=sources[Number($('tl_source').value)];if(!src||$('tl_source').value==='')return alert('Selecciona un article amb codi');Object.assign(row,{categoryId:$('tl_category').value||tpvEditCategory,type:src.type,itemId:src.id,code:String(src.code)});const raw=$('tl_price').value;if(raw==='')delete row.price;else{row.price=Number(raw);if(!Number.isFinite(row.price)||row.price<0)return alert('PVP no vàlid')}}
+ if(id)Object.assign(x,row);else tpvLayout.draft[kind].push(row);closeModal();renderTPVBack()};
+};
+window.saveTPVLayout=async publish=>{const key=layoutKey(),payload=JSON.stringify({revision:tpvLayout.revision,draft:tpvLayout.draft,publish});try{const result=await api('/api/tpv-layout',{method:'PUT',body:payload});if(key!==layoutKey())return;tpvLayout=result;renderTPVBack();$('tpvLayoutStatus').textContent=publish?'Distribució publicada al centre.':'Esborrany guardat.'}catch(e){alert('No s’ha guardat: '+e.message)}};
+
 function renderTPV(){
- const cfg=data.tpvConfig||{zones:[],orders:[]},z=cfg.zones.find(x=>x.id===tpvZone)||cfg.zones[0];if(!z)return $('view').innerHTML='<div class="errBox">Falta configuració del TPV.</div>';
+ if(tpvLayoutKey!==layoutKey()){tpvLayout=null;$('view').innerHTML='<div class="panel">Carregant distribució del centre…</div>';loadTPVLayout();return}
+ if(tpvBack)return renderTPVBack();
+
+ const cfg=data.tpvConfig||{zones:[],orders:[]},z=cfg.zones.find(x=>x.id===tpvZone)||cfg.zones[0];if(!z)return $('view').innerHTML='<div class="panel"><button class="btn" onclick="openTPVBack()">TPV BACK · Configurar botons</button><p>Falta configuració de zones i taules del TPV.</p></div>';
  const tabs=cfg.zones.map(x=>`<button class="zoneTab ${x.id===z.id?'active':''}" onclick="setTPVZone('${x.id}')">${esc(x.name)}</button>`).join('');
  let body='';
  if(z.id==='grups'){
@@ -240,7 +271,7 @@ function renderTPV(){
    body=`<div class="tableGrid">${(z.tables||[]).map(t=>{const o=activeOrder(z.id,t.id),st=o?orderStatusLabel(o):'LLIURE';return `<button class="tableTile ${o?'occupied':''} ${o?.status==='bill'?'bill':''}" onclick="openTableOrder('${z.id}','${t.id}')"><strong>${esc(t.name)}</strong><span>${t.min===t.max?`${t.max} pax`:`${t.min}–${t.max} pax`}</span><b>${st}</b>${o?`<small>${o.pax} pax · ${money(orderTotal(o))}</small>`:''}</button>`}).join('')}</div>`;
  }
  const open=(cfg.orders||[]).filter(o=>o.status!=='closed').length;
- $('view').innerHTML=`<div class="panel tpvHead"><div class="zoneTabs">${tabs}</div><div class="tpvCounter"><b>${open}</b><span>serveis oberts</span></div></div>${body}`;
+ $('view').innerHTML=`<div class="panel tpvHead"><button class="btn secondary" onclick="openTPVBack()">TPV BACK · Botons</button><div class="zoneTabs">${tabs}</div><div class="tpvCounter"><b>${open}</b><span>serveis oberts</span></div></div>${body}`;
 }
 window.setTPVZone=z=>{tpvZone=z;tpvCategory='';tpvProductPage=0;tpvFamilyPage=0;renderTPV()}
 window.openTableOrder=async(zone,tableId)=>{const z=data.tpvConfig.zones.find(x=>x.id===zone),t=z?.tables.find(x=>x.id===tableId);if(!t)return;let o=activeOrder(zone,tableId);if(!o){const suggested=t.min||1;o={id:uid('ord'),zone,tableId,tableName:t.name,pax:suggested,status:'open',createdAt:new Date().toISOString(),lines:[]};data.tpvConfig.orders.push(o);await save()}tpvOrderId=o.id;tpvCategory='';tpvProductPage=0;tpvFamilyPage=0;renderOrderModal()}
@@ -254,17 +285,17 @@ function renderOrderModal(){
  const visible=items.filter(x=>(x.family||'Altres')===tpvCategory);
  const prodPage=pageInfo(visible,tpvProductPage,tpvProductPageSize());tpvProductPage=prodPage.page;
  const lines=(o.lines||[]).map((l,i)=>`<div class="posTicketLine"><button class="posQtyMinus" onclick="changeOrderQty(${i},-1)">−</button><div><b>${esc(l.name)}</b><small>${l.qty} × ${money(l.price)}</small></div><strong>${money(n(l.price)*n(l.qty))}</strong><button class="posQtyPlus" onclick="changeOrderQty(${i},1)">+</button></div>`).join('')||'<div class="posEmpty">COMANDA BUIDA</div>';
- const familyButtons=famPage.items.map(c=>`<button class="posFamily ${c===tpvCategory?'active':''}" onclick="setTPVCategory('${safeJs(c)}')">${esc(c)}</button>`).join('');
- const productButtons=prodPage.items.map(x=>`<button class="posProduct" onclick="addOrderItem('${x.type}','${x.id}')"><b>${esc(x.name)}</b><span>${money(x.price)}</span></button>`).join('')||'<div class="posEmptyProducts">Sense articles en aquesta família.</div>';
+ const familyButtons=famPage.items.map(c=>`<button style="${layoutStyle(tpvLayout.published.categories.find(x=>x.id===c))}" class="posFamily ${tpvLayout.published.categories.find(x=>x.id===c)?.size===2?'tpvDouble':''} ${c===tpvCategory?'active':''}" onclick="setTPVCategory('${safeJs(c)}')">${esc(tpvLayout.published.categories.find(x=>x.id===c)?.name||c)}</button>`).join('');
+ const productButtons=prodPage.items.map(x=>`<button class="posProduct" style="${layoutStyle(x)}" onclick="addOrderItem('${x.type}','${x.id}')"><b>${esc(x.name)}</b><span>${money(x.price)}</span></button>`).join('')||'<div class="posEmptyProducts">Sense botons publicats en aquesta categoria.</div>';
  const famNav=famPage.pages>1?`<div class="posPager"><button onclick="setTPVFamilyPage(${famPage.page-1})" ${famPage.page===0?'disabled':''}>◀</button><b>${famPage.page+1}/${famPage.pages}</b><button onclick="setTPVFamilyPage(${famPage.page+1})" ${famPage.page===famPage.pages-1?'disabled':''}>▶</button></div>`:'';
  const prodNav=prodPage.pages>1?`<div class="posPager products"><button onclick="setTPVProductPage(${prodPage.page-1})" ${prodPage.page===0?'disabled':''}>◀ ANTERIOR</button><b>${prodPage.page+1}/${prodPage.pages}</b><button onclick="setTPVProductPage(${prodPage.page+1})" ${prodPage.page===prodPage.pages-1?'disabled':''}>SEGÜENT ▶</button></div>`:'';
- openModal(`${ZONE_LABELS[o.zone]||o.zone} · ${o.tableName}`,`<div class="posStandard"><div class="posTicket"><div class="posTicketHead"><div><strong>${esc(o.tableName)}</strong><span>${esc(ZONE_LABELS[o.zone]||o.zone)}</span></div><label>PAX <input id="tpv_pax" type="number" min="1" value="${esc(o.pax)}" onchange="saveOrderMeta()"></label><span class="posStatus ${o.status==='bill'?'bill':''}">${orderStatusLabel(o)}</span></div><div class="posTicketLines">${lines}</div><div class="posTicketTotal"><span>TOTAL</span><b>${money(orderTotal(o))}</b></div><div class="posTicketActions"><button class="posAction back" onclick="closeModal();tpvOrderId=null">← TAULES</button><button class="posAction send" onclick="orderStatus('sent')">ENVIAR CUINA</button><button class="posAction bill" onclick="orderStatus('bill')">COMPTE</button><button class="posAction close" onclick="closeOrder()">TANCAR TAULA</button></div></div><div class="posSelector"><div class="posFamilyArea"><div class="posFamilies">${familyButtons||'<div class="posEmptyProducts">Sense famílies.</div>'}</div>${famNav}</div><div class="posProducts">${productButtons}</div>${prodNav}</div></div>`);
+ openModal(`${ZONE_LABELS[o.zone]||o.zone} · ${o.tableName}`,`<div class="posStandard"><div class="posTicket"><div class="posTicketHead"><div><strong>${esc(o.tableName)}</strong><span>${esc(ZONE_LABELS[o.zone]||o.zone)}</span></div><label>PAX <input id="tpv_pax" type="number" min="1" value="${esc(o.pax)}" onchange="saveOrderMeta()"></label><span class="posStatus ${o.status==='bill'?'bill':''}">${orderStatusLabel(o)}</span></div><div class="posTicketLines">${lines}</div><div class="posTicketTotal"><span>TOTAL</span><b>${money(orderTotal(o))}</b></div><div class="posTicketActions"><button class="posAction back" onclick="closeModal();tpvOrderId=null">← TAULES</button><button class="posAction send" onclick="orderStatus('sent')">ENVIAR CUINA</button><button class="posAction bill" onclick="orderStatus('bill')">COMPTE</button><button class="posAction close" onclick="closeOrder()">TANCAR TAULA</button></div></div><div class="posSelector"><div class="posFamilyArea"><div class="posFamilies">${familyButtons||'<div class="posEmptyProducts">Sense categories publicades.</div>'}</div>${famNav}</div><div class="posProducts">${productButtons}</div>${prodNav}</div></div>`);
  const modal=document.querySelector('.modal');if(modal)modal.classList.add('posModal');
 }
 window.setTPVCategory=c=>{tpvCategory=c;tpvProductPage=0;renderOrderModal()}
 window.setTPVFamilyPage=p=>{tpvFamilyPage=Math.max(0,p);renderOrderModal()}
 window.setTPVProductPage=p=>{tpvProductPage=Math.max(0,p);renderOrderModal()}
-window.addOrderItem=async(type,id)=>{const o=(data.tpvConfig.orders||[]).find(x=>x.id===tpvOrderId);if(!o)return;let src=type==='dish'?(data.dishes||[]).find(x=>x.id===id):(data.saleItems||[]).find(x=>x.id===id);if(!src)return;const price=type==='dish'?n(src.sale):itemPrice(src,o.zone);const key=type+':'+id;let line=(o.lines||[]).find(x=>x.key===key);if(line)line.qty+=1;else o.lines.push({key,type,itemId:id,name:src.name,qty:1,price});o.updatedAt=new Date().toISOString();await save();renderOrderModal()}
+window.addOrderItem=async(type,id)=>{const o=(data.tpvConfig.orders||[]).find(x=>x.id===tpvOrderId);if(!o)return;if(type==='layout'){const tile=tpvItems(o).find(x=>x.id===id);if(!tile)return;const key=tile.sourceType+':'+tile.itemId;let line=o.lines.find(x=>x.key===key);if(line)line.qty+=1;else o.lines.push({key,type:tile.sourceType,itemId:tile.itemId,name:tile.name,qty:1,price:tile.price});o.updatedAt=new Date().toISOString();await save();renderOrderModal();return}let src=type==='dish'?(data.dishes||[]).find(x=>x.id===id):(data.saleItems||[]).find(x=>x.id===id);if(!src)return;const price=type==='dish'?n(src.sale):itemPrice(src,o.zone);const key=type+':'+id;let line=(o.lines||[]).find(x=>x.key===key);if(line)line.qty+=1;else o.lines.push({key,type,itemId:id,name:src.name,qty:1,price});o.updatedAt=new Date().toISOString();await save();renderOrderModal()}
 window.changeOrderQty=async(i,delta)=>{const o=(data.tpvConfig.orders||[]).find(x=>x.id===tpvOrderId);if(!o||!o.lines[i])return;o.lines[i].qty+=delta;if(o.lines[i].qty<=0)o.lines.splice(i,1);o.updatedAt=new Date().toISOString();await save();renderOrderModal()}
 window.saveOrderMeta=async()=>{const o=(data.tpvConfig.orders||[]).find(x=>x.id===tpvOrderId);if(!o)return;o.pax=Math.max(1,n($('tpv_pax').value)||1);o.updatedAt=new Date().toISOString();await save()}
 window.orderStatus=async st=>{const o=(data.tpvConfig.orders||[]).find(x=>x.id===tpvOrderId);if(!o)return;o.pax=Math.max(1,n($('tpv_pax').value)||1);o.status=st;o.updatedAt=new Date().toISOString();await save();renderOrderModal()}

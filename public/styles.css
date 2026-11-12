@@ -51,3 +51,9 @@
 .premiumDoc.minimal .title{text-align:left;font-weight:500;letter-spacing:-.03em}
 .premiumDoc.minimal .dish{padding:7px 0}
 @media print{.premiumDoc{box-sizing:border-box;min-height:90vh;box-shadow:none}.premiumDoc.elegant{border-color:var(--doc-accent)}}
+
+/* TPV BACK: touch targets and sortable layout. */
+.tpvEditRow{display:flex;align-items:center;gap:8px;margin:12px 0;flex-wrap:wrap}.tpvEditRow>.btn:first-of-type{flex:1;min-width:120px;min-height:64px}.tpvEditRow button,.posFamily,.posProduct{min-height:48px;touch-action:manipulation}.tpvEditRow[draggable]{cursor:grab}#tl_source{width:100%;min-height:180px}.posFamily:focus-visible,.posProduct:focus-visible{outline:4px solid #f59e0b;outline-offset:2px}
+
+.posProduct b,.posProduct span{color:inherit}.posFamily.active{outline:3px solid #f59e0b;outline-offset:-3px}.posProducts{overflow:auto;grid-auto-rows:minmax(76px,1fr)}.posFamilies{overflow:auto}.posQtyMinus,.posQtyPlus{height:44px}.posFamily:hover,.posProduct:hover{filter:brightness(1.1)}
+@media(max-width:1000px){.posFamily.tpvDouble{grid-column:auto!important;grid-row:span 2}}

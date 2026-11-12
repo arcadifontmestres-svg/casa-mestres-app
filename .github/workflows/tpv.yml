@@ -1,0 +1,25 @@
+name: TPV per centre
+on:
+  pull_request:
+    branches: [grup-trafec-operatiu]
+    paths:
+      - 'public/app.js'
+      - 'public/styles.css'
+      - 'server.js'
+      - 'tpv-layout-store.js'
+      - 'tests/tpv-layout.test.js'
+      - 'package.json'
+      - '.github/workflows/tpv.yml'
+permissions:
+  contents: read
+jobs:
+  tpv:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm run check
+      - run: npm run test:tpv
