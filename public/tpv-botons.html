@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TPV BACK · Botons · GRUP TRÀFEC</title>
+<link rel="stylesheet" href="/tpv-botons.css?v=20261112-1">
+<script defer src="/js/tpv-buttons-model.js?v=20261112-1"></script>
+<script defer src="/js/tpv-botons.js?v=20261112-1"></script>
+</head>
+<body class="tpv-editor">
+<header class="tb-header"><div class="tb-brand"><span class="tb-mark">GT</span><div><strong>GRUP TRÀFEC</strong><small>TPV BACK · CONFIGURACIÓ DE BOTONS</small></div></div><a id="back" class="tb-btn tb-header-back" href="/#tpv">← TPV FRONT</a></header>
+<main id="editor" aria-busy="true">
+<section class="tb-context"><div><p class="tb-eyebrow">CONFIGURACIÓ DEL CENTRE</p><h1 id="centreName">Carregant…</h1><p id="contextText">Els botons no modifiquen els productes ni les fitxes d’origen.</p></div><span id="status" class="tb-status" role="status">Carregant</span></section>
+<div id="error" class="tb-message tb-error" role="alert" hidden></div>
+<div id="notice" class="tb-message" role="status" hidden></div>
+<div id="chooseCentre" class="tb-panel" hidden><h2>Selecciona el centre que vols configurar</h2><label for="centreSelect">Centre de treball</label><select id="centreSelect"></select><button id="useCentre" class="tb-btn tb-primary">Obrir configuració</button></div>
+<div id="workspace" hidden>
+<nav class="tb-toolbar" aria-label="Edició i publicació"><div class="tb-mode"><button id="editMode" class="tb-btn active" aria-pressed="true">Configuració</button><button id="previewMode" class="tb-btn" aria-pressed="false">Vista prèvia FRONT</button></div><div class="tb-actions"><button id="discard" class="tb-btn">Descartar canvis</button><button id="saveDraft" class="tb-btn">Desar esborrany</button><button id="publish" class="tb-btn tb-primary">Publicar al centre</button></div></nav>
+<div id="editArea" class="tb-editor-grid">
+<aside class="tb-panel tb-groups"><div class="tb-section-head"><div><span class="tb-eyebrow">01 · ORGANITZAR</span><h2>Grups de pantalla</h2></div><button id="addGroup" class="tb-btn tb-icon" title="Crear grup de pantalla" aria-label="Crear grup de pantalla">+</button></div><p class="tb-help">Agrupacions pròpies del TPV, independents de les famílies de Magatzem.</p><div id="groups" class="tb-group-list"></div></aside>
+<section class="tb-panel tb-canvas"><div class="tb-section-head"><div><span class="tb-eyebrow">02 · CREAR I DISTRIBUIR</span><h2 id="groupName">Botons de venda</h2></div><div class="tb-actions"><button id="addFromCatalog" class="tb-btn">Seleccionar articles</button><button id="addButton" class="tb-btn tb-primary">+ Botó de venda</button></div></div><p class="tb-help">Arrossega des de la nansa per canviar l’ordre amb el dit o el ratolí. També pots seleccionar un botó i moure’l amb les fletxes.</p><div id="tiles" class="tb-tiles" aria-label="Distribució de botons"></div></section>
+<aside class="tb-panel tb-properties"><span class="tb-eyebrow">03 · PERSONALITZAR</span><h2>Propietats</h2><div id="properties"><p class="tb-help">Selecciona un grup o un botó per editar-lo.</p></div></aside>
+</div>
+<section id="previewArea" class="tb-panel" hidden><div class="tb-section-head"><div><span class="tb-eyebrow">PREVISUALITZACIÓ</span><h2>Així treballarà l’empleat</h2><p class="tb-help">Prova els botons. Aquí no es creen comandes reals ni moviments de caixa.</p></div><button id="clearPreview" class="tb-btn">Buidar prova</button></div><div class="tb-front"><aside class="tb-ticket"><div class="tb-ticket-head"><div><span class="tb-eyebrow">TAULA DE PROVA</span><strong>T1</strong></div><label>Comensals <input id="previewPax" type="number" min="1" max="99" value="2"></label></div><div id="previewLines" class="tb-ticket-lines"></div><div class="tb-total"><span>TOTAL</span><strong id="previewTotal">0,00 €</strong></div><p class="tb-help">Mode prova · sense cobrament</p></aside><div class="tb-front-catalog"><div id="previewGroups" class="tb-preview-groups"></div><div id="previewTiles" class="tb-tiles"></div></div></div></section>
+</div>
+<p id="revision" class="tb-footnote"></p>
+</main>
+<dialog id="picker" class="tb-picker"><form method="dialog" class="tb-picker-top"><div><span class="tb-eyebrow">ARTICLES EXISTENTS</span><h2>Vincular per codi</h2></div><button class="tb-btn" aria-label="Tancar selector">Tancar</button></form><p class="tb-help">Selecciona els articles d’origen. No es crearan productes duplicats ni es canviaran les famílies de Magatzem.</p><div class="tb-picker-filters"><label>Cercar per codi o nom<input id="sourceSearch" type="search" placeholder="Codi o nom de l’article…"></label><label>Origen<select id="sourceType"><option value="">Tots els orígens</option><option value="product">Magatzem</option><option value="dish">Cuina · plats</option><option value="sale">Articles de venda</option></select></label></div><div class="tb-picker-tools"><label><input id="selectVisible" type="checkbox"> Seleccionar els visibles amb codi</label><span id="pickedCount"></span></div><div id="sourceList" class="tb-source-list"></div><div class="tb-picker-bottom"><span id="sourceHint" class="tb-help"></span><button id="applySources" class="tb-btn tb-primary">Afegir selecció</button></div></dialog>
+</body></html>

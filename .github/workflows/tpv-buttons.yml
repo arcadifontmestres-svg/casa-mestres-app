@@ -1,0 +1,20 @@
+name: TPV botons i presentacio
+on:
+  push:
+    branches: [grup-trafec-operatiu]
+    paths: ['public/tpv-botons.*', 'public/js/tpv-botons.js', 'public/js/tpv-buttons-*.js', 'tests/tpv-buttons-*.test.js', '.github/workflows/tpv-buttons.yml', 'public/index.html']
+  pull_request:
+    branches: [grup-trafec-operatiu]
+permissions:
+  contents: read
+jobs:
+  tpv-buttons:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --check public/js/tpv-botons.js && node --check public/js/tpv-buttons-model.js && node --check public/js/tpv-buttons-bridge.js
+      - run: node --test tests/tpv-buttons-model.test.js tests/tpv-buttons-integration.test.js tests/tpv-buttons-bridge.test.js

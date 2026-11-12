@@ -1,0 +1,8 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const code=fs.readFileSync(path.join(__dirname,'../public/js/tpv-buttons-bridge.js'),'utf8');
+function run(search,ctx,exists=true){let target=null;const classes=[];const original=()=>{};const window=exists?{openTPVBack:original}:{};const sandbox={window,location:{search,origin:'https://example.invalid',assign:x=>target=x},URL,URLSearchParams,localStorage:{getItem:()=>JSON.stringify(ctx)},document:{body:{classList:{add:x=>classes.push(x)}}}};vm.runInNewContext(code,sandbox);return {window,original,classes,target:()=>target};}
+test('Back shortcut preserves company and centre without writing their data',()=>{const s=run('',{companyId:'company_grup_trafec',centreId:'centre_sarriera'});s.window.openTPVBack();assert.equal(s.target(),'/tpv-botons.html?companyId=company_grup_trafec&centreId=centre_sarriera');});
+test('global Direction opens editor centre selection, not a phantom centre',()=>{const s=run('',{companyId:'company_grup_trafec'});s.window.openTPVBack();assert.equal(s.target(),'/tpv-botons.html?companyId=company_grup_trafec');});
+test('service entry does not replace order handlers and hides the config shortcut',()=>{const s=run('?miniapp=1',{companyId:'c',centreId:'s'});assert.equal(s.window.openTPVBack,s.original);assert.deepEqual(s.classes,['tpv-service-mode']);assert.equal(s.target(),null);});
+test('no unrelated shortcut is created outside the existing TPV',()=>{const s=run('',{},false);assert.equal(s.window.openTPVBack,undefined);});
