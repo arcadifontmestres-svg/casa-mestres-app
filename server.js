@@ -1055,6 +1055,17 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { received: true });
     }
 
+    if (pathname === '/api/tpv-layout' && ['GET', 'PUT'].includes(req.method)) {
+      if (!requireAdmin(req, res)) return;
+      const context = requestContext(req);
+      const state = readData();
+      if (!(state.restaurants || []).some(c => c.id === context.centreId && c.organizationId === context.companyId)) return send(res, 400, { error: 'Centre no vàlid per a aquesta empresa' });
+      try {
+        const store = require('./tpv-layout-store').store(DATA_DIR, context);
+        return send(res, 200, req.method === 'GET' ? store.read() : store.save(await bodyJson(req)));
+      } catch (error) { return send(res, error.statusCode || 400, { error: error.message }); }
+    }
+
     if (pathname === '/api/tpv-catalog' && req.method === 'GET') {
       const context = requestContext(req);
       if (!context.companyId || !context.centreId) return send(res, 400, { error: 'Falten empresa o centre.' });
